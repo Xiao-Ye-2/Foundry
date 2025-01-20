@@ -79,7 +79,7 @@ public class QueryDB {
 		    System.out.println("Please provide the user ID: ");
 		    String id = input.nextLine().trim();
 		    System.out.println("Please provide the list of class names: ");
-		    String classes = input.nextLine();		    
+		    String classes = input.nextLine();
                     this.searchCommonClassmate(id, classes);
                     break;
                 case 3:
@@ -97,30 +97,30 @@ public class QueryDB {
         }
     }
 
-    // Q1.(1) 
+    // Q1.(1)
     private void getClassByUserID(String userID) throws SQLException {
 	//TODO: update the code below
 
 	System.out.println(userID);
-       
-	String getSClass = "SELECT cname FROM enrolled WHERE snum = ?";	
+
+	String getSClass = "SELECT cname FROM enrolled WHERE snum = ?";
 	PreparedStatement getSClassStmt = connection.prepareStatement(getSClass);
 	getSClassStmt.setString(1,userID);
-	
+
 	ResultSet sClassRs = getSClassStmt.executeQuery();
 
 
 	//IMPORTANT: Try to print your final output betwwen these two lines ("**Start of Answer**" and ""End of Answer")
 	//for example
-	System.out.println("**Start of Answer**"); 
+	System.out.println("**Start of Answer**");
 	while(sClassRs.next()){
 	    System.out.println(sClassRs.getString(1));
 	}
-       	System.out.println("**End of Answer**"); 
-	
+       	System.out.println("**End of Answer**");
+
 	connection.commit();
 	getSClassStmt.close();
-	
+
     }
 
     //Q1.(2)
@@ -134,9 +134,9 @@ public class QueryDB {
 	}
 
 	//IMPORTANT: Try to print your final output betwwen these two lines ("**Start of Answer**" and ""End of Answer")
-	System.out.println("**Start of Answer**"); 
-	//your answers here 
-       	System.out.println("**End of Answer**"); 
+	System.out.println("**Start of Answer**");
+	//your answers here
+       	System.out.println("**End of Answer**");
 
     }
 
@@ -147,9 +147,8 @@ public class QueryDB {
 	System.out.println(myclass);
 
 	//IMPORTANT: Try to print your final output betwwen these two lines ("**Start of Answer**" and ""End of Answer")
-	System.out.println("**Start of Answer**"); 
-	//your answers here 
-       	System.out.println("**End of Answer**"); 		
+	System.out.println("**Start of Answer**");
+	//your answers here
+       	System.out.println("**End of Answer**"); 
     }
-    
 }

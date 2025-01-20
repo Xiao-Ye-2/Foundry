@@ -68,7 +68,7 @@ public class MaintainDB {
             switch (selection) {
 	        case 1:
 		    System.out.println("Please provide class info (name, meets_at, room, fid) separated with comma: ");
-		    String classInfo = input.nextLine();		    
+		    String classInfo = input.nextLine();
 		    this.addClass(classInfo);
                     break;
                 case 2:
@@ -86,18 +86,18 @@ public class MaintainDB {
         }
     }
 
-    
+
     //Q2.(1)
     private void addClass(String classInfo) throws SQLException {
 
 	//TODO: update the code
 
 	System.out.println(classInfo);
-	
+
 	//IMPORTANT: Try to print your final output between these two lines ("**Start of Answer**" and ""End of Answer")
-	System.out.println("**Start of Answer**"); 
-	//your answers here 
-       	System.out.println("**End of Answer**"); 
+	System.out.println("**Start of Answer**");
+	//your answers here
+       	System.out.println("**End of Answer**");
     }
 
     //Q2.(2)
@@ -107,9 +107,9 @@ public class MaintainDB {
 	System.out.println("Drop classes of size less than " +classSize);
 
 	//IMPORTANT: Try to print your final output between these two lines ("**Start of Answer**" and ""End of Answer")
-	System.out.println("**Start of Answer**"); 
-	//your answers here 
-       	System.out.println("**End of Answer**"); 
+	System.out.println("**Start of Answer**");
+	//your answers here
+       	System.out.println("**End of Answer**");
 
     }
 

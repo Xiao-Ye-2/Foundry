@@ -17,7 +17,7 @@ cd $CLASSDIR
 ## Compile source code
 CLASSFILE1="MaintainDB.class"
 CLASSFILE2="QueryDB.class"
-if [ \( -f $CLASSFILE1 \) -a \( -f $CLASSFILE2 \) ] 
+if [ \( -f $CLASSFILE1 \) -a \( -f $CLASSFILE2 \) ]
 then
    rm $CLASSFILE1
    rm $CLASSFILE2
@@ -25,14 +25,14 @@ then
 fi
 
 chmod +x compile
-./compile 
+./compile
 
 ## Check for *.class output
-if ! [ \( -f $CLASSFILE1 \) -a \( -f $CLASSFILE2 \) ] 
-then 
+if ! [ \( -f $CLASSFILE1 \) -a \( -f $CLASSFILE2 \) ]
+then
     echo "CLASS FILE NOT Found. ABORT"
-    exit 1 
-else 
+    exit 1
+else
     echo "TEST 1 STARTS..."
 fi
 
@@ -61,7 +61,7 @@ Data Privacy, MWF 14, R129, 242518965
 2
 1
 0
-INPUT 
+INPUT
 
 sleep 2
 
