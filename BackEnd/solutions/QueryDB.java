@@ -3,41 +3,29 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Scanner;
 import java.sql.*;
-import java.math.BigDecimal;
 
 // sample input: localhost 50000 database_name username password
 public class QueryDB {
 
     private Scanner input = new Scanner(System.in);
     private Connection connection = null;
+    private static final String JDBC_URL = "jdbc:sqlite:" + System.getProperty("user.dir") + "/Database/testdb/test.db";
 
-    public QueryDB(String[] args) {
-
-        // loading the DBMS driver
+    public QueryDB() {
         try {
-            Class.forName("com.ibm.db2.jcc.DB2Driver");
-        } catch (ClassNotFoundException e) {
-            System.out.println("Missing DBMS driver.");
-            e.printStackTrace();
-        }
-
-
-        try {
-            // connecting to the a database
-            connection = DriverManager
-                    .getConnection("jdbc:db2:CS348");
-            System.out.println("Database connection open.\n");
-
-            // setting auto commit to false
-            connection.setAutoCommit(false);
-        } catch (SQLException e) {
-            System.out.println("DBMS connection failed.");
+            Class.forName("org.sqlite.JDBC");
+            connection = DriverManager.getConnection(JDBC_URL);
+            if (connection != null) {
+                connection.setAutoCommit(false);
+            }
+        } catch (Exception e) {
+            System.err.println("Database connection failed.");
             e.printStackTrace();
         }
     }
 
     public static void main(String[] args) throws Exception {
-        QueryDB menu = new QueryDB(args);
+        QueryDB menu = new QueryDB();
         menu.mainMenu();
         menu.exit();
     }
