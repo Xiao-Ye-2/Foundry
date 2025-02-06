@@ -82,6 +82,7 @@ CREATE TABLE Employers (
 -- Table: Job Postings
 CREATE TABLE JobPostings (
     JobId INTEGER PRIMARY KEY AUTOINCREMENT,
+    EmployerId INTEGER NOT NULL,
     Title TEXT NOT NULL,
     Description TEXT NOT NULL,
     MinSalary REAL NOT NULL CHECK (MinSalary >= 0),
@@ -90,6 +91,7 @@ CREATE TABLE JobPostings (
     CityId INTEGER NOT NULL,
     IsActive BOOLEAN NOT NULL DEFAULT 1,
     PostDate DATE NOT NULL DEFAULT CURRENT_DATE,
+    FOREIGN KEY (EmployerId) REFERENCES Employers(UserId),
     FOREIGN KEY (CityId) REFERENCES Cities(CityId)
 );
 
