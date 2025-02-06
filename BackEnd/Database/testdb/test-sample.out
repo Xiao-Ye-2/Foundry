@@ -1,22 +1,22 @@
-Expect output for query 1:
+Expected output for query 1:
 Software Engineer|Develop and maintain software applications|60000.0|120000.0|Full-time|New York
 
-Expect output for query 2:
+Expected output for query 2:
 Google|New York|Tech|100000
 
-Expect output for query 3:
+Expected output for query 3:
 1|2|Software Engineer|Develop and maintain software applications|60000.0|120000.0|Full-time|1|1|CURRENT_DATE
 2|2|Data Analyst|Analyze data and generate reports|50000.0|90000.0|Intern|2|1|CURRENT_DATE
 3|2|Product Manager|Manage product lifecycle and strategy|70000.0|130000.0|Full-time|3|1|CURRENT_DATE
 4|2|Product Manager|manage products|90000.0|150000.0|Full-time|1|1|2025-02-06
 
-Expect output for query 4:
+Expected output for query 4:
 1|2|CURRENT_DATE|Pending
 1|1|2025-02-06|Pending
 
-Expect output for query 5:
+Expected output for query 5:
 Software Engineer|Develop and maintain software applications|1|2025-02-06|Pending
 Data Analyst|Analyze data and generate reports|1|CURRENT_DATE|Pending
 
-Expect output for query 6:
+Expected output for query 6:
 1|resumes/john_doe.pdf
