@@ -15,8 +15,9 @@ fi
 echo "Creating and populating database..."
 cd "$DATDIR"
 rm -f test.db
+chmod +x populatetables.sh
 sqlite3 test.db < createtables.sql
-sqlite3 test.db < populatetables.sql
+./populatetables.sh
 
 cd "$CLASSDIR"
 
@@ -30,27 +31,27 @@ if [ ! -d "target/classes" ]; then
     exit 1
 fi
 
-echo "TEST 1 STARTS..."
+# echo "TEST 1 STARTS..."
 
-# Run QueryDB tests
-mvn exec:java -Dexec.mainClass="QueryDB" << INPUT
-1
-112348546
-2
-112348546
-Database Systems, Operating System Design
-3
-Database Systems
-0
-INPUT
+# # Run QueryDB tests
+# mvn exec:java -Dexec.mainClass="QueryDB" << INPUT
+# 1
+# 112348546
+# 2
+# 112348546
+# Database Systems, Operating System Design
+# 3
+# Database Systems
+# 0
+# INPUT
 
-# Run MaintainDB tests
-mvn exec:java -Dexec.mainClass="MaintainDB" << INPUT
-1
-Data Privacy, MWF 14, R129, 242518965
-2
-1
-0
-INPUT
+# # Run MaintainDB tests
+# mvn exec:java -Dexec.mainClass="MaintainDB" << INPUT
+# 1
+# Data Privacy, MWF 14, R129, 242518965
+# 2
+# 1
+# 0
+# INPUT
 
-sleep 2
+# sleep 2

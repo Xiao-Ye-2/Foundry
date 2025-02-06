@@ -1,3 +1,18 @@
+PRAGMA foreign_keys = ON;
+
+DROP TABLE IF EXISTS Applications;
+DROP TABLE IF EXISTS Dislike;
+DROP TABLE IF EXISTS Shortlist;
+DROP TABLE IF EXISTS JobPostings;
+DROP TABLE IF EXISTS Employers;
+DROP TABLE IF EXISTS Employees;
+DROP TABLE IF EXISTS Users;
+DROP TABLE IF EXISTS FocusOn;
+DROP TABLE IF EXISTS Industry;
+DROP TABLE IF EXISTS Companies;
+DROP TABLE IF EXISTS Cities;
+DROP TABLE IF EXISTS Countries;
+
 -- Table: Countries
 CREATE TABLE Countries (
     CountryId INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -76,15 +91,6 @@ CREATE TABLE JobPostings (
     IsActive BOOLEAN NOT NULL DEFAULT 1,
     PostDate DATE NOT NULL DEFAULT CURRENT_DATE,
     FOREIGN KEY (CityId) REFERENCES Cities(CityId)
-);
-
--- Table: Post (Relationship between Employer and Job)
-CREATE TABLE Post (
-    EmployerId INTEGER NOT NULL,
-    JobId INTEGER NOT NULL,
-    PRIMARY KEY (EmployerId, JobId),
-    FOREIGN KEY (EmployerId) REFERENCES Employers(UserId),
-    FOREIGN KEY (JobId) REFERENCES JobPostings(JobId)
 );
 
 -- Table: Shortlist (Relationship between Employee and Job)
