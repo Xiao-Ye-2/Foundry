@@ -18,14 +18,14 @@ CREATE TABLE Companies (
     CompanyId INTEGER PRIMARY KEY AUTOINCREMENT,
     CompanyName TEXT UNIQUE NOT NULL,
     Size INTEGER,
-    CityId INTEGER,
+    CityId INTEGER NOT NULL,
     FOREIGN KEY (CityId) REFERENCES Cities(CityId)
 );
 
 -- Table: Industry
 CREATE TABLE Industry (
-    IndustryId INTEGER PRIMARY KEY,
-    IndustryName TEXT NOT NULL
+    IndustryId INTEGER PRIMARY KEY AUTOINCREMENT,
+    IndustryName TEXT UNIQUE NOT NULL
 );
 
 -- Table: FocusOn (Relationship between Company and Industry)
@@ -44,20 +44,21 @@ CREATE TABLE Users (
     PasswordHash TEXT NOT NULL,
     FirstName TEXT NOT NULL,
     LastName TEXT NOT NULL,
-    CityId INTEGER,
-    Role TEXT CHECK (Role IN ('employee', 'employer', 'admin'))  -- Optional
+    CityId INTEGER NOT NULL,
+    Role TEXT NOT NULL CHECK (Role IN ('employee', 'employer', 'admin')),
+    FOREIGN KEY (CityId) REFERENCES Cities(CityId)
 );
 
 -- Table: Employees
 CREATE TABLE Employees (
-    UserId INTEGER PRIMARY KEY AUTOINCREMENT,
+    UserId INTEGER PRIMARY KEY,
     ResumeUrl TEXT,
     FOREIGN KEY (UserId) REFERENCES Users(UserId)
 );
 
 -- Table: Employers
 CREATE TABLE Employers (
-    UserId INTEGER PRIMARY KEY AUTOINCREMENT,
+    UserId INTEGER PRIMARY KEY,
     CompanyId INTEGER NOT NULL,
     FOREIGN KEY (UserId) REFERENCES Users(UserId),
     FOREIGN KEY (CompanyId) REFERENCES Companies(CompanyId)
@@ -67,10 +68,13 @@ CREATE TABLE Employers (
 CREATE TABLE JobPostings (
     JobId INTEGER PRIMARY KEY AUTOINCREMENT,
     Title TEXT NOT NULL,
-    MinSalary REAL CHECK (MinSalary >= 0),
-    MaxSalary REAL CHECK (MaxSalary >= MinSalary),
-    WorkType TEXT CHECK (WorkType IN ('Full-time', 'Part-time', 'Contract', 'Intern')),
+    Description TEXT NOT NULL,
+    MinSalary REAL NOT NULL CHECK (MinSalary >= 0),
+    MaxSalary REAL NOT NULL CHECK (MaxSalary >= MinSalary),
+    WorkType TEXT NOT NULL CHECK (WorkType IN ('Full-time', 'Part-time', 'Contract', 'Intern')),
     CityId INTEGER NOT NULL,
+    IsActive BOOLEAN NOT NULL DEFAULT 1,
+    PostDate DATE NOT NULL DEFAULT CURRENT_DATE,
     FOREIGN KEY (CityId) REFERENCES Cities(CityId)
 );
 
@@ -105,8 +109,8 @@ CREATE TABLE Dislike (
 CREATE TABLE Applications (
     EmployeeId INTEGER NOT NULL,
     JobId INTEGER NOT NULL,
-    ApplyDate TEXT NOT NULL,
-    Status TEXT DEFAULT 'Pending',
+    ApplyDate DATE NOT NULL DEFAULT CURRENT_DATE,
+    Status TEXT NOT NULL CHECK (Status IN ('Pending', 'Interviewing', 'Accepted', 'Rejected', 'Withdrawn')) DEFAULT 'Pending',
     PRIMARY KEY (EmployeeId, JobId),
     FOREIGN KEY (EmployeeId) REFERENCES Employees(UserId),
     FOREIGN KEY (JobId) REFERENCES JobPostings(JobId)
