@@ -1,4 +1,4 @@
-sqlite3 test.db ".mode csv" "PRAGMA foreign_keys = ON;" \
+sqlite3 testdb ".mode csv" "PRAGMA foreign_keys = ON;" \
 ".import Countries.csv Countries" \
 ".import Cities.csv Cities" \
 ".import Companies.csv Companies" \
@@ -12,7 +12,7 @@ sqlite3 test.db ".mode csv" "PRAGMA foreign_keys = ON;" \
 ".import Dislike.csv Dislike" \
 ".import Applications.csv Applications"
 
-sqlite3 test.db \
+sqlite3 testdb \
 ".mode column" \
 ".headers on" \
 "SELECT * FROM Countries;" \

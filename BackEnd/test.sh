@@ -12,46 +12,95 @@ if ! command -v mvn &> /dev/null; then
     exit 1
 fi
 
+# Check if curl is installed
+if ! command -v curl &> /dev/null; then
+    echo "curl is not installed. Please install curl first."
+    exit 1
+fi
+
 echo "Creating and populating database..."
 cd "$DATDIR"
-rm -f test.db
-chmod +x populatetables.sh
-sqlite3 test.db < createtables.sql
+rm -f testdb
+sqlite3 testdb < createtables.sql
 ./populatetables.sh
 
 cd "$CLASSDIR"
 
-# Build with Maven
-echo "Building with Maven..."
-mvn clean compile
+# Build and run Spring Boot application
+echo "Building and starting Spring Boot application..."
+mvn clean spring-boot:run &
+SPRING_PID=$!
 
-# Check if build was successful
-if [ ! -d "target/classes" ]; then
-    echo "Build failed. ABORT"
+# Wait for Spring Boot to start
+echo "Waiting for Spring Boot to start..."
+sleep 15
+
+# Basic API Tests
+echo "Running basic API tests..."
+
+# Test 1: Search all jobs
+echo "Test 1: Search all jobs"
+response=$(curl -s "http://localhost:8080/api/jobs/search")
+echo "Response: $response"
+if [ -z "$response" ]; then
+    echo "Test 1 Failed: No response"
+    kill $SPRING_PID
     exit 1
 fi
 
-# echo "TEST 1 STARTS..."
+# Test 2: Search Jobs with filters
+echo "Test 2: Search Jobs with filters"
+response=$(curl -s "http://localhost:8080/api/jobs/search?location=Toronto&workType=Intern")
+echo "Response: $response"
+if [ -z "$response" ]; then
+    echo "Test 2 Failed: No response"
+    kill $SPRING_PID
+    exit 1
+fi
 
-# # Run QueryDB tests
-# mvn exec:java -Dexec.mainClass="QueryDB" << INPUT
-# 1
-# 112348546
-# 2
-# 112348546
-# Database Systems, Operating System Design
-# 3
-# Database Systems
-# 0
-# INPUT
+# Test 3: Post a Job
+echo "Test 3: Post a Job"
+response=$(curl -s -X POST "http://localhost:8080/api/jobs/post" \
+  -H "Content-Type: application/json" \
+  -H "user-id: 2" \
+  -d '{
+    "title": "Software Engineer",
+    "description": "Test position",
+    "minSalary": 60000,
+    "maxSalary": 80000,
+    "workType": "Full-time",
+    "cityId": 1
+  }')
+echo "Response: $response"
+if [[ "$response" != *"successfully"* ]]; then
+    echo "Test 3 Failed: Unexpected response"
+    kill $SPRING_PID
+    exit 1
+fi
 
-# # Run MaintainDB tests
-# mvn exec:java -Dexec.mainClass="MaintainDB" << INPUT
-# 1
-# Data Privacy, MWF 14, R129, 242518965
-# 2
-# 1
-# 0
-# INPUT
+# Test 1: Search all jobs
+echo "Test 1: Search all jobs"
+response=$(curl -s "http://localhost:8080/api/jobs/search")
+echo "Response: $response"
+if [ -z "$response" ]; then
+    echo "Test 1 Failed: No response"
+    kill $SPRING_PID
+    exit 1
+fi
 
-# sleep 2
+# Test 4: Apply to Job
+echo "Test 4: Apply to Job"
+response=$(curl -s -X POST "http://localhost:8080/api/jobs/apply" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "employeeId": 1,
+    "jobId": "1"
+  }')
+echo "Response: $response"
+if [[ "$response" != *"successfully"* ]]; then
+    echo "Test 4 Failed: Unexpected response"
+    kill $SPRING_PID
+    exit 1
+fi
+
+echo "All tests completed successfully"

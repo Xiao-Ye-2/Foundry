@@ -1,6 +1,7 @@
 package controller;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
 import data.ApplicationRequest;
 
@@ -20,20 +21,45 @@ public class JobController {
     @GetMapping("/search")
     public List<JobPosting> searchJobs(
         @RequestParam(required = false) String location,
-        @RequestParam(required = false) Double minSalary
+        @RequestParam(required = false) Double minSalary,
+        @RequestParam(required = false) String workType
     ) {
-        return jobService.searchJobs(location, minSalary);
+        return jobService.searchJobs(location, minSalary, workType);
     }
 
     // R7: Apply to a job
     @PostMapping("/apply")
-    public String applyToJob(@RequestBody ApplicationRequest request) {
-        return jobService.applyToJob(request.getEmployeeId(), request.getJobId());
+    public ResponseEntity<?> applyToJob(@RequestBody ApplicationRequest request) {
+        try {
+            jobService.applyToJob(request.getEmployeeId(), Long.parseLong(request.getJobId()));
+            return ResponseEntity.ok("Application submitted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
     }
 
     // R8: Post a job (Employer-only)
     @PostMapping("/post")
-    public String postJob(@RequestBody JobPosting job, @RequestHeader("user-id") Long employerId) {
-        return jobService.postJob(job, employerId);
+    public ResponseEntity<?> postJob(
+        @RequestBody JobPosting job,
+        @RequestHeader("user-id") Long employerId
+    ) {
+        try {
+            job.setEmployerId(employerId);
+            jobService.postJob(job);
+            return ResponseEntity.ok("Job posted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+
+    // R9: View applications (Employer-only)
+    @GetMapping("/applications")
+    public ResponseEntity<?> getApplications(@RequestHeader("user-id") Long employerId) {
+        try {
+            return ResponseEntity.ok(jobService.getApplications(employerId));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
     }
 }
