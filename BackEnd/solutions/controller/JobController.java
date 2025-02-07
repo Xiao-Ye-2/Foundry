@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import data.JobPosting;
 import service.JobService;
 
+import java.util.ArrayList;
+
 @RestController
 @RequestMapping("/api/jobs")
 public class JobController {
@@ -60,6 +62,23 @@ public class JobController {
             return ResponseEntity.ok(jobService.getApplications(employerId));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+
+    // Get all jobs
+    @GetMapping
+    @CrossOrigin(origins = "http://localhost:5173")
+    public ResponseEntity<?> getAllJobs() {
+        try {
+            List<JobPosting> jobs = jobService.getAllJobs();
+            if (jobs.isEmpty()) {
+                return ResponseEntity.ok().body(new ArrayList<>());
+            }
+            return ResponseEntity.ok(jobs);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest()
+                .body("Error fetching jobs: " + e.getMessage());
         }
     }
 }

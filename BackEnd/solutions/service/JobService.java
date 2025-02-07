@@ -63,4 +63,35 @@ public class JobService {
                     "WHERE j.EmployerId = ?";
         return jdbcTemplate.queryForList(sql, employerId);
     }
+
+    // Get all active jobs
+    public List<JobPosting> getAllJobs() {
+        try {
+            // First, let's check if the table exists and has data
+            String checkSql = "SELECT COUNT(*) FROM JobPostings";
+            Integer count = jdbcTemplate.queryForObject(checkSql, Integer.class);
+            System.out.println("Found " + count + " jobs in database");
+
+            String sql = "SELECT j.JobId, j.Title, j.Description, " +
+                        "j.MinSalary, j.MaxSalary, j.WorkType, " +
+                        "j.IsActive, j.PostDate, j.EmployerId, " +
+                        "COALESCE(c.CompanyName, 'Unknown') as CompanyName, " +
+                        "COALESCE(ci.CityName, 'Unknown') as CityName " +
+                        "FROM JobPostings j " +
+                        "LEFT JOIN Employers e ON j.EmployerId = e.UserId " +
+                        "LEFT JOIN Companies c ON e.CompanyId = c.CompanyId " +
+                        "LEFT JOIN Cities ci ON j.CityId = ci.CityId " +
+                        "WHERE j.IsActive = 1 " +
+                        "ORDER BY j.PostDate DESC";
+            
+            System.out.println("Executing query: " + sql);
+            List<JobPosting> jobs = jdbcTemplate.query(sql, jobRowMapper);
+            System.out.println("Query executed successfully, found " + jobs.size() + " jobs");
+            return jobs;
+        } catch (Exception e) {
+            System.err.println("Error in getAllJobs:");
+            e.printStackTrace();
+            throw new RuntimeException("Database error: " + e.getMessage(), e);
+        }
+    }
 }
