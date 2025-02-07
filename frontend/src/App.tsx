@@ -24,7 +24,7 @@ const App: React.FC = () => {
       setLoading(true);
       setError("");
       console.log('Fetching jobs from:', 'http://localhost:8080/api/jobs');
-      
+    
       const response = await fetch('http://localhost:8080/api/jobs', {
         method: 'GET',
         headers: {
