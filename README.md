@@ -1,5 +1,4 @@
 # Foundry
 Foundry - A job search app
 
-// First install sqlite
-https://www.sqlite.org/download.html
+The detailed readme is under the folder Backend and Frontend (TBC).

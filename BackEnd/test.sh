@@ -94,7 +94,7 @@ response=$(curl -s -X POST "http://localhost:8080/api/jobs/apply" \
   -H "Content-Type: application/json" \
   -d '{
     "employeeId": 1,
-    "jobId": "1"
+    "jobId": "2"
   }')
 echo "Response: $response"
 if [[ "$response" != *"successfully"* ]]; then
