@@ -1,3 +1,11 @@
-1,2,Software Engineer,Develop and maintain software applications,60000,120000,Full-time,1,1,CURRENT_DATE
-2,2,Data Analyst,Analyze data and generate reports,50000,90000,Intern,2,1,CURRENT_DATE
-3,2,Product Manager,Manage product lifecycle and strategy,70000,130000,Full-time,3,1,CURRENT_DATE
+JobId,EmployerId,Title,Description,MinSalary,MaxSalary,WorkType,CityId,IsActive,PostDate
+1,2,Software Engineer,Develop and maintain software applications,60000,120000,Full-time,1,1,2024-02-06
+2,2,Data Analyst,Analyze data and generate reports,50000,90000,Intern,2,1,2024-02-06
+3,4,Frontend Developer,Build user interfaces,70000,110000,Full-time,2,1,2024-02-06
+4,4,Backend Developer,Design server architecture,75000,115000,Full-time,2,1,2024-02-06
+5,6,Product Manager,Lead product development,80000,140000,Full-time,5,1,2024-02-06
+6,6,UX Designer,Design user experiences,65000,95000,Contract,5,1,2024-02-06
+7,8,DevOps Engineer,Manage cloud infrastructure,85000,130000,Full-time,2,1,2024-02-06
+8,8,Data Scientist,Build ML models,90000,150000,Full-time,2,1,2024-02-06
+9,10,Financial Analyst,Analyze financial data,55000,85000,Part-time,1,1,2024-02-06
+10,10,Risk Analyst,Assess financial risks,60000,90000,Full-time,1,1,2024-02-06
