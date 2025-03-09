@@ -14,6 +14,7 @@ interface Job {
   companyName: string;
   isActive: boolean;
   postDate: string;
+  countryName?: string;
 }
 
 const App: React.FC = () => {
@@ -97,17 +98,21 @@ const App: React.FC = () => {
               <div className="job-list-container">
                 {jobs.map(job => (
                   <div key={job.jobId} className="job-card">
-                    <h3 className="job-title">{job.title}</h3>
+                    <div className="job-card-header">
+                      <h3 className="job-title">{job.title}</h3>
+                      <h4>{job.companyName}</h4>
+                    </div>
                     <div className="job-details">
-                      <p><strong>Company:</strong> {job.companyName}</p>
-                      <p><strong>Location:</strong> {job.cityName}</p>
+                      <p><strong>Location:</strong> {job.cityName}{job.countryName ? `, ${job.countryName}` : ''}</p>
                       <p><strong>Salary Range:</strong> ${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()}</p>
                       <p><strong>Work Type:</strong> {job.workType}</p>
                       <p><strong>Posted:</strong> {new Date(job.postDate).toLocaleDateString()}</p>
-                      {job.description && (
-                        <p className="job-description">{job.description}</p>
-                      )}
                     </div>
+                    {job.description && (
+                      <div className="job-expanded-details">
+                        <p className="job-description">{job.description}</p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

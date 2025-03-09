@@ -32,6 +32,26 @@ const JobSearch: React.FC = () => {
   // Country options based on database
   const countries = ['USA', 'Canada', 'UK', 'Germany', 'France', 'Australia', 'Japan', 'China'];
   
+  // State for expanded job cards
+  const [expandedJobIds, setExpandedJobIds] = useState<number[]>([]);
+  
+  // Toggle job details expansion
+  const toggleJobDetails = (jobId: number) => {
+    setExpandedJobIds(prevIds => 
+      prevIds.includes(jobId) 
+        ? prevIds.filter(id => id !== jobId) 
+        : [...prevIds, jobId]
+    );
+  };
+  
+  // Check if a job is expanded
+  const isJobExpanded = (jobId: number) => expandedJobIds.includes(jobId);
+  
+  // Reset expanded jobs when filters change
+  useEffect(() => {
+    setExpandedJobIds([]);
+  }, [city, country, minSalary, maxSalary, workType]);
+  
   // Fetch all jobs initially
   useEffect(() => {
     const fetchJobs = async () => {
@@ -202,15 +222,32 @@ const JobSearch: React.FC = () => {
           <div className="job-list">
             {filteredJobs.map((job) => (
               <div key={job.jobId} className="job-card">
-                <h3>{job.title}</h3>
-                <h4>{job.companyName}</h4>
+                <div className="job-card-header">
+                  <h3>{job.title}</h3>
+                  <h4>{job.companyName}</h4>
+                </div>
+                
                 <div className="job-details">
-                  <p><strong>Location:</strong> {job.cityName}, {job.countryName}</p>
+                  <p><strong>Location:</strong> {job.cityName}{job.countryName ? `, ${job.countryName}` : ''}</p>
                   <p><strong>Salary:</strong> ${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()}</p>
                   <p><strong>Work Type:</strong> {job.workType}</p>
                 </div>
-                <p className="job-description">{job.description}</p>
-                <button className="apply-button">Apply Now</button>
+                
+                {isJobExpanded(job.jobId) && (
+                  <div className="job-expanded-details">
+                    <p className="job-description">{job.description}</p>
+                  </div>
+                )}
+                
+                <div className="job-card-actions">
+                  <button 
+                    className="details-button" 
+                    onClick={() => toggleJobDetails(job.jobId)}
+                  >
+                    {isJobExpanded(job.jobId) ? 'Hide Details' : 'Show Details'}
+                  </button>
+                  <button className="apply-button">Apply Now</button>
+                </div>
               </div>
             ))}
           </div>
