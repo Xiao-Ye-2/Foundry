@@ -130,7 +130,6 @@
 .job-results h3 {
   margin-bottom: var(--spacing-lg);
   color: var(--color-text);
-  border-bottom: 2px solid var(--color-border);
   padding-bottom: var(--spacing-sm);
   font-weight: var(--font-weight-medium);
   font-size: 1.5rem;

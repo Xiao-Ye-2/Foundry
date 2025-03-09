@@ -51,6 +51,7 @@ const App: React.FC = () => {
   const [loadingApplications, setLoadingApplications] = useState(false);
   const [applicationError, setApplicationError] = useState<string>("");
   const [expandedApplications, setExpandedApplications] = useState<number[]>([]);
+  const [expandedJobs, setExpandedJobs] = useState<number[]>([]);
 
   // Load jobs when the component mounts or when the employee logs in
   useEffect(() => {
@@ -228,6 +229,16 @@ const App: React.FC = () => {
 
   const isApplicationExpanded = (jobId: number) => expandedApplications.includes(jobId);
 
+  const toggleJobDetails = (jobId: number) => {
+    setExpandedJobs(prev => 
+      prev.includes(jobId) 
+        ? prev.filter(id => id !== jobId) 
+        : [...prev, jobId]
+    );
+  };
+
+  const isJobExpanded = (jobId: number) => expandedJobs.includes(jobId);
+
   // If no role is selected, show the role selection screen
   if (userRole === null) {
     return <RoleSelection onSelectRole={handleRoleSelection} />;
@@ -293,42 +304,56 @@ const App: React.FC = () => {
             )}
             
             {jobs.length > 0 && (
-              <div className="job-list-container">
-                {jobs.map(job => (
-                  <div key={job.jobId} className="job-card">
-                    <div className="job-card-header">
-                      <h3 className="job-title">{job.title}</h3>
-                      <h4>{job.companyName}</h4>
-                    </div>
-                    <div className="job-details">
-                      <p><strong>Location:</strong> {job.cityName}{job.countryName ? `, ${job.countryName}` : ''}</p>
-                      <p><strong>Salary Range:</strong> ${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()}</p>
-                      <p><strong>Work Type:</strong> {job.workType}</p>
-                      <p><strong>Posted:</strong> {new Date(job.postDate).toLocaleDateString()}</p>
-                    </div>
-                    {job.description && (
-                      <div className="job-expanded-details">
-                        <p className="job-description">{job.description}</p>
+              <>
+                <div className="job-results">
+                  <h3>Available Jobs ({jobs.length})</h3>
+                </div>
+                <div className="job-list-container">
+                  {jobs.map(job => (
+                    <div key={job.jobId} className="job-card">
+                      <div className="job-card-header">
+                        <h3 className="job-title">{job.title}</h3>
+                        <h4>{job.companyName}</h4>
                       </div>
-                    )}
-                    <div className="job-actions">
-                      {hasAppliedForJob(job.jobId) ? (
-                        <button className="applied-button" disabled>
-                          Applied
-                        </button>
-                      ) : (
+                      <div className="job-details">
+                        <p><strong>Location:</strong> {job.cityName}{job.countryName ? `, ${job.countryName}` : ''}</p>
+                        <p><strong>Salary Range:</strong> ${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()}</p>
+                        <p><strong>Work Type:</strong> {job.workType}</p>
+                        <p><strong>Posted:</strong> {new Date(job.postDate).toLocaleDateString()}</p>
+                      </div>
+                      
+                      <div className="job-card-actions">
                         <button 
-                          className="apply-button" 
-                          onClick={() => handleApplyForJob(job.jobId)}
-                          disabled={applyingToJob === job.jobId}
+                          className="details-button" 
+                          onClick={() => toggleJobDetails(job.jobId)}
                         >
-                          {applyingToJob === job.jobId ? 'Applying...' : 'Apply Now'}
+                          {isJobExpanded(job.jobId) ? 'Hide Details' : 'Show Details'}
                         </button>
+                        
+                        {hasAppliedForJob(job.jobId) ? (
+                          <button className="applied-button" disabled>
+                            Applied
+                          </button>
+                        ) : (
+                          <button 
+                            className="apply-button" 
+                            onClick={() => handleApplyForJob(job.jobId)}
+                            disabled={applyingToJob === job.jobId}
+                          >
+                            {applyingToJob === job.jobId ? 'Applying...' : 'Apply Now'}
+                          </button>
+                        )}
+                      </div>
+                      
+                      {isJobExpanded(job.jobId) && job.description && (
+                        <div className="job-expanded-details">
+                          <p className="job-description">{job.description}</p>
+                        </div>
                       )}
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </>
             )}
           </>
         )}
