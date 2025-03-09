@@ -200,22 +200,21 @@
 
 .job-expanded-details {
   margin-top: var(--spacing-xs);
-  padding-top: var(--spacing-xs);
 }
 
 .job-card-actions {
   display: flex;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-sm);
-  padding-top: var(--spacing-xs);
+  justify-content: space-between;
+  margin-top: 15px;
+  gap: 10px;
 }
 
 .details-button {
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: 8px 16px;
   background-color: #f1f1f1;
   color: var(--color-text);
   border: none;
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--border-radius-md);
   cursor: pointer;
   font-weight: var(--font-weight-medium);
   transition: background-color 0.3s;
@@ -227,16 +226,17 @@
 }
 
 .apply-button {
+  padding: 8px 16px;
   background-color: var(--color-success);
   color: white;
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-size: 1rem;
-  font-weight: var(--font-weight-medium);
-  border-radius: var(--border-radius-sm);
   border: none;
+  border-radius: var(--border-radius-md);
   cursor: pointer;
+  font-weight: var(--font-weight-medium);
   transition: background-color 0.3s;
-  flex: 2;
+  flex: 1;
+  min-width: 120px;
+  text-align: center;
 }
 
 .apply-button:hover {
@@ -251,7 +251,9 @@
   border-radius: var(--border-radius-md);
   font-weight: var(--font-weight-medium);
   cursor: not-allowed;
-  margin-left: 10px;
+  flex: 1;
+  min-width: 120px;
+  text-align: center;
 }
 
 /* =========================================

@@ -40,7 +40,7 @@ interface ApiApplication {
 }
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'jobs' | 'advanced'>('jobs');
+  const [activeTab, setActiveTab] = useState<'jobs' | 'applications' | 'advanced'>('jobs');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -48,6 +48,9 @@ const App: React.FC = () => {
   const [employeeId, setEmployeeId] = useState<number | null>(null);
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [applyingToJob, setApplyingToJob] = useState<number | null>(null);
+  const [loadingApplications, setLoadingApplications] = useState(false);
+  const [applicationError, setApplicationError] = useState<string>("");
+  const [expandedApplications, setExpandedApplications] = useState<number[]>([]);
 
   // Load jobs when the component mounts or when the employee logs in
   useEffect(() => {
@@ -56,12 +59,12 @@ const App: React.FC = () => {
     }
   }, [employeeId, jobs.length]);
 
-  // Load applications when the employee logs in
+  // Load applications when the employee logs in or when the tab changes to 'applications'
   useEffect(() => {
-    if (employeeId !== null) {
+    if (employeeId !== null && activeTab === 'applications') {
       handleGetApplications();
     }
-  }, [employeeId]);
+  }, [employeeId, activeTab]);
 
   const handleGetJobs = async () => {
     try {
@@ -106,6 +109,9 @@ const App: React.FC = () => {
     if (!employeeId) return;
 
     try {
+      setLoadingApplications(true);
+      setApplicationError("");
+      
       const response = await fetch(`http://localhost:8080/api/jobs/applications/employee/${employeeId}`, {
         method: 'GET',
         headers: {
@@ -132,7 +138,9 @@ const App: React.FC = () => {
       setApplications(applications);
     } catch (error) {
       console.error('Error fetching applications:', error);
-      // We don't show this error to the user, just log it
+      setApplicationError(error instanceof Error ? error.message : 'Failed to load applications');
+    } finally {
+      setLoadingApplications(false);
     }
   };
 
@@ -210,6 +218,16 @@ const App: React.FC = () => {
     setApplications([]);
   };
 
+  const toggleApplicationDetails = (jobId: number) => {
+    setExpandedApplications(prev => 
+      prev.includes(jobId) 
+        ? prev.filter(id => id !== jobId) 
+        : [...prev, jobId]
+    );
+  };
+
+  const isApplicationExpanded = (jobId: number) => expandedApplications.includes(jobId);
+
   // If no role is selected, show the role selection screen
   if (userRole === null) {
     return <RoleSelection onSelectRole={handleRoleSelection} />;
@@ -240,6 +258,12 @@ const App: React.FC = () => {
             className={`tab-button ${activeTab === 'jobs' ? 'active' : ''}`}
           >
             Browse Jobs
+          </button>
+          <button 
+            onClick={() => setActiveTab('applications')}
+            className={`tab-button ${activeTab === 'applications' ? 'active' : ''}`}
+          >
+            My Applications
           </button>
           <button 
             onClick={() => setActiveTab('advanced')}
@@ -307,6 +331,71 @@ const App: React.FC = () => {
               </div>
             )}
           </>
+        )}
+        
+        {activeTab === 'applications' && (
+          <div className="applications-container">
+            <h2>My Applications</h2>
+            
+            {loadingApplications && <div className="loading-indicator">Loading your applications...</div>}
+            
+            {applicationError && (
+              <div className="error-message">
+                {applicationError}
+              </div>
+            )}
+            
+            {!loadingApplications && !applicationError && applications.length === 0 && (
+              <div className="no-applications-message">
+                <p>You haven't applied to any jobs yet.</p>
+                <button className="primary-button" onClick={() => setActiveTab('jobs')}>
+                  Browse Jobs
+                </button>
+              </div>
+            )}
+            
+            {!loadingApplications && !applicationError && applications.length > 0 && (
+              <div className="applications-list">
+                {applications.map((application) => {
+                  // Find the corresponding job
+                  const job = jobs.find(j => j.jobId === application.jobId);
+                  
+                  return (
+                    <div key={`${application.employeeId}-${application.jobId}`} className="application-card">
+                      <div className="application-header">
+                        <h3>{job ? job.title : `Job #${application.jobId}`}</h3>
+                        <h4>{job ? job.companyName : 'Unknown Company'}</h4>
+                      </div>
+                      
+                      <div className="application-details">
+                        <p><strong>Applied On:</strong> {application.applicationDate ? new Date(application.applicationDate).toLocaleDateString() : 'Unknown'}</p>
+                        <p><strong>Status:</strong> <span className={`status-${application.status?.toLowerCase()}`}>{application.status || 'Pending'}</span></p>
+                      </div>
+                      
+                      {job && isApplicationExpanded(job.jobId) && (
+                        <div className="job-expanded-details">
+                          <p><strong>Location:</strong> {job.cityName}{job.countryName ? `, ${job.countryName}` : ''}</p>
+                          <p><strong>Salary Range:</strong> ${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()}</p>
+                          <p><strong>Work Type:</strong> {job.workType}</p>
+                          <p><strong>Description:</strong></p>
+                          <p className="job-description">{job.description}</p>
+                        </div>
+                      )}
+                      
+                      {job && (
+                        <button 
+                          className="view-job-button"
+                          onClick={() => toggleApplicationDetails(job.jobId)}
+                        >
+                          {isApplicationExpanded(job.jobId) ? 'Hide Details' : 'View Job Details'}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         )}
         
         {activeTab === 'advanced' && (
