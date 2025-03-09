@@ -243,6 +243,17 @@
   background-color: var(--color-success-dark);
 }
 
+.applied-button {
+  padding: 8px 16px;
+  background-color: #e0e0e0;
+  color: var(--color-text-light);
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-weight: var(--font-weight-medium);
+  cursor: not-allowed;
+  margin-left: 10px;
+}
+
 /* =========================================
    Responsive Styles
    ========================================= */

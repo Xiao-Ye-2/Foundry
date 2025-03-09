@@ -13,7 +13,18 @@ interface Job {
   countryName: string;
 }
 
-const JobSearch: React.FC = () => {
+interface JobSearchProps {
+  employeeId: number | null;
+  onApplyForJob: (jobId: number) => Promise<void>;
+  hasAppliedForJob: (jobId: number) => boolean;
+  applyingToJob: number | null;
+}
+
+const JobSearch: React.FC<JobSearchProps> = ({ 
+  onApplyForJob, 
+  hasAppliedForJob,
+  applyingToJob
+}) => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -246,7 +257,20 @@ const JobSearch: React.FC = () => {
                   >
                     {isJobExpanded(job.jobId) ? 'Hide Details' : 'Show Details'}
                   </button>
-                  <button className="apply-button">Apply Now</button>
+                  
+                  {hasAppliedForJob(job.jobId) ? (
+                    <button className="applied-button" disabled>
+                      Applied
+                    </button>
+                  ) : (
+                    <button 
+                      className="apply-button"
+                      onClick={() => onApplyForJob(job.jobId)}
+                      disabled={applyingToJob === job.jobId}
+                    >
+                      {applyingToJob === job.jobId ? 'Applying...' : 'Apply Now'}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

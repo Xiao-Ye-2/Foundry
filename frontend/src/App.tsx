@@ -21,6 +21,24 @@ interface Job {
 
 type UserRole = 'employee' | 'employer' | null;
 
+interface JobApplication {
+  applicationId?: number;
+  employeeId: number;
+  jobId: number;
+  applicationDate?: string;
+  status?: string;
+}
+
+// Transform the data to match our JobApplication interface
+interface ApiApplication {
+  EmployeeId: number;
+  JobId: number;
+  ApplyDate: string;
+  Status: string;
+  JobTitle?: string;
+  CompanyName?: string;
+}
+
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'jobs' | 'advanced'>('jobs');
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -28,6 +46,8 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [employeeId, setEmployeeId] = useState<number | null>(null);
+  const [applications, setApplications] = useState<JobApplication[]>([]);
+  const [applyingToJob, setApplyingToJob] = useState<number | null>(null);
 
   // Load jobs when the component mounts or when the employee logs in
   useEffect(() => {
@@ -35,6 +55,13 @@ const App: React.FC = () => {
       handleGetJobs();
     }
   }, [employeeId, jobs.length]);
+
+  // Load applications when the employee logs in
+  useEffect(() => {
+    if (employeeId !== null) {
+      handleGetApplications();
+    }
+  }, [employeeId]);
 
   const handleGetJobs = async () => {
     try {
@@ -48,7 +75,7 @@ const App: React.FC = () => {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
-        credentials: 'omit'  // Added this to avoid CORS credentials issues
+        credentials: 'omit'
       });
       
       console.log('Response:', {
@@ -75,6 +102,93 @@ const App: React.FC = () => {
     }
   };
 
+  const handleGetApplications = async () => {
+    if (!employeeId) return;
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/jobs/applications/employee/${employeeId}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        credentials: 'omit'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch applications: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      // Transform the data to match our JobApplication interface
+      const applications: JobApplication[] = data.map((app: ApiApplication) => ({
+        employeeId: app.EmployeeId,
+        jobId: app.JobId,
+        applicationDate: app.ApplyDate,
+        status: app.Status || 'Pending'
+      }));
+      
+      setApplications(applications);
+    } catch (error) {
+      console.error('Error fetching applications:', error);
+      // We don't show this error to the user, just log it
+    }
+  };
+
+  const handleApplyForJob = async (jobId: number) => {
+    if (!employeeId) {
+      alert('Please log in to apply for jobs');
+      return;
+    }
+
+    try {
+      setApplyingToJob(jobId);
+      
+      const response = await fetch('http://localhost:8080/api/jobs/apply', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          employeeId: employeeId,
+          jobId: jobId.toString()
+        }),
+        credentials: 'omit'
+      });
+
+      if (response.status === 409) {
+        alert('You have already applied for this job');
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`Failed to submit application: ${response.status} ${response.statusText}`);
+      }
+
+      // Add the new application to the state
+      const newApplication: JobApplication = {
+        employeeId: employeeId,
+        jobId: jobId,
+        applicationDate: new Date().toISOString(),
+        status: 'Pending'
+      };
+      
+      setApplications(prev => [...prev, newApplication]);
+      alert(`Application submitted successfully for job: ${jobs.find(job => job.jobId === jobId)?.title}`);
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      alert('Failed to submit application. Please try again later.');
+    } finally {
+      setApplyingToJob(null);
+    }
+  };
+
+  const hasAppliedForJob = (jobId: number) => {
+    return applications.some(app => app.jobId === jobId);
+  };
+
   const handleRoleSelection = (role: 'employee' | 'employer') => {
     setUserRole(role);
     // If employer is selected, show a message
@@ -93,6 +207,7 @@ const App: React.FC = () => {
   const handleSignOut = () => {
     setUserRole(null);
     setEmployeeId(null);
+    setApplications([]);
   };
 
   // If no role is selected, show the role selection screen
@@ -173,12 +288,19 @@ const App: React.FC = () => {
                       </div>
                     )}
                     <div className="job-actions">
-                      <button 
-                        className="apply-button" 
-                        onClick={() => alert(`Application functionality coming soon! You would apply for job ID: ${job.jobId}`)}
-                      >
-                        Apply Now
-                      </button>
+                      {hasAppliedForJob(job.jobId) ? (
+                        <button className="applied-button" disabled>
+                          Applied
+                        </button>
+                      ) : (
+                        <button 
+                          className="apply-button" 
+                          onClick={() => handleApplyForJob(job.jobId)}
+                          disabled={applyingToJob === job.jobId}
+                        >
+                          {applyingToJob === job.jobId ? 'Applying...' : 'Apply Now'}
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -188,7 +310,12 @@ const App: React.FC = () => {
         )}
         
         {activeTab === 'advanced' && (
-          <JobSearch />
+          <JobSearch 
+            employeeId={employeeId} 
+            onApplyForJob={handleApplyForJob} 
+            hasAppliedForJob={hasAppliedForJob}
+            applyingToJob={applyingToJob}
+          />
         )}
       </div>
     </div>
