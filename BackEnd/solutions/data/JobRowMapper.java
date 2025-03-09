@@ -28,6 +28,13 @@ public class JobRowMapper implements RowMapper<JobPosting> {
             String cityName = rs.getString("CityName");
             jobPosting.setCityName(cityName != null ? cityName : "Remote");
             
+            try {
+                String countryName = rs.getString("CountryName");
+                jobPosting.setCountryName(countryName != null ? countryName : "Unknown Country");
+            } catch (SQLException e) {
+                jobPosting.setCountryName("Unknown Country");
+            }
+            
             return jobPosting;
         } catch (SQLException e) {
             System.err.println("Error mapping row to JobPosting:");

@@ -13,6 +13,7 @@ public class JobPosting {
     private String postDate;
     private String companyName;
     private String cityName;
+    private String countryName;
 
     // Getters and Setters
     public Long getJobId() {
@@ -109,5 +110,13 @@ public class JobPosting {
 
     public void setCityName(String cityName) {
         this.cityName = cityName;
+    }
+
+    public String getCountryName() {
+        return countryName;
+    }
+
+    public void setCountryName(String countryName) {
+        this.countryName = countryName;
     }
 }
