@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import Button from "./components/Button";
+import JobSearch from "./components/JobSearch";
+import "./App.css";
 
 interface Job {
   jobId: number;
@@ -15,6 +17,7 @@ interface Job {
 }
 
 const App: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'simple' | 'advanced'>('simple');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -61,57 +64,57 @@ const App: React.FC = () => {
   };
 
   return (
-    <div style={{ 
-      width: '100vw',
-      minHeight: '100vh',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center'
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: '800px',
-        padding: '20px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '20px'
-      }}>
-        <h1>Job Board</h1>
-        <Button text={loading ? "Loading..." : "Get All Jobs"} onClick={handleGetJobs} />
+    <div className="app-container">
+      <div className="content-wrapper">
+        <h1 className="app-title">Job Board</h1>
         
-        {error && (
-          <div style={{ color: 'red', marginTop: '10px' }}>
-            {error}
-          </div>
-        )}
+        <div className="tab-container">
+          <button 
+            onClick={() => setActiveTab('simple')}
+            className={`tab-button ${activeTab === 'simple' ? 'active' : ''}`}
+          >
+            Simple View
+          </button>
+          <button 
+            onClick={() => setActiveTab('advanced')}
+            className={`tab-button ${activeTab === 'advanced' ? 'active' : ''}`}
+          >
+            Advanced Search
+          </button>
+        </div>
         
-        {jobs.length > 0 && (
-          <div style={{ width: '100%' }}>
-            {jobs.map(job => (
-              <div key={job.jobId} style={{
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                padding: '20px',
-                margin: '10px auto',
-                width: '100%',
-                maxWidth: '600px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-              }}>
-                <h3 style={{ margin: '0 0 10px 0' }}>{job.title}</h3>
-                <div style={{ display: 'grid', gap: '8px' }}>
-                  <p style={{ margin: 0 }}><strong>Company:</strong> {job.companyName}</p>
-                  <p style={{ margin: 0 }}><strong>Location:</strong> {job.cityName}</p>
-                  <p style={{ margin: 0 }}><strong>Salary Range:</strong> ${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()}</p>
-                  <p style={{ margin: 0 }}><strong>Work Type:</strong> {job.workType}</p>
-                  <p style={{ margin: 0 }}><strong>Posted:</strong> {new Date(job.postDate).toLocaleDateString()}</p>
-                  {job.description && (
-                    <p style={{ margin: '10px 0 0 0' }}>{job.description}</p>
-                  )}
-                </div>
+        {activeTab === 'simple' ? (
+          <>
+            <Button text={loading ? "Loading..." : "Get All Jobs"} onClick={handleGetJobs} />
+            
+            {error && (
+              <div className="error-message">
+                {error}
               </div>
-            ))}
-          </div>
+            )}
+            
+            {jobs.length > 0 && (
+              <div className="job-list-container">
+                {jobs.map(job => (
+                  <div key={job.jobId} className="job-card">
+                    <h3 className="job-title">{job.title}</h3>
+                    <div className="job-details">
+                      <p><strong>Company:</strong> {job.companyName}</p>
+                      <p><strong>Location:</strong> {job.cityName}</p>
+                      <p><strong>Salary Range:</strong> ${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()}</p>
+                      <p><strong>Work Type:</strong> {job.workType}</p>
+                      <p><strong>Posted:</strong> {new Date(job.postDate).toLocaleDateString()}</p>
+                      {job.description && (
+                        <p className="job-description">{job.description}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <JobSearch />
         )}
       </div>
     </div>
