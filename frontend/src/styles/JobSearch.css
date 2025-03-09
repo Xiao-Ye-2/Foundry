@@ -145,14 +145,14 @@
 
 .job-card {
   background-color: var(--color-background);
-  border-radius: var(--border-radius-lg);
-  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-md);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s, box-shadow 0.3s;
   border: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
 }
 
 .job-card:hover {
@@ -161,29 +161,29 @@
 }
 
 .job-card-header {
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
 }
 
 .job-card h3 {
   margin-top: 0;
   color: var(--color-primary);
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   border-bottom: none;
   font-weight: var(--font-weight-medium);
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: 0;
 }
 
 .job-card h4 {
   color: var(--color-text-light);
   margin-top: 0;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: var(--font-weight-regular);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-xs);
 }
 
 .job-details {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .job-details p {
@@ -199,15 +199,15 @@
 }
 
 .job-expanded-details {
-  margin-top: var(--spacing-md);
-  padding-top: var(--spacing-md);
+  margin-top: var(--spacing-xs);
+  padding-top: var(--spacing-xs);
 }
 
 .job-card-actions {
   display: flex;
   gap: var(--spacing-md);
-  margin-top: var(--spacing-lg);
-  padding-top: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-xs);
 }
 
 .details-button {
