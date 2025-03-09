@@ -17,20 +17,28 @@ public class JobService {
     @Autowired
     private JobRowMapper jobRowMapper;
 
-    // R6:
-    public List<JobPosting> searchJobs(String location, Double minSalary, String workType) {
-        String sql = "SELECT j.*, c.CompanyName, ci.CityName " +
+    // R6: Job search with filters
+    public List<JobPosting> searchJobs(String city, String country, Double minSalary, Double maxSalary, String workType) {
+        String sql = "SELECT j.*, c.CompanyName, ci.CityName, co.CountryName " +
                     "FROM JobPostings j " +
                     "JOIN Employers e ON j.EmployerId = e.UserId " +
                     "JOIN Companies c ON e.CompanyId = c.CompanyId " +
                     "JOIN Cities ci ON j.CityId = ci.CityId " +
+                    "JOIN Countries co ON ci.CountryId = co.CountryId " +
                     "WHERE j.IsActive = 1 " +
-                    "AND (?1 IS NULL OR ci.CityName = ?1) " +
-                    "AND (?2 IS NULL OR j.MinSalary >= ?2) " +
-                    "AND (?3 IS NULL OR j.WorkType = ?3)";
-        return jdbcTemplate.query(sql, jobRowMapper, location, minSalary, workType);
+                    "AND (?1 IS NULL OR ci.CityName LIKE ?1) " +
+                    "AND (?2 IS NULL OR co.CountryName LIKE ?2) " +
+                    "AND (?3 IS NULL OR j.MinSalary >= ?3) " +
+                    "AND (?4 IS NULL OR j.MaxSalary <= ?4) " +
+                    "AND (?5 IS NULL OR j.WorkType = ?5) " +
+                    "ORDER BY j.PostDate DESC";
+        
+        // Prepare parameters with wildcards for text searches
+        String cityParam = city != null ? "%" + city + "%" : null;
+        String countryParam = country != null ? "%" + country + "%" : null;
+        
+        return jdbcTemplate.query(sql, jobRowMapper, cityParam, countryParam, minSalary, maxSalary, workType);
     }
-
 
     // R7:
     public void applyToJob(Long employeeId, Long jobId) {
@@ -76,11 +84,13 @@ public class JobService {
                         "j.MinSalary, j.MaxSalary, j.WorkType, " +
                         "j.IsActive, j.PostDate, j.EmployerId, " +
                         "COALESCE(c.CompanyName, 'Unknown') as CompanyName, " +
-                        "COALESCE(ci.CityName, 'Unknown') as CityName " +
+                        "COALESCE(ci.CityName, 'Unknown') as CityName, " +
+                        "COALESCE(co.CountryName, 'Unknown') as CountryName " +
                         "FROM JobPostings j " +
                         "LEFT JOIN Employers e ON j.EmployerId = e.UserId " +
                         "LEFT JOIN Companies c ON e.CompanyId = c.CompanyId " +
                         "LEFT JOIN Cities ci ON j.CityId = ci.CityId " +
+                        "LEFT JOIN Countries co ON ci.CountryId = co.CountryId " +
                         "WHERE j.IsActive = 1 " +
                         "ORDER BY j.PostDate DESC";
             
@@ -89,8 +99,6 @@ public class JobService {
             System.out.println("Query executed successfully, found " + jobs.size() + " jobs");
             return jobs;
         } catch (Exception e) {
-            System.err.println("Error in getAllJobs:");
-            e.printStackTrace();
             throw new RuntimeException("Database error: " + e.getMessage(), e);
         }
     }

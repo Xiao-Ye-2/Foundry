@@ -21,12 +21,15 @@ public class JobController {
 
     // R6: Job search
     @GetMapping("/search")
+    @CrossOrigin(origins = "http://localhost:5173")
     public List<JobPosting> searchJobs(
-        @RequestParam(required = false) String location,
+        @RequestParam(required = false) String city,
+        @RequestParam(required = false) String country,
         @RequestParam(required = false) Double minSalary,
+        @RequestParam(required = false) Double maxSalary,
         @RequestParam(required = false) String workType
     ) {
-        return jobService.searchJobs(location, minSalary, workType);
+        return jobService.searchJobs(city, country, minSalary, maxSalary, workType);
     }
 
     // R7: Apply to a job
