@@ -102,4 +102,15 @@ public class JobService {
             throw new RuntimeException("Database error: " + e.getMessage(), e);
         }
     }
+
+    // Get applications by employee ID
+    public List<Map<String, Object>> getApplicationsByEmployeeId(Long employeeId) {
+        String sql = "SELECT a.*, j.Title as JobTitle, c.CompanyName " +
+                    "FROM Applications a " +
+                    "JOIN JobPostings j ON a.JobId = j.JobId " +
+                    "JOIN Employers e ON j.EmployerId = e.UserId " +
+                    "JOIN Companies c ON e.CompanyId = c.CompanyId " +
+                    "WHERE a.EmployeeId = ?";
+        return jdbcTemplate.queryForList(sql, employeeId);
+    }
 }

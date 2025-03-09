@@ -12,6 +12,7 @@ import data.JobPosting;
 import service.JobService;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -34,6 +35,7 @@ public class JobController {
 
     // R7: Apply to a job
     @PostMapping("/apply")
+    @CrossOrigin(origins = "http://localhost:5173")
     public ResponseEntity<?> applyToJob(@RequestBody ApplicationRequest request) {
         try {
             jobService.applyToJob(request.getEmployeeId(), Long.parseLong(request.getJobId()));
@@ -82,6 +84,18 @@ public class JobController {
             e.printStackTrace();
             return ResponseEntity.badRequest()
                 .body("Error fetching jobs: " + e.getMessage());
+        }
+    }
+
+    // Get applications by employee ID
+    @GetMapping("/applications/employee/{employeeId}")
+    @CrossOrigin(origins = "http://localhost:5173")
+    public ResponseEntity<?> getApplicationsByEmployeeId(@PathVariable Long employeeId) {
+        try {
+            List<Map<String, Object>> applications = jobService.getApplicationsByEmployeeId(employeeId);
+            return ResponseEntity.ok(applications);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
 }
