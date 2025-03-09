@@ -190,3 +190,24 @@
     max-width: 100%;
   }
 }
+
+/* Role Switcher */
+.role-switcher {
+  margin-top: var(--spacing-xl);
+  text-align: center;
+}
+
+.switch-role-button {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: #f1f1f1;
+  color: var(--color-text);
+  border: none;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  font-weight: var(--font-weight-medium);
+  transition: background-color 0.3s;
+}
+
+.switch-role-button:hover {
+  background-color: #e0e0e0;
+}

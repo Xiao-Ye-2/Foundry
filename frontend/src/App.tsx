@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Button from "./components/Button";
 import JobSearch from "./components/JobSearch";
+import RoleSelection from "./components/RoleSelection";
 import "./App.css";
 
 interface Job {
@@ -17,11 +18,14 @@ interface Job {
   countryName?: string;
 }
 
+type UserRole = 'employee' | 'employer' | null;
+
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'simple' | 'advanced'>('simple');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [userRole, setUserRole] = useState<UserRole>(null);
 
   const handleGetJobs = async () => {
     try {
@@ -64,6 +68,22 @@ const App: React.FC = () => {
     }
   };
 
+  const handleRoleSelection = (role: 'employee' | 'employer') => {
+    setUserRole(role);
+    // If employer is selected, show a message
+    if (role === 'employer') {
+      alert('Employer functionality is coming soon!');
+      // Reset to employee view after alert
+      setUserRole('employee');
+    }
+  };
+
+  // If no role is selected, show the role selection screen
+  if (userRole === null) {
+    return <RoleSelection onSelectRole={handleRoleSelection} />;
+  }
+
+  // Show the job board (employee view)
   return (
     <div className="app-container">
       <div className="content-wrapper">
@@ -121,6 +141,15 @@ const App: React.FC = () => {
         ) : (
           <JobSearch />
         )}
+
+        <div className="role-switcher">
+          <button 
+            className="switch-role-button" 
+            onClick={() => setUserRole(null)}
+          >
+            Change Role
+          </button>
+        </div>
       </div>
     </div>
   );
