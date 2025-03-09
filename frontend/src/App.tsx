@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import Button from "./components/Button";
+import React, { useState, useEffect } from "react";
 import JobSearch from "./components/JobSearch";
 import RoleSelection from "./components/RoleSelection";
+import EmployeeLogin from "./components/EmployeeLogin";
 import "./App.css";
+import "./styles/EmployeeLogin.css";
 
 interface Job {
   jobId: number;
@@ -21,11 +22,19 @@ interface Job {
 type UserRole = 'employee' | 'employer' | null;
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'simple' | 'advanced'>('simple');
+  const [activeTab, setActiveTab] = useState<'jobs' | 'advanced'>('jobs');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [userRole, setUserRole] = useState<UserRole>(null);
+  const [employeeId, setEmployeeId] = useState<number | null>(null);
+
+  // Load jobs when the component mounts or when the employee logs in
+  useEffect(() => {
+    if (employeeId !== null && jobs.length === 0) {
+      handleGetJobs();
+    }
+  }, [employeeId, jobs.length]);
 
   const handleGetJobs = async () => {
     try {
@@ -49,8 +58,6 @@ const App: React.FC = () => {
       });
       
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error response body:', errorText);
         throw new Error(`Failed to fetch jobs: ${response.status} ${response.statusText}`);
       }
       
@@ -78,23 +85,46 @@ const App: React.FC = () => {
     }
   };
 
+  const handleEmployeeLogin = (id: number) => {
+    setEmployeeId(id);
+    console.log(`Employee logged in with ID: ${id}`);
+  };
+
+  const handleSignOut = () => {
+    setUserRole(null);
+    setEmployeeId(null);
+  };
+
   // If no role is selected, show the role selection screen
   if (userRole === null) {
     return <RoleSelection onSelectRole={handleRoleSelection} />;
+  }
+
+  // If employee role is selected but not logged in, show the login screen
+  if (userRole === 'employee' && employeeId === null) {
+    return <EmployeeLogin onLogin={handleEmployeeLogin} onBack={() => setUserRole(null)} />;
   }
 
   // Show the job board (employee view)
   return (
     <div className="app-container">
       <div className="content-wrapper">
-        <h1 className="app-title">Job Board</h1>
+        <div className="header-container">
+          <button className="sign-out-button" onClick={handleSignOut}>
+            Sign Out
+          </button>
+          <div className="employee-info">
+            <p>Employee ID: {employeeId}</p>
+          </div>
+          <h1 className="app-title">Job Board</h1>
+        </div>
         
         <div className="tab-container">
           <button 
-            onClick={() => setActiveTab('simple')}
-            className={`tab-button ${activeTab === 'simple' ? 'active' : ''}`}
+            onClick={() => setActiveTab('jobs')}
+            className={`tab-button ${activeTab === 'jobs' ? 'active' : ''}`}
           >
-            Simple View
+            Browse Jobs
           </button>
           <button 
             onClick={() => setActiveTab('advanced')}
@@ -104,13 +134,22 @@ const App: React.FC = () => {
           </button>
         </div>
         
-        {activeTab === 'simple' ? (
+        {activeTab === 'jobs' && (
           <>
-            <Button text={loading ? "Loading..." : "Get All Jobs"} onClick={handleGetJobs} />
+            {loading && <div className="loading-indicator">Loading jobs...</div>}
             
             {error && (
               <div className="error-message">
                 {error}
+              </div>
+            )}
+            
+            {!loading && !error && jobs.length === 0 && (
+              <div className="no-jobs-message">
+                <p>No jobs available. Please try again later.</p>
+                <button className="primary-button" onClick={handleGetJobs}>
+                  Refresh Jobs
+                </button>
               </div>
             )}
             
@@ -133,23 +172,24 @@ const App: React.FC = () => {
                         <p className="job-description">{job.description}</p>
                       </div>
                     )}
+                    <div className="job-actions">
+                      <button 
+                        className="apply-button" 
+                        onClick={() => alert(`Application functionality coming soon! You would apply for job ID: ${job.jobId}`)}
+                      >
+                        Apply Now
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
           </>
-        ) : (
+        )}
+        
+        {activeTab === 'advanced' && (
           <JobSearch />
         )}
-
-        <div className="role-switcher">
-          <button 
-            className="switch-role-button" 
-            onClick={() => setUserRole(null)}
-          >
-            Change Role
-          </button>
-        </div>
       </div>
     </div>
   );
