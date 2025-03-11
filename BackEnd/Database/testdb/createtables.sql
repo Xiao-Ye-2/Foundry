@@ -55,12 +55,12 @@ CREATE TABLE FocusOn (
 -- Table: Users
 CREATE TABLE Users (
     UserId INTEGER PRIMARY KEY AUTOINCREMENT,
-    Email TEXT UNIQUE NOT NULL,
+    Phone TEXT UNIQUE NOT NULL,
     PasswordHash TEXT NOT NULL,
-    FirstName TEXT NOT NULL,
-    LastName TEXT NOT NULL,
+    UserName TEXT NOT NULL,
     CityId INTEGER NOT NULL,
     Role TEXT NOT NULL CHECK (Role IN ('employee', 'employer', 'admin')),
+    Email TEXT UNIQUE DEFAULT NULL,
     FOREIGN KEY (CityId) REFERENCES Cities(CityId)
 );
 

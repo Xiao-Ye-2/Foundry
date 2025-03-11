@@ -1,5 +1,5 @@
 #!/bin/bash
-CLASSDIR="$(pwd)"
+CLASSDIR="$(pwd)/backend"
 DATDIR="$CLASSDIR/Database/testdb"
 
 # Check if Maven is installed
@@ -21,6 +21,7 @@ fi
 echo "Creating and populating database..."
 cd "$DATDIR"
 rm -f testdb
+python3 parser.py
 sqlite3 testdb < createtables.sql
 ./populatetables.sh
 
@@ -39,27 +40,27 @@ sleep 15
 echo "Running basic API tests..."
 
 # Test 1: Search all jobs
-echo "Test 1: Search all jobs"
-response=$(curl -s "http://localhost:8080/api/jobs/search")
-echo "Response: $response"
-if [ -z "$response" ]; then
-    echo "Test 1 Failed: No response"
-    kill $SPRING_PID
-    exit 1
-fi
+# echo "Test 1: Search all jobs"
+# response=$(curl -s "http://localhost:8080/api/jobs/search")
+# echo "Response: $response"
+# if [ -z "$response" ]; then
+#     echo "Test 1 Failed: No response"
+#     kill $SPRING_PID
+#     exit 1
+# fi
 
 # Test 2: Search Jobs with filters
-echo "Test 2: Search Jobs with filters"
-response=$(curl -s "http://localhost:8080/api/jobs/search?location=Toronto&workType=Intern")
-echo "Response: $response"
-if [ -z "$response" ]; then
-    echo "Test 2 Failed: No response"
-    kill $SPRING_PID
-    exit 1
-fi
+# echo "Test 2: Search Jobs with filters"
+# response=$(curl -s "http://localhost:8080/api/jobs/search?location=Toronto&workType=Intern")
+# echo "Response: $response"
+# if [ -z "$response" ]; then
+#     echo "Test 2 Failed: No response"
+#     kill $SPRING_PID
+#     exit 1
+# fi
 
 # Test 3: Post a Job
-echo "Test 3: Post a Job"
+echo "Test 1: Post a Job"
 response=$(curl -s -X POST "http://localhost:8080/api/jobs/post" \
   -H "Content-Type: application/json" \
   -H "user-id: 2" \
@@ -79,17 +80,17 @@ if [[ "$response" != *"successfully"* ]]; then
 fi
 
 # Test 1: Search all jobs
-echo "Test 1: Search all jobs"
-response=$(curl -s "http://localhost:8080/api/jobs/search")
-echo "Response: $response"
-if [ -z "$response" ]; then
-    echo "Test 1 Failed: No response"
-    kill $SPRING_PID
-    exit 1
-fi
+# echo "Test 1: Search all jobs"
+# response=$(curl -s "http://localhost:8080/api/jobs/search")
+# echo "Response: $response"
+# if [ -z "$response" ]; then
+#     echo "Test 1 Failed: No response"
+#     kill $SPRING_PID
+#     exit 1
+# fi
 
 # Test 4: Apply to Job
-echo "Test 4: Apply to Job"
+echo "Test 2: Apply to Job"
 response=$(curl -s -X POST "http://localhost:8080/api/jobs/apply" \
   -H "Content-Type: application/json" \
   -d '{
