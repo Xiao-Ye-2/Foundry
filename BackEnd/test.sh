@@ -1,6 +1,6 @@
 #!/bin/bash
 CLASSDIR="$(pwd)"
-DATDIR="$CLASSDIR/Database/proddb"
+DATDIR="$CLASSDIR/Database/testdb"
 
 # Check if Maven is installed
 if ! command -v mvn &> /dev/null; then
