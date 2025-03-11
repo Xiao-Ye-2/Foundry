@@ -2,7 +2,8 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=java,maven,react
 
 ### Java ###
-backend/Database/testdb/testdb
+Backend/Database/testdb/testdb
+BackEnd/Database/proddb/proddb
 
 # Compiled class file
 *.class

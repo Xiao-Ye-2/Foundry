@@ -1,7 +1,7 @@
 import pandas as pd
 import json
 import os
-import kaggle
+import sys
 import tempfile
 
 CSV_FILE = "job_descriptions.csv"
@@ -13,6 +13,7 @@ else:
     DATASET = "ravindrasinghrana/job-description-dataset"
     TEMP_DIR = tempfile.mkdtemp()
     try:
+        import kaggle
         kaggle_config_path = os.path.expanduser("~/.kaggle/kaggle.json")
         if not os.path.exists(kaggle_config_path):
             raise FileNotFoundError("Kaggle API credentials not found! Please place 'kaggle.json' in ~/.kaggle/")
@@ -21,15 +22,10 @@ else:
         csv_files = [f for f in os.listdir(TEMP_DIR) if f.endswith(".csv")]
         CSV_FILE = os.path.join(TEMP_DIR, csv_files[0]) if csv_files else None
         print("Download complete")
-    except FileNotFoundError as e:
-        print(f"ERROR: {e}")
-        print("Solution: Please see README.md")
-    except kaggle.rest.ApiException as e:
-        print(f"Kaggle API error: {e}")
-        print("Solution: Please see README.md")
     except Exception as e:
-        print(f"Unexpected error: {e}")
-        print("Solution: Please see README.md")
+        print(f"Error: {e}")
+        print("Please see README.md for solution")
+        sys.exit(1)
 
 df = pd.read_csv(CSV_FILE)
 

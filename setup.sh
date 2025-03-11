@@ -18,6 +18,7 @@ if ! command -v curl &> /dev/null; then
     exit 1
 fi
 
+set -e
 echo "Creating and populating database..."
 cd "$DATDIR"
 rm -f proddb
