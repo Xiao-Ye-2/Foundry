@@ -28,5 +28,5 @@ And run:
 chmod 600 ~/.kaggle/kaggle.json  
 
 ### Set up the database
-Run test.sh
+Run setup.sh
 
