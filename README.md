@@ -18,7 +18,7 @@ pip3 install -r requirements.txt
 ### Download the dataset of the project
 #### Option1:
 Go to [Kaggle Job Dataset](https://www.kaggle.com/datasets/ravindrasinghrana/job-description-dataset/data) and click download  
-Move job_descriptions.csv to Foundry/backend/Database/testdb
+Move job_descriptions.csv to Foundry/backend/Database/proddb
 #### Option2:
 Register or sign in to a [Kaggle account](https://www.kaggle.com/account/login)  
 Click on your avatar and go to Settings  
