@@ -1,0 +1,11 @@
+EmployeeId,JobId,ApplyDate,Status
+1,1,2024-02-06,Pending
+1,3,2024-02-06,Accepted
+3,2,2024-02-06,Pending
+3,4,2024-02-06,Rejected
+5,5,2024-02-06,Pending
+5,7,2024-02-06,Accepted
+7,6,2024-02-06,Pending
+7,8,2024-02-06,Rejected
+9,9,2024-02-06,Pending
+9,10,2024-02-06,Accepted

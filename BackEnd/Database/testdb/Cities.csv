@@ -1,0 +1,16 @@
+CityId,CityName,CountryId
+1,New York,1
+2,Toronto,2
+3,London,3
+4,San Francisco,1
+5,Vancouver,2
+6,Montreal,2
+7,Boston,1
+8,Seattle,1
+9,Berlin,4
+10,Paris,5
+11,Sydney,6
+12,Tokyo,7
+13,Shanghai,8
+14,Chicago,1
+15,Ottawa,2

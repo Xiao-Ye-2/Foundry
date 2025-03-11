@@ -4,7 +4,7 @@ import os
 import kaggle
 import tempfile
 
-file_path = "job_descriptions.csv"
+CSV_FILE = "job_descriptions.csv"
 
 if os.path.exists(file_path):
     print("Dataset csv already existed, escape downloading")
@@ -31,7 +31,7 @@ else:
         print(f"Unexpected error: {e}")
         print("Solution: Please see README.md")
 
-df = pd.read_csv(CSV_FILE)  # Replace with your file path
+df = pd.read_csv(CSV_FILE)
 
 print("Generating Industry.csv...")
 def extract_industry(profile):
