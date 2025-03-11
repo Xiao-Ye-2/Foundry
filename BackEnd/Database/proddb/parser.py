@@ -6,7 +6,7 @@ import tempfile
 
 CSV_FILE = "job_descriptions.csv"
 
-if os.path.exists(file_path):
+if os.path.exists(CSV_FILE):
     print("Dataset csv already existed, escape downloading")
 else:
     print("Dataset csv does not exist, try downloading...")
