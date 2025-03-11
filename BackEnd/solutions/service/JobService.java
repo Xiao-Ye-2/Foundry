@@ -9,6 +9,7 @@ import data.JobRowMapper;
 
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 
 @Service
 public class JobService {
@@ -18,26 +19,44 @@ public class JobService {
     private JobRowMapper jobRowMapper;
 
     // R6: Job search with filters
-    public List<JobPosting> searchJobs(String city, String country, Double minSalary, Double maxSalary, String workType) {
-        String sql = "SELECT j.*, c.CompanyName, ci.CityName, co.CountryName " +
-                    "FROM JobPostings j " +
-                    "JOIN Employers e ON j.EmployerId = e.UserId " +
-                    "JOIN Companies c ON e.CompanyId = c.CompanyId " +
-                    "JOIN Cities ci ON j.CityId = ci.CityId " +
-                    "JOIN Countries co ON ci.CountryId = co.CountryId " +
-                    "WHERE j.IsActive = 1 " +
-                    "AND (?1 IS NULL OR ci.CityName LIKE ?1) " +
-                    "AND (?2 IS NULL OR co.CountryName LIKE ?2) " +
-                    "AND (?3 IS NULL OR j.MinSalary >= ?3) " +
-                    "AND (?4 IS NULL OR j.MaxSalary <= ?4) " +
-                    "AND (?5 IS NULL OR j.WorkType = ?5) " +
-                    "ORDER BY j.PostDate DESC";
+    public List<JobPosting> searchJobs(String city, String country, Double minSalary, Double maxSalary, 
+                                     String workType, Integer limit, Integer offset) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT j.*, c.CompanyName, ci.CityName, co.CountryName " +
+            "FROM JobPostings j " +
+            "JOIN Employers e ON j.EmployerId = e.UserId " +
+            "JOIN Companies c ON e.CompanyId = c.CompanyId " +
+            "JOIN Cities ci ON j.CityId = ci.CityId " +
+            "JOIN Countries co ON ci.CountryId = co.CountryId " +
+            "WHERE j.IsActive = 1 " +
+            "AND (?1 IS NULL OR ci.CityName LIKE ?1) " +
+            "AND (?2 IS NULL OR co.CountryName LIKE ?2) " +
+            "AND (?3 IS NULL OR j.MinSalary >= ?3) " +
+            "AND (?4 IS NULL OR j.MaxSalary <= ?4) " +
+            "AND (?5 IS NULL OR j.WorkType = ?5) " +
+            "ORDER BY j.PostDate DESC"
+        );
+
+        // Only add LIMIT and OFFSET if they are provided
+        if (limit != null) sql.append(" LIMIT ?6");
+        if (offset != null) sql.append(" OFFSET ?7");
 
         // Prepare parameters with wildcards for text searches
         String cityParam = city != null ? "%" + city + "%" : null;
         String countryParam = country != null ? "%" + country + "%" : null;
 
-        return jdbcTemplate.query(sql, jobRowMapper, cityParam, countryParam, minSalary, maxSalary, workType);
+        // Create a list of parameters to pass to the query
+        List<Object> params = new ArrayList<>();
+        params.add(cityParam);
+        params.add(countryParam);
+        params.add(minSalary);
+        params.add(maxSalary);
+        params.add(workType);
+
+        if (limit != null) params.add(limit);
+        if (offset != null) params.add(offset);
+
+        return jdbcTemplate.query(sql.toString(), jobRowMapper, params.toArray());
     }
 
     // R7:
