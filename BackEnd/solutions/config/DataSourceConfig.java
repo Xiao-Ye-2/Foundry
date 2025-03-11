@@ -11,7 +11,8 @@ public class DataSourceConfig {
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("org.sqlite.JDBC");
-        dataSource.setUrl("jdbc:sqlite:Database/testdb/testdb");
+        dataSource.setUrl("jdbc:sqlite:Database/testdb/testdb"); // Use testdb
+        //dataSource.setUrl("jdbc:sqlite:Database/proddb/proddb"); // Use proddb
         return dataSource;
     }
 }
