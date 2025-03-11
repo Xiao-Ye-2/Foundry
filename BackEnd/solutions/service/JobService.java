@@ -32,11 +32,11 @@ public class JobService {
                     "AND (?4 IS NULL OR j.MaxSalary <= ?4) " +
                     "AND (?5 IS NULL OR j.WorkType = ?5) " +
                     "ORDER BY j.PostDate DESC";
-        
+
         // Prepare parameters with wildcards for text searches
         String cityParam = city != null ? "%" + city + "%" : null;
         String countryParam = country != null ? "%" + country + "%" : null;
-        
+
         return jdbcTemplate.query(sql, jobRowMapper, cityParam, countryParam, minSalary, maxSalary, workType);
     }
 
@@ -94,7 +94,7 @@ public class JobService {
                         "WHERE j.IsActive = 1 " +
                         "ORDER BY j.PostDate DESC " +
                         "LIMIT 500";
-            
+
             System.out.println("Executing query: " + sql);
             List<JobPosting> jobs = jdbcTemplate.query(sql, jobRowMapper);
             System.out.println("Query executed successfully, found " + jobs.size() + " jobs");

@@ -4,6 +4,7 @@
 ### Java ###
 Backend/Database/testdb/testdb
 BackEnd/Database/proddb/proddb
+BackEnd/Database/proddb/*.csv
 
 # Compiled class file
 *.class

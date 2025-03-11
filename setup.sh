@@ -22,7 +22,7 @@ set -e
 echo "Creating and populating database..."
 cd "$DATDIR"
 rm -f proddb
-python3 parser.py
+python parser.py
 sqlite3 proddb < createtables.sql
 ./populatetables.sh
 
