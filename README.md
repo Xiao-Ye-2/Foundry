@@ -2,7 +2,7 @@
 Foundry - A job search app
 
 ### Clone the repository
-git clone [https://github.com/your-username/your-repo.git](https://github.com/Xiao-Ye-2/Foundry.git)  
+git clone https://github.com/Xiao-Ye-2/Foundry.git  
 cd Foundry
 
 ### Create and activate a virtual environment
