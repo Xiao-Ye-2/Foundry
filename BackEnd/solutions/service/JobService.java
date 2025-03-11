@@ -83,16 +83,17 @@ public class JobService {
             String sql = "SELECT j.JobId, j.Title, j.Description, " +
                         "j.MinSalary, j.MaxSalary, j.WorkType, " +
                         "j.IsActive, j.PostDate, j.EmployerId, " +
-                        "COALESCE(c.CompanyName, 'Unknown') as CompanyName, " +
-                        "COALESCE(ci.CityName, 'Unknown') as CityName, " +
-                        "COALESCE(co.CountryName, 'Unknown') as CountryName " +
+                        "c.CompanyName as CompanyName, " +
+                        "ci.CityName as CityName, " +
+                        "co.CountryName as CountryName " +
                         "FROM JobPostings j " +
                         "LEFT JOIN Employers e ON j.EmployerId = e.UserId " +
                         "LEFT JOIN Companies c ON e.CompanyId = c.CompanyId " +
                         "LEFT JOIN Cities ci ON j.CityId = ci.CityId " +
                         "LEFT JOIN Countries co ON ci.CountryId = co.CountryId " +
                         "WHERE j.IsActive = 1 " +
-                        "ORDER BY j.PostDate DESC";
+                        "ORDER BY j.PostDate DESC " +
+                        "LIMIT 500";
             
             System.out.println("Executing query: " + sql);
             List<JobPosting> jobs = jdbcTemplate.query(sql, jobRowMapper);

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Populating the database..."
-sqlite3 testdb << 'END_SQL'
+sqlite3 proddb << 'END_SQL'
 .mode csv
 PRAGMA foreign_keys = OFF;
 
@@ -44,3 +44,4 @@ SELECT UserId, Phone, NULL, PasswordHash, UserName, CityId, Role FROM Users_tmp;
 END_SQL
 
 echo "Populating complete"
+rm *csv

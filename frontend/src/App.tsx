@@ -317,7 +317,7 @@ const App: React.FC = () => {
                       </div>
                       <div className="job-details">
                         <p><strong>Location:</strong> {job.cityName}{job.countryName ? `, ${job.countryName}` : ''}</p>
-                        <p><strong>Salary Range:</strong> ${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()}</p>
+                        <p><strong>Salary Range:</strong> ${job.minSalary.toLocaleString()}K - ${job.maxSalary.toLocaleString()}K</p>
                         <p><strong>Work Type:</strong> {job.workType}</p>
                         <p><strong>Posted:</strong> {new Date(job.postDate).toLocaleDateString()}</p>
                       </div>
