@@ -513,3 +513,33 @@
   padding-bottom: var(--spacing-sm);
   font-weight: var(--font-weight-medium);
 }
+
+/* =========================================
+   Dropdown Styles
+   ========================================= */
+   .employee-name {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: var(--font-weight-medium);
+    color: var(--color-primary);
+  }
+  
+  .profile-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid var(--color-border);
+    padding: var(--spacing-md);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    border-radius: var(--border-radius-md);
+  }
+  
+  .profile-dropdown p {
+    margin: var(--spacing-xs) 0;
+    font-size: 0.95rem;
+    color: var(--color-text);
+  }

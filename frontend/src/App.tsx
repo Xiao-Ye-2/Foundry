@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import JobSearch from "./components/JobSearch";
 import RoleSelection from "./components/RoleSelection";
 import EmployeeLogin from "./components/EmployeeLogin";
+import ProfileDropdown from "./components/ProfileDropdown";
 import "./App.css";
 import "./styles/EmployeeLogin.css";
 
@@ -52,6 +53,22 @@ const App: React.FC = () => {
   const [applicationError, setApplicationError] = useState<string>("");
   const [expandedApplications, setExpandedApplications] = useState<number[]>([]);
   const [expandedJobs, setExpandedJobs] = useState<number[]>([]);
+  const [showProfileDropdown, setProfileShowDropdown] = useState(false);
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setProfileShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownRef]);
 
   // Load jobs when the component mounts or when the employee logs in
   useEffect(() => {
@@ -237,6 +254,15 @@ const App: React.FC = () => {
     );
   };
 
+  // This is temporary data for the demo, will be removed for the final version
+  const employeeNameMapping: { [key: number]: string } = {
+    1: 'John Wang',
+    3: 'Bob Smith',
+    5: 'Mike Brown',
+    7: 'David Lee',
+    9: 'James Taylor',
+  };
+
   const isJobExpanded = (jobId: number) => expandedJobs.includes(jobId);
 
   // If no role is selected, show the role selection screen
@@ -258,7 +284,23 @@ const App: React.FC = () => {
             Sign Out
           </button>
           <div className="employee-info">
-            <p>Employee ID: {employeeId}</p>
+            <button 
+              className="employee-icon" 
+              onClick={() => setProfileShowDropdown(!showProfileDropdown)}
+            >
+              {/* Temporary Display */}
+              {employeeId && employeeNameMapping[employeeId] 
+                ? `${employeeNameMapping[employeeId]}`
+                : `Employee Id: ${employeeId}`}
+            </button>
+            {showProfileDropdown && (
+              <div ref={dropdownRef}>
+                <ProfileDropdown 
+                  employeeId={employeeId} 
+                  employeeName={employeeId ? employeeNameMapping[employeeId] : 'Who am I?'}
+                />
+              </div>
+            )}
           </div>
           <h1 className="app-title">Job Board</h1>
         </div>
