@@ -1,4 +1,4 @@
-.employee-login-container {
+.user-login-container {
   max-width: 600px;
   margin: 0 auto;
   padding: var(--spacing-xl);
@@ -124,6 +124,26 @@
   border-radius: var(--border-radius-sm);
 }
 
+.signup-section {
+  margin-top: var(--spacing-lg);
+  text-align: center;
+}
+
+.signup-button {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none;
+  border-radius: var(--border-radius-md);
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  font-weight: var(--font-weight-medium);
+  transition: background-color 0.3s;
+}
+
+.signup-button:hover {
+  background-color: #0056b3;
+}
+
 @media (max-width: 768px) {
   .login-actions {
     flex-direction: column;
@@ -133,4 +153,4 @@
     flex-direction: column;
     align-items: center;
   }
-} 
+}

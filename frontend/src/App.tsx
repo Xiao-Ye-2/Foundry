@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import JobSearch from "./components/JobSearch";
 import RoleSelection from "./components/RoleSelection";
-import EmployeeLogin from "./components/EmployeeLogin";
+import UserLogin from "./components/UserLogin";
 import ProfileDropdown from "./components/ProfileDropdown";
 import PostJobForm from "./components/PostJobForm";
 import "./App.css";
-import "./styles/EmployeeLogin.css";
 
 interface Job {
   jobId: number;
@@ -41,6 +40,11 @@ interface ApiApplication {
   CompanyName?: string;
 }
 
+interface UserProfile {
+  userId: number | null;
+  userName: string;
+}
+
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'jobs' | 'applications' | 'post-job' | 'advanced'>('jobs');
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -55,6 +59,7 @@ const App: React.FC = () => {
   const [expandedApplications, setExpandedApplications] = useState<number[]>([]);
   const [expandedJobs, setExpandedJobs] = useState<number[]>([]);
   const [showProfileDropdown, setProfileShowDropdown] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -243,14 +248,22 @@ const App: React.FC = () => {
     setUserRole(role);
   };
 
-  const handleEmployeeLogin = (id: number) => {
-    setEmployeeId(id);
-    console.log(`Employee logged in with ID: ${id}`);
+  const handleEmployeeLogin = (data: UserProfile) => {
+    console.log(data);
+    setEmployeeId(data.userId);
+    setUserProfile(data);
+    console.log(`Employee logged in with ID: ${data.userId}`);
   };
+
+  const handleEmployeeSignup = () => {
+    setEmployeeId(null);
+    console.log(`Employee signed up successfully`);
+  }
 
   const handleSignOut = () => {
     setUserRole(null);
     setEmployeeId(null);
+    setUserProfile(null);
     setApplications([]);
   };
 
@@ -272,27 +285,26 @@ const App: React.FC = () => {
     );
   };
 
-  // This is temporary data for the demo, will be removed for the final version
-  const employeeNameMapping: { [key: number]: string } = {
-    1: 'John Wang',
-    3: 'Bob Smith',
-    5: 'Mike Brown',
-    7: 'David Lee',
-    9: 'James Taylor',
-  };
-
   const isJobExpanded = (jobId: number) => expandedJobs.includes(jobId);
 
   // If no role is selected, show the role selection screen
   if (userRole === null) {
     return <RoleSelection onSelectRole={handleRoleSelection} />;
   }
+  // // If employee role is selected but not logged in, show the login screen
+  // if (userRole === 'employee' && employeeId === null) {
+  //   return <UserLogin onLogin={handleEmployeeLogin} onBack={() => setUserRole(null)} onSignup={handleEmployeeSignup}/>;
+  // }
 
-  // If employee role is selected but not logged in, show the login screen
-  if (userRole === 'employee' && employeeId === null) {
-    return <EmployeeLogin onLogin={handleEmployeeLogin} onBack={() => setUserRole(null)} />;
+  // // If employee role is selected but not logged in, show the login screen
+  // if (userRole === 'employer' && employeeId === null) {
+  //   return <UserLogin onLogin={handleEmployeeLogin} onBack={() => setUserRole(null)} onSignup={handleEmployeeSignup}/>;
+  // }
+
+
+  if (userProfile === null) {
+    return <UserLogin onLogin={handleEmployeeLogin} onBack={() => setUserRole(null)} onSignup={handleEmployeeSignup} userRole={userRole}/>;
   }
-
   // Show the job board (employee view)
   return (
     <div className="app-container">
@@ -307,16 +319,11 @@ const App: React.FC = () => {
               onClick={() => setProfileShowDropdown(!showProfileDropdown)}
             >
               {/* Temporary Display */}
-              {employeeId && employeeNameMapping[employeeId] 
-                ? `${employeeNameMapping[employeeId]}`
-                : `Employee Id: ${employeeId}`}
+              {userProfile ? `${userRole} ID: ${userProfile.userId}` : 'Who am I?'}
             </button>
             {showProfileDropdown && (
               <div ref={dropdownRef}>
-                <ProfileDropdown 
-                  employeeId={employeeId} 
-                  employeeName={employeeId ? employeeNameMapping[employeeId] : 'Who am I?'}
-                />
+                {userProfile && <ProfileDropdown userProfile={userProfile} userRole={userRole}/>}
               </div>
             )}
           </div>
