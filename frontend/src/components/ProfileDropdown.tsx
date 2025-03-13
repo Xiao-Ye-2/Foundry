@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
 import "../styles/ProfileDropdown.css";
 
-interface EmployeeDropdownProps {
-  employeeId: number | null;
-  employeeName: string;
+interface UserProfile {
+  userId: number | null;
+  userName: string;
 }
 
-const EmployeeDropdown: React.FC<EmployeeDropdownProps> = ({ employeeId, employeeName }) => {
+
+interface EmployeeDropdownProps {
+  userProfile: UserProfile;
+  userRole: 'employee' | 'employer';
+}
+
+const EmployeeDropdown: React.FC<EmployeeDropdownProps> = ({ userProfile, userRole }) => {
   const [skills, setSkills] = useState<string[]>([]);
   const [newSkill, setNewSkill] = useState<string>("");
   const [resumeUrl, setResumeUrl] = useState<string>("");
@@ -25,13 +31,13 @@ const EmployeeDropdown: React.FC<EmployeeDropdownProps> = ({ employeeId, employe
       setResumeUrl(resumeUrl);
 
       const url = `http://localhost:8080/api/employees/profile`;
-      if (employeeId) {
+      if (userProfile.userId !== null) {
         try {
           const response = await fetch(url, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
-              'user-id': employeeId.toString(),
+              'user-id': userProfile.userId.toString(),
             },
             body: JSON.stringify({ resumeUrl: resumeUrl }),
           });
@@ -51,9 +57,9 @@ const EmployeeDropdown: React.FC<EmployeeDropdownProps> = ({ employeeId, employe
 
   return (
     <div className="profile-dropdown">
-      <p>Employee ID: {employeeId}</p>
-      <p>Name: {employeeName}</p>
-      <p>Role: Employee</p>
+      <p>{userRole} ID: {userProfile.userId}</p>
+      <p>Name: {userProfile.userName}</p>
+      <p>Role: {userRole}</p>
       <div className="skills-section">
         <h4>Skills</h4>
         <ul>
@@ -69,6 +75,7 @@ const EmployeeDropdown: React.FC<EmployeeDropdownProps> = ({ employeeId, employe
         />
         <button onClick={handleAddSkill}>Save</button>
       </div>
+      {userRole === "employee" && 
       <div className="resume-section">
         <h4>Resume</h4>
         <input 
@@ -81,7 +88,7 @@ const EmployeeDropdown: React.FC<EmployeeDropdownProps> = ({ employeeId, employe
             <a href={resumeUrl} target="_blank" rel="noopener noreferrer">View Resume</a>
           </div>
         )}
-      </div>
+      </div>}
     </div>
   );
 };
