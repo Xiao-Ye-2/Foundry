@@ -513,3 +513,70 @@
   padding-bottom: var(--spacing-sm);
   font-weight: var(--font-weight-medium);
 }
+
+.post-job-form h2 {
+  width: 100%; 
+  margin-bottom: 10px; 
+}
+
+.post-job-form {
+  max-width: 900px; 
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px; 
+  justify-content: space-between;
+}
+
+.post-job-form label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.post-job-form .form-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 calc(50% - 15px); 
+  min-width: 300px; 
+}
+
+.post-job-form input,
+.post-job-form select,
+.post-job-form textarea {
+  padding: 8px;
+  width: 100%;
+  font-size: 16px;
+  box-sizing: border-box; 
+}
+
+.post-job-form textarea {
+  flex: 1 1 100%;
+  height: 100px;
+}
+
+.post-job-form button {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 20px;
+}
+
+.post-job-form button:hover {
+  background-color: #0056b3;
+}
+
+
+@media (max-width: 768px) {
+  .post-job-form {
+    flex-direction: column; 
+  }
+
+  .post-job-form .form-group {
+    flex: 1 1 100%; 
+  }
+}
