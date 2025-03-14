@@ -96,6 +96,13 @@ public class UserService {
         userProfile.setCityName(cityName);
         userProfile.setCountryName(countryName);
 
+        // Fetch resumeUrl if the user is an employee
+        if ("employee".equalsIgnoreCase(userProfile.getRole())) {
+            String resumeSql = "SELECT ResumeUrl FROM Employees WHERE UserId = ?";
+            String resumeUrl = jdbcTemplate.queryForObject(resumeSql, (rs, rowNum) -> rs.getString("ResumeUrl"),new Object[]{userProfile.getUserId()});
+            userProfile.setResumeUrl(resumeUrl);
+        }
+
         // Remove the password hash before returning the profile
         userProfile.setPasswordHash(null);
         return userProfile;

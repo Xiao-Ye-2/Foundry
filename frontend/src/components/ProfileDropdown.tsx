@@ -8,38 +8,31 @@ interface EmployeeDropdownProps {
 }
 
 const EmployeeDropdown: React.FC<EmployeeDropdownProps> = ({ userProfile, userRole }) => {
-  const [skills, setSkills] = useState<string[]>([]);
-  const [newSkill, setNewSkill] = useState<string>("");
-  const [resumeUrl, setResumeUrl] = useState<string>("");
-
-  const handleAddSkill = () => {
-    if (newSkill.trim() !== "") {
-      setSkills([...skills, newSkill.trim()]);
-      setNewSkill("");
-    }
-  };
+  const [resumeUrl, setResumeUrl] = useState<string>(userProfile.resumeUrl || '');
+  const [isSaved, setIsSaved] = useState<boolean>(false); // Track save status
 
   const handleResumeUrlUpdate = async () => {
-    const url = `http://localhost:8080/api/employees/profile`; // Backend endpoint
+    const url = `http://localhost:8080/api/employees/profile`;
     if (userProfile.userId !== null) {
       try {
         const response = await fetch(url, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'user-id': userProfile.userId.toString(), // Pass employeeId in the header
+            'user-id': userProfile.userId.toString(),
           },
           body: JSON.stringify({
-            resumeUrl: resumeUrl, // Only pass the resume URL in the body
+            resumeUrl: resumeUrl,
           }),
         });
-  
+
         if (!response.ok) {
           const errorMessage = await response.text();
           throw new Error(errorMessage || 'Failed to update resume URL');
         }
-  
-        alert('Resume URL updated successfully');
+
+        setIsSaved(true); // Set save status to true
+        setTimeout(() => setIsSaved(false), 3000); // Reset save status after 3 seconds
       } catch (error: any) {
         console.error('Error updating resume URL:', error);
         alert(error.message || 'Failed to update resume URL');
@@ -64,7 +57,18 @@ const EmployeeDropdown: React.FC<EmployeeDropdownProps> = ({ userProfile, userRo
           onChange={(e) => setResumeUrl(e.target.value)} 
           placeholder="Paste your resume URL" 
         />
-        <button onClick={handleResumeUrlUpdate}>Save Resume URL</button>
+        <button 
+          onClick={handleResumeUrlUpdate} 
+          className={isSaved ? 'saved-button' : ''}
+        >
+          {isSaved ? (
+            <>
+              Saved <span className="checkmark">✔</span>
+            </>
+          ) : (
+            'Save Resume URL'
+          )}
+        </button>
         {resumeUrl && (
           <div className="resume-link">
             <a href={resumeUrl} target="_blank" rel="noopener noreferrer">View Resume</a>

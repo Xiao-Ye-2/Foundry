@@ -60,6 +60,16 @@
     background-color: var(--color-primary-dark);
 }
 
+.resume-section button.saved-button {
+    background-color: #28a745; /* Green background for saved state */
+    color: white; /* White text for saved state */
+    cursor: default; /* Disable pointer cursor for saved state */
+}
+.checkmark {
+    margin-left: 8px; /* Add some spacing between the text and the checkmark */
+    font-size: 0.9rem; /* Adjust the size of the checkmark */
+    color: white; /* Match the text color */
+  }
 .resume-link {
     margin-top: var(--spacing-sm);
 }

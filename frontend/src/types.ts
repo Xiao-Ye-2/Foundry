@@ -3,4 +3,5 @@ export interface UserProfile {
     userName: string | null;
     cityName: string | null;
     countryName: string | null;
+    resumeUrl?: string | null;
 }
