@@ -5,10 +5,13 @@ public class UserProfile {
     private String phone;
     private String passwordHash;
     private String userName;
+    private Long cityId;
     private String cityName;
+    private Long countryId;
     private String countryName;
     private String role;
     private String email;
+    private String resumeUrl; // Only for employees
     private Long companyId; // Only for employers
 
     // Getters and setters
@@ -67,7 +70,13 @@ public class UserProfile {
     public void setCompanyId(Long companyId) {
         this.companyId = companyId;
     }
+    public Long getCityId() {
+        return cityId;
+    }
 
+    public void setCityId(Long cityId) {
+        this.cityId = cityId;
+    }
         // Getter and setter for cityName
     public String getCityName() {
         return cityName;
@@ -77,6 +86,14 @@ public class UserProfile {
         this.cityName = cityName;
     }
 
+    public Long getCountryId() {
+        return countryId;
+    }
+
+    public void setCountryId(Long countryId) {
+        this.countryId = countryId;
+    }
+    
     // Getter and setter for countryName
     public String getCountryName() {
         return countryName;
@@ -84,5 +101,13 @@ public class UserProfile {
 
     public void setCountryName(String countryName) {
         this.countryName = countryName;
+    }
+
+    public String getResumeUrl() {
+        return resumeUrl;
+    }
+
+    public void setResumeUrl(String resumeUrl) {
+        this.resumeUrl = resumeUrl;
     }
 }

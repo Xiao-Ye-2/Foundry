@@ -61,13 +61,13 @@ public class UserService {
     }
 
     public UserProfile login(LoginRequest loginRequest) throws Exception {
-        String sql = "SELECT UserId, Phone, PasswordHash, UserName, Role, Email FROM Users WHERE Phone = ? OR Email = ?";
+        String sql = "SELECT UserId, Phone, PasswordHash, UserName, Role, Email, CityId FROM Users WHERE Phone = ? OR Email = ?";
         
         List<Object> params = new ArrayList<>();
         params.add(loginRequest.getIdentifier());
         params.add(loginRequest.getIdentifier());
 
-        List<UserProfile> userProfiles = jdbcTemplate.query(sql, (rs, rowNum) -> {
+        UserProfile userProfile = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
             UserProfile profile = new UserProfile();
             profile.setUserId(rs.getLong("UserId"));
             profile.setPhone(rs.getString("Phone"));
@@ -75,17 +75,26 @@ public class UserService {
             profile.setUserName(rs.getString("UserName"));
             profile.setRole(rs.getString("Role"));
             profile.setEmail(rs.getString("Email"));
+            profile.setCityId(rs.getLong("CityId"));
             return profile;
         }, params.toArray());
 
-        if (userProfiles.isEmpty()) {
-            throw new Exception("User does not exist");
+        if (userProfile == null) {
+            throw new Exception("Invalid Username or Password");
         }
 
-        UserProfile userProfile = userProfiles.get(0);
         if (!passwordEncoder.matches(loginRequest.getPassword(), userProfile.getPasswordHash())) {
-            throw new Exception("adfasdas");
+            throw new Exception("Invalid Username or Password");
         }
+
+        String citySql = "SELECT c.CityName, co.CountryName FROM Cities c JOIN Countries co ON c.CountryId = co.CountryId WHERE c.CityId = ?";
+        List<String> cityDetails = jdbcTemplate.query(citySql, (rs, rowNum) -> rs.getString("CityName") + "," + rs.getString("CountryName"), new Object[]{userProfile.getCityId()});
+        String[] cityDetailsArray = cityDetails.get(0).split(",");
+        String cityName = cityDetailsArray[0];
+        String countryName = cityDetailsArray[1];
+
+        userProfile.setCityName(cityName);
+        userProfile.setCountryName(countryName);
 
         // Remove the password hash before returning the profile
         userProfile.setPasswordHash(null);

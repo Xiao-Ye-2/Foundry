@@ -129,7 +129,7 @@ const EmployeeSignup: React.FC<EmployeeSignupProps> = ({ onSignup, onBack }) => 
             id="cityName"
             value={cityName}
             onChange={(e) => setcityName(e.target.value)}
-            placeholder="Enter your city ID"
+            placeholder="Enter your city name"
             min="1"
           />
         </div>

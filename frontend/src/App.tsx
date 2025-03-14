@@ -4,6 +4,7 @@ import RoleSelection from "./components/RoleSelection";
 import UserLogin from "./components/UserLogin";
 import ProfileDropdown from "./components/ProfileDropdown";
 import PostJobForm from "./components/PostJobForm";
+import { UserProfile } from "./types";
 import "./App.css";
 
 interface Job {
@@ -38,11 +39,6 @@ interface ApiApplication {
   Status: string;
   JobTitle?: string;
   CompanyName?: string;
-}
-
-interface UserProfile {
-  userId: number | null;
-  userName: string;
 }
 
 const App: React.FC = () => {
