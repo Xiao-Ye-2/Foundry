@@ -26,7 +26,7 @@ const UserLogin: React.FC<UserLoginProps> = ({ onLogin, onBack, onSignup, userRo
 
     if (userRole === 'employer' && identifier === 'TestEmployer') {
       console.log('Employer login successful');
-      onLogin({ userId: 69, userName: 'Frederick Cox', cityName: 'Ottawa', countryName: 'Canada' });
+      onLogin({ userId: 69, userName: 'Frederick Cox', cityName: 'Ottawa', countryName: 'Canada', companyName: 'FedEx' });
       return;
     }
 

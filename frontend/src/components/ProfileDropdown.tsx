@@ -75,6 +75,7 @@ const EmployeeDropdown: React.FC<EmployeeDropdownProps> = ({ userProfile, userRo
           </div>
         )}
       </div>}
+      {userRole === "employer" && <p>Company: {userProfile.companyName}</p>}
     </div>
   );
 };
