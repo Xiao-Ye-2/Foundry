@@ -26,12 +26,12 @@ public class UserService {
         if (isDuplicateUser(userProfile.getPhone(), userProfile.getEmail())) {
             throw new Exception("A user with the same phone number or email already exists");
         }
-    
+
         Long cityId = getCityId(userProfile.getCityName(), userProfile.getCountryName());
-    
+
         String insertUserSql = "INSERT INTO Users (Phone, PasswordHash, UserName, CityId, Role, Email) VALUES (?, ?, ?, ?, ?, ?)";
         String hashedPassword = passwordEncoder.encode(userProfile.getPasswordHash());
-        
+
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(insertUserSql, Statement.RETURN_GENERATED_KEYS);
@@ -48,7 +48,7 @@ public class UserService {
                      .map(Number::longValue)
                      .orElseThrow(() -> new Exception("Failed to retrieve generated user ID"));
 
-    
+
         if ("employee".equalsIgnoreCase(userProfile.getRole())) {
             String insertEmployeeSql = "INSERT INTO Employees (UserId) VALUES (?)";
             jdbcTemplate.update(insertEmployeeSql, userId);
@@ -62,7 +62,7 @@ public class UserService {
 
     public UserProfile login(LoginRequest loginRequest) throws Exception {
         String sql = "SELECT UserId, Phone, PasswordHash, UserName, Role, Email, CityId FROM Users WHERE Phone = ? OR Email = ?";
-        
+
         List<Object> params = new ArrayList<>();
         params.add(loginRequest.getIdentifier());
         params.add(loginRequest.getIdentifier());
@@ -111,11 +111,11 @@ public class UserService {
     private Long getCityId(String cityName, String countryName) throws Exception {
         String sql = "SELECT c.CityId FROM Cities c JOIN Countries co ON c.CountryId = co.CountryId WHERE c.CityName = ? AND co.CountryName = ?";
         List<Long> cityIds = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("CityId"), new Object[]{cityName, countryName});
-    
+
         if (cityIds.isEmpty()) {
             throw new Exception("City not found");
         }
-    
+
         return cityIds.get(0);
     }
 
