@@ -100,7 +100,7 @@ public class UserProfile {
     public void setCountryId(Long countryId) {
         this.countryId = countryId;
     }
-    
+
     // Getter and setter for countryName
     public String getCountryName() {
         return countryName;
