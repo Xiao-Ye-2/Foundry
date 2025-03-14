@@ -1,0 +1,35 @@
+Expected output for query 1:
+Quality Control Manager|Quality Control Managers establish and enforce quality standards within an organization. They develop quality control processes, perform inspections, and implement corrective actions to maintain product or service quality.|61.0|104.0|Full-time|Macao
+Wireless Network Engineer|Wireless Network Engineers design, implement, and maintain wireless network solutions. They optimize wireless connectivity, troubleshoot issues, and ensure reliable and secure wireless communications.|65.0|91.0|Full-time|Porto-Novo
+Quality Assurance Analyst|A Quality Assurance Analyst tests software and products to ensure they meet quality standards. They identify defects, report issues, and work with development teams to resolve problems.|59.0|93.0|Full-time|Brussels
+Classroom Teacher|A Classroom Teacher educates students in a specific subject or grade level. They create lesson plans, deliver instruction, assess student progress, and foster a positive learning environment.|63.0|103.0|Full-time|George Town
+Interaction Designer|Interaction Designers specialize in designing user interactions within digital interfaces. They create meaningful and engaging user experiences by considering user behaviors and system responses.|65.0|102.0|Full-time|Male
+Wedding Consultant|A Wedding Consultant assists couples in planning and coordinating their weddings, helping them with vendor selection, budget management, and ensuring a seamless wedding day experience.|60.0|80.0|Full-time|Saint John's
+Mechanical Design Engineer|Mechanical Design Engineers create and develop mechanical systems and components, from concept to manufacturing, ensuring functionality and safety.|65.0|122.0|Full-time|Kingston
+Network Security Analyst|Protect an organizations computer networks and systems from security threats, monitor network traffic, and respond to incidents.|56.0|86.0|Full-time|Banjul
+Sales Account Manager|A Sales Account Manager is responsible for building and maintaining relationships with clients, identifying their needs, and proposing tailored solutions to achieve sales targets.|57.0|98.0|Full-time|Damascus
+Product Brand Manager|A Product Brand Manager focuses on promoting and managing the brand identity of specific products or product lines within a companys portfolio.|65.0|100.0|Full-time|Sanaa
+
+Expected output for query 2:
+Icahn Enterprises|Douglas|26801
+PNC Financial Services Group|Ashgabat|100340
+United Services Automobile Assn.|Macao|84525
+Hess|Porto-Novo|129896
+Cairn Energy|Santiago|53944
+Adani Ports and Special Economic Zone|Brussels|23196
+FedEx|George Town|26119
+Ryder System|SÃ£o TomÃ©|40558
+Zee Entertainment Enterprises|Male|105343
+CSX|Saint John's|102069
+
+Expected output for query 3:
+1615948|2|Product Manager|manage products|90000.0|150000.0|Full-time|1|1|2025-03-14
+
+Expected output for query 4:
+1|1|2025-03-14|Pending
+
+Expected output for query 5:
+Social Media Manager|Social Media Managers oversee an organizations social media presence. They create and schedule content, engage with followers, and analyze social media metrics to drive brand awareness and engagement.|1|2025-03-14|Pending
+
+Expected output for query 6:
+1615934|resumes/john_doe.pdf
