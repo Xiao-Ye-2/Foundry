@@ -212,6 +212,7 @@ const App: React.FC = () => {
       setApplyingToJob(null);
     }
   };
+
   const handlePostJob = async (jobData: {
     jobId: number;
     title: string;
@@ -219,20 +220,67 @@ const App: React.FC = () => {
     minSalary: number;
     maxSalary: number;
     workType: string;
-    cityName: string;
-    countryName: string;
   }) => {
-    try {
-      // TODO: API call to post the response
-      const response: Response | undefined = undefined;
+    if (!userProfile || !userProfile.cityName || !userProfile.countryName) {
+      alert("City and Country information is required to post a job.");
+      return;
+    }
 
-      // if (!response.ok) {
-      //   throw new Error(`Failed to post job}`);
-      // }
+    try {
+      console.log("Posting job:", jobData);
+
+      const cityId = await getCityIdFromBackend(userProfile.cityName, userProfile.countryName);
+
+      if (!cityId) {
+        throw new Error("Invalid city or country name.");
+      }
+
+      const formattedJobData = {
+        jobId: jobData.jobId,
+        title: jobData.title,
+        description: jobData.description,
+        minSalary: jobData.minSalary,
+        maxSalary: jobData.maxSalary,
+        workType: jobData.workType,
+        cityId: cityId, 
+      };
+
+      const response = await fetch("http://localhost:8080/api/jobs/post", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "user-id": userProfile.userId?.toString() || "2", 
+        },
+        body: JSON.stringify(formattedJobData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to post job: ${response.status} ${response.statusText}`);
+      }
+
+      const responseData = await response.json();
+      console.log("Job posted successfully:", responseData);
 
       alert("Job posted successfully!");
     } catch (error) {
+      console.error("Error posting job:", error);
       alert("Failed to post job. Please try again.");
+    }
+  };
+
+  const getCityIdFromBackend = async (cityName: string, countryName: string): Promise<number | null> => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/cities/getCityId?city=${cityName}&country=${countryName}`);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch cityId: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data.cityId || null;
+    } catch (error) {
+      console.error("Error fetching cityId:", error);
+      return null;
     }
   };
 
@@ -299,7 +347,7 @@ const App: React.FC = () => {
 
 
   if (userProfile === null) {
-    return <UserLogin onLogin={handleEmployeeLogin} onBack={() => setUserRole(null)} onSignup={handleEmployeeSignup} userRole={userRole}/>;
+    return <UserLogin onLogin={handleEmployeeLogin} onBack={() => setUserRole(null)} onSignup={handleEmployeeSignup} userRole={userRole} />;
   }
   // Show the job board (employee view)
   return (
@@ -310,8 +358,8 @@ const App: React.FC = () => {
             Sign Out
           </button>
           <div className="employee-info">
-            <button 
-              className="employee-icon" 
+            <button
+              className="employee-icon"
               onClick={() => setProfileShowDropdown(!showProfileDropdown)}
             >
               {/* Temporary Display */}
@@ -426,9 +474,9 @@ const App: React.FC = () => {
           </>
         )}
 
-        {activeTab === 'post-job' && userRole === 'employer' && (
+        {activeTab === "post-job" && userRole === "employer" && userProfile && (
           <div className="post-job-container">
-            <PostJobForm onSubmit={handlePostJob} />
+            <PostJobForm userProfile={userProfile} onSubmit={handlePostJob} />
           </div>
         )}
 

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { UserProfile } from "../types"; 
 
 interface PostJobFormProps {
+  userProfile: UserProfile; 
   onSubmit: (jobData: {
     jobId: number;
     title: string;
@@ -13,21 +15,24 @@ interface PostJobFormProps {
   }) => void;
 }
 
-const PostJobForm: React.FC<PostJobFormProps> = ({ onSubmit }) => {
+const PostJobForm: React.FC<PostJobFormProps> = ({ userProfile, onSubmit }) => {
   const [jobId, setJobId] = useState<number | "">("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [minSalary, setMinSalary] = useState<number | "">("");
   const [maxSalary, setMaxSalary] = useState<number | "">("");
   const [workType, setWorkType] = useState("Full-time");
-  const [cityName, setCityName] = useState("");
-  const [countryName, setCountryName] = useState("");
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!jobId || !title || !description || !minSalary || !maxSalary || !cityName || !countryName) {
+    if (!jobId || !title || !description || !minSalary || !maxSalary) {
       alert("Please fill out all fields.");
+      return;
+    }
+
+    if (!userProfile.cityName || !userProfile.countryName) {
+      alert("Your profile is missing city or country information.");
       return;
     }
 
@@ -38,8 +43,8 @@ const PostJobForm: React.FC<PostJobFormProps> = ({ onSubmit }) => {
       minSalary: Number(minSalary),
       maxSalary: Number(maxSalary),
       workType,
-      cityName,
-      countryName,
+      cityName: userProfile.cityName,
+      countryName: userProfile.countryName, 
     });
 
     setJobId("");
@@ -48,8 +53,6 @@ const PostJobForm: React.FC<PostJobFormProps> = ({ onSubmit }) => {
     setMinSalary("");
     setMaxSalary("");
     setWorkType("Full-time");
-    setCityName("");
-    setCountryName("");
   };
 
   return (
@@ -79,11 +82,11 @@ const PostJobForm: React.FC<PostJobFormProps> = ({ onSubmit }) => {
         <option value="Intern">Intern</option>
       </select>
 
-      <label>City Name:</label>
-      <input type="text" value={cityName} onChange={(e) => setCityName(e.target.value)} required />
+      <label>City:</label>
+      <input type="text" value={userProfile.cityName || ""} disabled />
 
-      <label>Country Name:</label>
-      <input type="text" value={countryName} onChange={(e) => setCountryName(e.target.value)} required />
+      <label>Country:</label>
+      <input type="text" value={userProfile.countryName || ""} disabled />
 
       <button type="submit">Post Job</button>
     </form>
