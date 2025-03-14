@@ -1,6 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/UserSignup.css';
+import ComboBox from './ComboBox';
 
+interface Company {
+  companyId: number;
+  companyName: string;
+}
+
+interface Location {
+  cityId: number;
+  cityName: string;
+  countryName: string;
+}
 
 interface UserSignupProps {
   onSignup: () => void;
@@ -8,179 +19,277 @@ interface UserSignupProps {
   userRole: 'employee' | 'employer';
 }
 
-const UserSignup: React.FC<UserSignupProps> = ({ onSignup, onBack, userRole}) => {
-  const [phone, setPhone] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [userName, setUserName] = useState<string>('');
-  const [cityName, setcityName] = useState<string>('');
-  const [countryName, setCountryName] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
+const UserSignup: React.FC<UserSignupProps> = ({ onSignup, onBack, userRole }) => {
+  const [formData, setFormData] = useState({
+    userName: '',
+    phone: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    cityId: '',
+    companyId: '', // Only used for employer
+  });
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
   const [error, setError] = useState<string>('');
-  const [companyName, setCompanyName] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [locationSearch, setLocationSearch] = useState('');
+  const [companySearch, setCompanySearch] = useState('');
 
-  const countries = [
-    "Afghanistan", "Albania", "Algeria", "American Samoa", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Aruba",
-    "Australia", "Austria", "Azerbaijan", "Bahamas, The", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize",
-    "Benin", "Bermuda", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "British Virgin Islands", "Brunei", "Bulgaria",
-    "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Cayman Islands", "Central African Republic", "Chad", "Chile",
-    "China", "Colombia", "Comoros", "Costa Rica", "Cote d'Ivoire", "Croatia", "Cuba", "Curacao", "Cyprus", "Czech Republic",
-    "Democratic Republic Of Congo", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea",
-    "Estonia", "Eswatini", "Ethiopia", "Faroe Islands", "Fiji", "Finland", "France", "French Polynesia", "Gabon", "Gambia",
-    "Georgia", "Germany", "Ghana", "Gibraltar", "Greece", "Greenland", "Grenada", "Guam", "Guatemala", "Guinea",
-    "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hong Kong SAR, China", "Hungary", "Iceland", "India", "Indonesia", "Iran, Islamic Rep.",
-    "Iraq", "Ireland", "Isle of Man", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya",
-    "Kiribati", "Korea, Rep.", "Kosovo", "Kuwait", "Kyrgyz Republic", "Lao PDR", "Latvia", "Lebanon", "Lesotho", "Liberia",
-    "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macao SAR, China", "Macedonia, FYR", "Madagascar", "Malawi", "Malaysia", "Maldives",
-    "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia, Fed. Sts.", "Moldova", "Monaco", "Mongolia",
-    "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Caledonia", "New Zealand",
-    "Nicaragua", "Niger", "Nigeria", "North Korea", "Northern Mariana Islands", "Norway", "Oman", "Pakistan", "Palau", "Panama",
-    "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Puerto Rico", "Qatar", "Republic Of Congo", "Romania",
-    "Russia", "Rwanda", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone",
-    "Singapore", "Sint Maarten (Dutch part)", "Slovak Republic", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka",
-    "St. Kitts and Nevis", "St. Lucia", "St. Martin (French part)", "St. Vincent and the Grenadines", "Sudan", "Suriname", "Sweden", "Switzerland", "Syrian Arab Republic", "Tajikistan",
-    "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Turks and Caicos Islands",
-    "Tuvalu", "UAE", "UK", "USA", "Uganda", "Ukraine", "Uruguay", "Uzbekistan", "Vanuatu", "Venezuela, RB",
-    "Vietnam", "Virgin Islands (U.S.)", "West Bank and Gaza", "Yemen", "Zambia", "Zimbabwe"
-  ];
+  // Fetch companies and locations on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch locations
+        const locationsResponse = await fetch('http://localhost:8080/api/locations');
+        const locationsData = await locationsResponse.json();
+        setLocations(locationsData);
+
+        // Only fetch companies if user is employer
+        if (userRole === 'employer') {
+          const companiesResponse = await fetch('http://localhost:8080/api/companies');
+          const companiesData = await companiesResponse.json();
+          setCompanies(companiesData);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError('Failed to load necessary data. Please try again.');
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    fetchData();
+  }, [userRole]);
+
+  // Filter locations based on search
+  const filteredLocations = locations.filter(location => {
+    const searchTerm = locationSearch.toLowerCase();
+    return location.cityName.toLowerCase().includes(searchTerm) ||
+           location.countryName.toLowerCase().includes(searchTerm);
+  });
+
+  // Filter companies based on search
+  const filteredCompanies = companies.filter(company =>
+    company.companyName.toLowerCase().includes(companySearch.toLowerCase())
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
 
-    if (!phone.trim() || !password.trim() || !userName.trim() || !cityName.trim()) {
-      setError('Please fill in all required fields');
+    // Validation
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
       return;
     }
 
-    const userProfile = {
-      phone,
-      passwordHash: password,
-      userName,
-      cityName: cityName,
-      countryName: countryName,
-      role: userRole,
-      email,
-      companyName: companyName,
-    };
+    // For employer, validate company selection
+    if (userRole === 'employer' && !formData.companyId) {
+      setError('Please select a company');
+      return;
+    }
 
+    // Validate location selection
+    if (!formData.cityId) {
+      setError('Please select a location');
+      return;
+    }
+
+    setIsLoading(true);
     try {
-        console.log(userProfile);
-        const response = await fetch('http://localhost:8080/api/users/signup', {
+      const response = await fetch('http://localhost:8080/api/users/signup', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userProfile),
-        });
+        body: JSON.stringify({
+          ...formData,
+          role: userRole,
+          passwordHash: formData.password,
+          ...(userRole === 'employer' ? { companyId: parseInt(formData.companyId) } : {})
+        }),
+      });
 
+      const responseText = await response.text();
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
         if (!response.ok) {
-          const errorMessage = await response.text();
-          throw new Error(errorMessage);
+          throw new Error(responseText);
         }
+      }
 
-        onSignup();
-    } catch (error : any) {
-      console.error('Error signing up:', error);
-      setError(error.message);
+      if (!response.ok) {
+        throw new Error(data?.message || 'Failed to sign up. Please try again.');
+      }
+
+      onSignup();
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      setError(error.message || 'An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    if (error) setError('');
+  };
+
+  const handleLocationChange = (label: string, cityId: number) => {
+    setFormData(prev => ({
+      ...prev,
+      cityId: cityId.toString()
+    }));
+  };
+
+  const handleCompanyChange = (label: string, companyId: number) => {
+    setFormData(prev => ({
+      ...prev,
+      companyId: companyId.toString()
+    }));
+  };
+
+  if (isLoadingData) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div className="employee-signup-container">
-      <h1 className="signup-title">{userRole === 'employee' ? 'Employee Signup' : 'Employer Signup'}</h1>
-      <p className="signup-subtitle">Please fill in the details to create an account</p>
+    <div className="user-signup-container">
+      <h1 className="signup-title">
+        {userRole === 'employee' ? 'Employee Sign Up' : 'Employer Sign Up'}
+      </h1>
 
       <form className="signup-form" onSubmit={handleSubmit}>
-        {error && <div className="signup-error">{error}</div>}
+        {error && (
+          <div className="signup-error" role="alert">
+            {error}
+          </div>
+        )}
 
         <div className="form-group">
-          <label htmlFor="phone">Phone <span className="required">*</span></label>
-          <input
-            type="text"
-            id="phone"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="Enter your phone number"
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="password">Password <span className="required">*</span></label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password"
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="userName">Full Name <span className="required">*</span></label>
+          <label htmlFor="userName">Full Name:</label>
           <input
             type="text"
             id="userName"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
+            name="userName"
+            value={formData.userName}
+            onChange={handleInputChange}
             placeholder="Enter your full name"
+            required
+            disabled={isLoading}
           />
         </div>
 
         <div className="form-group">
-          <label htmlFor="company">Company <span className="required">*</span></label>
+          <label htmlFor="phone">Phone Number:</label>
           <input
-            type="text"
-            id="company"
-            value={companyName}
-            onChange={(e) => setCompanyName(e.target.value)}
-            placeholder="Enter your company name"
+            type="tel"
+            id="phone"
+            name="phone"
+            value={formData.phone}
+            onChange={handleInputChange}
+            placeholder="Enter your phone number"
+            required
+            disabled={isLoading}
           />
         </div>
 
         <div className="form-group">
-          <label htmlFor="cityName">City <span className="required">*</span></label>
-          <input
-            type="text"
-            id="cityName"
-            value={cityName}
-            onChange={(e) => setcityName(e.target.value)}
-            placeholder="Enter your city name"
-            min="1"
-          />
-        </div>
-
-        <div className="form-group">
-            <label htmlFor="countryName">Country <span className="required">*</span></label>
-            <select
-                id="countryName"
-                value={countryName}
-                onChange={(e) => setCountryName(e.target.value)}
-            >
-                <option value="">Select your country</option>
-                {countries.map((country) => (
-                <option key={country} value={country}>
-                    {country}
-                </option>
-                ))}
-            </select>
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="email">Email </label>
+          <label htmlFor="email">Email:</label>
           <input
             type="email"
             id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
             placeholder="Enter your email"
+            required
+            disabled={isLoading}
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="location">Location:</label>
+          <ComboBox
+            options={locations.map(loc => ({
+              id: loc.cityId,
+              label: `${loc.countryName} - ${loc.cityName}`
+            }))}
+            value={formData.cityId ? locations.find(l => l.cityId.toString() === formData.cityId)?.cityName || '' : ''}
+            onChange={handleLocationChange}
+            placeholder="Search for a location"
+            disabled={isLoading}
+          />
+        </div>
+
+        {userRole === 'employer' && (
+          <div className="form-group">
+            <label htmlFor="company">Company:</label>
+            <ComboBox
+              options={companies.map(comp => ({
+                id: comp.companyId,
+                label: comp.companyName
+              }))}
+              value={formData.companyId ? companies.find(c => c.companyId.toString() === formData.companyId)?.companyName || '' : ''}
+              onChange={handleCompanyChange}
+              placeholder="Search for a company"
+              disabled={isLoading}
+            />
+          </div>
+        )}
+
+        <div className="form-group">
+          <label htmlFor="password">Password:</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            value={formData.password}
+            onChange={handleInputChange}
+            placeholder="Enter your password"
+            required
+            disabled={isLoading}
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="confirmPassword">Confirm Password:</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleInputChange}
+            placeholder="Confirm your password"
+            required
+            disabled={isLoading}
           />
         </div>
 
         <div className="signup-actions">
-          <button type="button" className="back-button" onClick={onBack}>
+          <button
+            type="button"
+            className="back-button"
+            onClick={onBack}
+            disabled={isLoading}
+          >
             Back
           </button>
-          <button type="submit" className="signup-button">
-            Sign Up
+          <button
+            type="submit"
+            className="signup-button"
+            disabled={isLoading || isLoadingData}
+          >
+            {isLoading ? 'Signing up...' : 'Sign Up'}
           </button>
         </div>
       </form>

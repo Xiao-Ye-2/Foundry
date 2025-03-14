@@ -1,6 +1,7 @@
-package data;
+package data.mapper;
 
 import org.springframework.jdbc.core.RowMapper;
+import data.UserProfile;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 

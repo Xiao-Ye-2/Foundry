@@ -3,7 +3,7 @@ import JobSearch from "./components/JobSearch";
 import RoleSelection from "./components/RoleSelection";
 import UserLogin from "./components/UserLogin";
 import ProfileDropdown from "./components/ProfileDropdown";
-import PostJobForm from "./components/PostJobForm";
+import PostJob from "./components/PostJob";
 import { UserProfile } from "./types";
 import "./App.css";
 
@@ -214,54 +214,36 @@ const App: React.FC = () => {
   };
 
   const handlePostJob = async (jobData: {
-    jobId: number;
     title: string;
     description: string;
+    cityId: number;
     minSalary: number;
     maxSalary: number;
     workType: string;
+    requirements: string;
   }) => {
-    if (!userProfile || !userProfile.cityName || !userProfile.countryName) {
-      alert("City and Country information is required to post a job.");
+    if (!userProfile) {
+      alert("You must be logged in to post a job.");
       return;
     }
 
     try {
-      console.log("Posting job:", jobData);
-
-      const cityId = await getCityIdFromBackend(userProfile.cityName, userProfile.countryName);
-
-      if (!cityId) {
-        throw new Error("Invalid city or country name.");
-      }
-
-      const formattedJobData = {
-        jobId: jobData.jobId,
-        title: jobData.title,
-        description: jobData.description,
-        minSalary: jobData.minSalary,
-        maxSalary: jobData.maxSalary,
-        workType: jobData.workType,
-        cityId: cityId, 
-      };
-
       const response = await fetch("http://localhost:8080/api/jobs/post", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "user-id": userProfile.userId?.toString() || "2", 
+          "user-id": userProfile?.userId?.toString() || ''
         },
-        body: JSON.stringify(formattedJobData),
+        body: JSON.stringify(jobData),
       });
 
       if (!response.ok) {
         throw new Error(`Failed to post job: ${response.status} ${response.statusText}`);
       }
 
-      const responseData = await response.json();
-      console.log("Job posted successfully:", responseData);
-
       alert("Job posted successfully!");
+      handleGetJobs();
+      setActiveTab('jobs');
     } catch (error) {
       console.error("Error posting job:", error);
       alert("Failed to post job. Please try again.");
@@ -476,7 +458,10 @@ const App: React.FC = () => {
 
         {activeTab === "post-job" && userRole === "employer" && userProfile && (
           <div className="post-job-container">
-            <PostJobForm userProfile={userProfile} onSubmit={handlePostJob} />
+            <PostJob
+              userProfile={userProfile}
+              onSubmit={handlePostJob}
+            />
           </div>
         )}
 

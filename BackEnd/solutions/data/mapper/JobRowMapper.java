@@ -1,9 +1,11 @@
-package data;
+package data.mapper;
 
 import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.stereotype.Component;
+
+import data.JobPosting;
 
 @Component
 public class JobRowMapper implements RowMapper<JobPosting> {

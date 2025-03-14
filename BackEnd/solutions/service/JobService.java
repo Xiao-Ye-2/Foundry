@@ -5,7 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import data.JobPosting;
-import data.JobRowMapper;
+import data.mapper.JobRowMapper;
 
 import java.util.List;
 import java.util.Map;

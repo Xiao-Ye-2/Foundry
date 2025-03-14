@@ -5,6 +5,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -14,11 +16,12 @@ import org.springframework.stereotype.Service;
 
 import data.UserProfile;
 import data.LoginRequest;
-import data.UserProfileMapper;
+import data.mapper.UserProfileMapper;
 
 @Service
 public class UserService {
-    private final JdbcTemplate jdbcTemplate;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
     private final BCryptPasswordEncoder passwordEncoder;
     private final UserProfileMapper userProfileMapper;
 
@@ -30,10 +33,38 @@ public class UserService {
     }
 
     public void signUp(UserProfile userProfile) throws Exception {
-        validateNewUser(userProfile);
-        Long cityId = getCityId(userProfile.getCityName(), userProfile.getCountryName());
-        Long userId = insertUser(userProfile, cityId);
-        insertRoleSpecificData(userProfile, userId);
+        if (isDuplicateUser(userProfile.getPhone(), userProfile.getEmail())) {
+            throw new Exception("A user with the same phone number or email already exists");
+        }
+
+        String insertUserSql = "INSERT INTO Users (Phone, PasswordHash, UserName, CityId, Role, Email) VALUES (?, ?, ?, ?, ?, ?)";
+        String hashedPassword = passwordEncoder.encode(userProfile.getPasswordHash());
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(insertUserSql, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, userProfile.getPhone());
+            ps.setString(2, hashedPassword);
+            ps.setString(3, userProfile.getUserName());
+            ps.setLong(4, userProfile.getCityId());
+            ps.setString(5, userProfile.getRole());
+            ps.setString(6, userProfile.getEmail().length() > 0 ? userProfile.getEmail() : null);
+            return ps;
+        }, keyHolder);
+
+        Long userId = Optional.ofNullable(keyHolder.getKey())
+                     .map(Number::longValue)
+                     .orElseThrow(() -> new Exception("Failed to retrieve generated user ID"));
+
+        if ("employee".equalsIgnoreCase(userProfile.getRole())) {
+            String insertEmployeeSql = "INSERT INTO Employees (UserId) VALUES (?)";
+            jdbcTemplate.update(insertEmployeeSql, userId);
+        } else if ("employer".equalsIgnoreCase(userProfile.getRole())) {
+            String insertEmployerSql = "INSERT INTO Employers (UserId, CompanyId) VALUES (?, ?)";
+            jdbcTemplate.update(insertEmployerSql, userId, userProfile.getCompanyId());
+        } else {
+            throw new Exception("Invalid role");
+        }
     }
 
     public UserProfile login(LoginRequest loginRequest) throws Exception {
@@ -46,66 +77,19 @@ public class UserService {
         return userProfile;
     }
 
-    private void validateNewUser(UserProfile userProfile) throws Exception {
-        if (isDuplicateUser(userProfile.getPhone(), userProfile.getEmail())) {
-            throw new Exception("A user with the same phone number or email already exists");
-        }
-    }
-
-    private Long insertUser(UserProfile userProfile, Long cityId) throws Exception {
-        String sql = "INSERT INTO Users (Phone, PasswordHash, UserName, CityId, Role, Email) VALUES (?, ?, ?, ?, ?, ?)";
-        String hashedPassword = passwordEncoder.encode(userProfile.getPasswordHash());
-
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, userProfile.getPhone());
-            ps.setString(2, hashedPassword);
-            ps.setString(3, userProfile.getUserName());
-            ps.setLong(4, cityId);
-            ps.setString(5, userProfile.getRole());
-            ps.setString(6, userProfile.getEmail().length() > 0 ? userProfile.getEmail() : null);
-            return ps;
-        }, keyHolder);
-
-        return Optional.ofNullable(keyHolder.getKey())
-                .map(Number::longValue)
-                .orElseThrow(() -> new Exception("Failed to retrieve generated user ID"));
-    }
-
-    private void insertRoleSpecificData(UserProfile userProfile, Long userId) throws Exception {
-        if ("employee".equalsIgnoreCase(userProfile.getRole())) {
-            insertEmployee(userId);
-        } else if ("employer".equalsIgnoreCase(userProfile.getRole())) {
-            insertEmployer(userId, userProfile.getCompanyName());
-        } else {
-            throw new Exception("Invalid role");
-        }
-    }
-
-    private void insertEmployee(Long userId) {
-        String sql = "INSERT INTO Employees (UserId) VALUES (?)";
-        jdbcTemplate.update(sql, userId);
-    }
-
-    private void insertEmployer(Long userId, String companyName) {
-        String getCompanyIdSql = "SELECT CompanyId FROM Companies WHERE CompanyName = ?";
-        Long companyId = jdbcTemplate.queryForObject(getCompanyIdSql, Long.class, companyName);
-
-        String insertEmployerSql = "INSERT INTO Employers (UserId, CompanyId) VALUES (?, ?)";
-        jdbcTemplate.update(insertEmployerSql, userId, companyId);
-    }
-
     private UserProfile findUserByIdentifier(LoginRequest loginRequest) throws Exception {
         String sql = "SELECT UserId, Phone, PasswordHash, UserName, Role, Email, CityId " +
                     "FROM Users WHERE Phone = ? OR Email = ?";
 
-        UserProfile userProfile = jdbcTemplate.queryForObject(sql, userProfileMapper,
-            loginRequest.getIdentifier(), loginRequest.getIdentifier());
+        List<Object> params = new ArrayList<>();
+        params.add(loginRequest.getIdentifier());
+        params.add(loginRequest.getIdentifier());
 
-        if (userProfile == null) throw new Exception("Invalid Username or Password");
-
-        return userProfile;
+        try {
+            return jdbcTemplate.queryForObject(sql, userProfileMapper, params.toArray());
+        } catch (EmptyResultDataAccessException e) {
+            throw new Exception("User not found with provided email/phone");
+        }
     }
 
     private void validatePassword(LoginRequest loginRequest, UserProfile userProfile) throws Exception {
@@ -155,23 +139,6 @@ public class UserService {
 
         String companyName = jdbcTemplate.queryForObject(sql, String.class, userProfile.getUserId());
         userProfile.setCompanyName(companyName);
-    }
-
-    private Long getCityId(String cityName, String countryName) throws Exception {
-        String sql = "SELECT c.CityId " +
-                    "FROM Cities c " +
-                    "JOIN Countries co ON c.CountryId = co.CountryId " +
-                    "WHERE c.CityName = ? AND co.CountryName = ?";
-
-        List<Long> cityIds = jdbcTemplate.query(
-            sql,
-            (rs, rowNum) -> rs.getLong("CityId"),
-            cityName, countryName
-        );
-
-        if (cityIds.isEmpty()) throw new Exception("City not found");
-
-        return cityIds.get(0);
     }
 
     private boolean isDuplicateUser(String phone, String email) {
