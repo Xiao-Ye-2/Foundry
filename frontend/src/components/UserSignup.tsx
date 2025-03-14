@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import '../styles/EmployeeSignup.css';
+import '../styles/UserSignup.css';
 
 
-interface EmployeeSignupProps {
+interface UserSignupProps {
   onSignup: () => void;
   onBack: () => void;
+  userRole: 'employee' | 'employer';
 }
 
-const EmployeeSignup: React.FC<EmployeeSignupProps> = ({ onSignup, onBack }) => {
+const UserSignup: React.FC<UserSignupProps> = ({ onSignup, onBack, userRole}) => {
   const [phone, setPhone] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [userName, setUserName] = useState<string>('');
@@ -15,6 +16,7 @@ const EmployeeSignup: React.FC<EmployeeSignupProps> = ({ onSignup, onBack }) => 
   const [countryName, setCountryName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [error, setError] = useState<string>('');
+  const [companyName, setCompanyName] = useState<string>('');
 
   const countries = [
     "Afghanistan", "Albania", "Algeria", "American Samoa", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Aruba",
@@ -51,12 +53,13 @@ const EmployeeSignup: React.FC<EmployeeSignupProps> = ({ onSignup, onBack }) => 
 
     const userProfile = {
       phone,
-      passwordHash: password, // In a real app, hash the password before sending
+      passwordHash: password,
       userName,
       cityName: cityName,
       countryName: countryName,
-      role: 'employee',
+      role: userRole,
       email,
+      companyName: companyName,
     };
 
     try {
@@ -83,7 +86,7 @@ const EmployeeSignup: React.FC<EmployeeSignupProps> = ({ onSignup, onBack }) => 
 
   return (
     <div className="employee-signup-container">
-      <h1 className="signup-title">Employee Sign Up</h1>
+      <h1 className="signup-title">{userRole === 'employee' ? 'Employee Signup' : 'Employer Signup'}</h1>
       <p className="signup-subtitle">Please fill in the details to create an account</p>
 
       <form className="signup-form" onSubmit={handleSubmit}>
@@ -119,6 +122,17 @@ const EmployeeSignup: React.FC<EmployeeSignupProps> = ({ onSignup, onBack }) => 
             value={userName}
             onChange={(e) => setUserName(e.target.value)}
             placeholder="Enter your full name"
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="company">Company <span className="required">*</span></label>
+          <input
+            type="text"
+            id="company"
+            value={companyName}
+            onChange={(e) => setCompanyName(e.target.value)}
+            placeholder="Enter your company name"
           />
         </div>
 
@@ -174,4 +188,4 @@ const EmployeeSignup: React.FC<EmployeeSignupProps> = ({ onSignup, onBack }) => 
   );
 };
 
-export default EmployeeSignup;
+export default UserSignup;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/UserLogin.css';
-import EmployeeSignup from './EmployeeSignup';
 import { UserProfile } from "../types";
+import UserSignup from './UserSignup';
 
 interface UserLoginProps {
   onLogin: (data: UserProfile) => void;
@@ -24,7 +24,7 @@ const UserLogin: React.FC<UserLoginProps> = ({ onLogin, onBack, onSignup, userRo
       return;
     }
 
-    if (userRole === 'employer') {
+    if (userRole === 'employer' && identifier === 'TestEmployer') {
       console.log('Employer login successful');
       onLogin({ userId: 69, userName: 'Frederick Cox', cityName: 'Ottawa', countryName: 'Canada' });
       return;
@@ -59,7 +59,7 @@ const UserLogin: React.FC<UserLoginProps> = ({ onLogin, onBack, onSignup, userRo
   };
 
   if (showSignup) {
-    return <EmployeeSignup onSignup={handleSignup} onBack={() => setShowSignup(false)} />;
+    return <UserSignup onSignup={handleSignup} onBack={() => setShowSignup(false)} userRole={userRole} />;
   }
 
   return (

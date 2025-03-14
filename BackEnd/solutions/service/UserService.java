@@ -53,8 +53,10 @@ public class UserService {
             String insertEmployeeSql = "INSERT INTO Employees (UserId) VALUES (?)";
             jdbcTemplate.update(insertEmployeeSql, userId);
         } else if ("employer".equalsIgnoreCase(userProfile.getRole())) {
+            String getCompanyIdsql = "SELECT CompanyId FROM Companies WHERE CompanyName = ?";
+            Long companyId = jdbcTemplate.queryForObject(getCompanyIdsql, (rs, rowNum) -> rs.getLong("CompanyId"), new Object[]{userProfile.getCompanyName()});
             String insertEmployerSql = "INSERT INTO Employers (UserId, CompanyId) VALUES (?, ?)";
-            jdbcTemplate.update(insertEmployerSql, userId, userProfile.getCompanyId());
+            jdbcTemplate.update(insertEmployerSql, userId, companyId);
         } else {
             throw new Exception("Invalid role");
         }
@@ -101,7 +103,12 @@ public class UserService {
             String resumeSql = "SELECT ResumeUrl FROM Employees WHERE UserId = ?";
             String resumeUrl = jdbcTemplate.queryForObject(resumeSql, (rs, rowNum) -> rs.getString("ResumeUrl"),new Object[]{userProfile.getUserId()});
             userProfile.setResumeUrl(resumeUrl);
+        } else if ("employer".equalsIgnoreCase(userProfile.getRole())) {
+            String companySql = "SELECT c.CompanyName FROM Employers e JOIN Companies c ON e.CompanyId = c.CompanyId WHERE e.UserId = ?";
+            String companyName = jdbcTemplate.queryForObject(companySql, (rs, rowNum) -> rs.getString("CompanyName"), new Object[]{userProfile.getUserId()});
+            userProfile.setCompanyName(companyName);
         }
+
 
         // Remove the password hash before returning the profile
         userProfile.setPasswordHash(null);

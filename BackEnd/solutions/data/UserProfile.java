@@ -13,7 +13,7 @@ public class UserProfile {
     private String email;
     private String resumeUrl; // Only for employees
     private Long companyId; // Only for employers
-
+    private String companyName; // Only for employers
     // Getters and setters
     public Long getUserId() {
         return userId;
@@ -69,6 +69,13 @@ public class UserProfile {
 
     public void setCompanyId(Long companyId) {
         this.companyId = companyId;
+    }
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
     }
     public Long getCityId() {
         return cityId;
