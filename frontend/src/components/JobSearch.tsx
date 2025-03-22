@@ -26,7 +26,7 @@ const JobSearch: React.FC<JobSearchProps> = ({
   applyingToJob
 }) => {
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   
   // Pagination states
@@ -49,6 +49,9 @@ const JobSearch: React.FC<JobSearchProps> = ({
   
   // State for expanded job cards
   const [expandedJobIds, setExpandedJobIds] = useState<number[]>([]);
+  
+  // Added state to track if a search has been performed
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
   
   // Toggle job details expansion
   const toggleJobDetails = (jobId: number) => {
@@ -157,15 +160,48 @@ const JobSearch: React.FC<JobSearchProps> = ({
     }
   };
   
-  // Fetch jobs on initial load and when page changes
+  // Fetch initial total count silently (without loading state)
+  const fetchInitialCount = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/jobs/count', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        credentials: 'omit'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch job count: ${response.status} ${response.statusText}`);
+      }
+      
+      const count = await response.json();
+      console.log(`Initial total job count: ${count}`);
+      setTotalJobs(count);
+    } catch (err) {
+      console.error('Error fetching initial job count:', err);
+    }
+  };
+  
+  // Fetch initial total count on component mount
   useEffect(() => {
-    fetchJobs(currentPage);
-  }, [currentPage]);
+    fetchInitialCount();
+  }, []);
+
+  // Fetch jobs only when search is performed or page is changed
+  useEffect(() => {
+    if (hasSearched) {
+      fetchJobs(currentPage);
+    }
+  }, [currentPage, hasSearched, city, country, minSalary, maxSalary, workType]);
   
   // Apply filters
-  const applyFilters = async () => {
-    setCurrentPage(0); // Reset to first page when filters change
-    await fetchJobs(0);
+  const applyFilters = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCurrentPage(0);
+    setHasSearched(true);
+    // fetchJobs will be called via the useEffect that watches hasSearched
   };
   
   // Reset filters
@@ -176,7 +212,10 @@ const JobSearch: React.FC<JobSearchProps> = ({
     setMaxSalary('');
     setWorkType('');
     setCurrentPage(0);
-    fetchJobs(0);
+    setFilteredJobs([]);
+    setHasSearched(false);
+    // Update total job count when resetting filters
+    fetchInitialCount();
   };
   
   // Pagination handlers
@@ -276,19 +315,26 @@ const JobSearch: React.FC<JobSearchProps> = ({
         </div>
       </div>
       
-      {loading && <div className="loading">Loading jobs...</div>}
       {error && <div className="error">Error: {error}</div>}
       
       <div className="job-results">
         <div className="job-results-header">
           <h3>Job Results</h3>
           <div className="job-count-badge">
-            {totalJobs} jobs found {totalPages > 1 && `• Page ${currentPage + 1} of ${totalPages}`}
+            {totalJobs} jobs found {filteredJobs.length > 0 && totalPages > 1 && `• Page ${currentPage + 1} of ${totalPages}`}
           </div>
         </div>
         
-        {filteredJobs.length === 0 && !loading ? (
-          <div className="no-results">No jobs found matching your criteria</div>
+        {loading ? (
+          <div className="loading">Loading jobs...</div>
+        ) : filteredJobs.length === 0 ? (
+          hasSearched ? (
+            <div className="no-results">No jobs found matching your criteria</div>
+          ) : (
+            <div className="intro-message">
+              Use the filters above to search for jobs
+            </div>
+          )
         ) : (
           <>
             <div className="job-list">
