@@ -20,9 +20,14 @@ public class JobController {
 
     @GetMapping
     @CrossOrigin(origins = "http://localhost:5173")
-    public List<JobPosting> getAllJobs() {
-        // Use searchJobs with no filters and limit of 500
-        return jobService.searchJobs(null, null, null, null, null, 500, null);
+    public List<JobPosting> getAllJobs(
+        @RequestParam(required = false, defaultValue = "0") Integer page,
+        @RequestParam(required = false, defaultValue = "75") Integer pageSize
+    ) {
+        // Calculate offset based on page number and page size
+        Integer offset = page * pageSize;
+        // Use searchJobs with no filters and with pagination params
+        return jobService.searchJobs(null, null, null, null, null, pageSize, offset);
     }
 
     // R6: Job search
@@ -34,9 +39,11 @@ public class JobController {
         @RequestParam(required = false) Double minSalary,
         @RequestParam(required = false) Double maxSalary,
         @RequestParam(required = false) String workType,
-        @RequestParam(required = false) Integer limit,
-        @RequestParam(required = false) Integer offset) {
-        return jobService.searchJobs(city, country, minSalary, maxSalary, workType, limit, offset);
+        @RequestParam(required = false, defaultValue = "75") Integer pageSize,
+        @RequestParam(required = false, defaultValue = "0") Integer page) {
+        // Calculate offset based on page number and page size
+        Integer offset = page * pageSize;
+        return jobService.searchJobs(city, country, minSalary, maxSalary, workType, pageSize, offset);
     }
 
     // R7: Apply to a job
@@ -88,5 +95,17 @@ public class JobController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
+    }
+
+    // Get total count for pagination
+    @GetMapping("/count")
+    @CrossOrigin(origins = "http://localhost:5173")
+    public int getJobsCount(
+        @RequestParam(required = false) String city,
+        @RequestParam(required = false) String country,
+        @RequestParam(required = false) Double minSalary,
+        @RequestParam(required = false) Double maxSalary,
+        @RequestParam(required = false) String workType) {
+        return jobService.getTotalJobCount(city, country, minSalary, maxSalary, workType);
     }
 }
