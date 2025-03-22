@@ -55,7 +55,7 @@ public class JobService {
 
         if (limit != null) params.add(limit);
         if (offset != null) params.add(offset);
-        
+
         return jdbcTemplate.query(sql.toString(), jobRowMapper, params.toArray());
     }
 
@@ -132,36 +132,5 @@ public class JobService {
                     "JOIN Companies c ON e.CompanyId = c.CompanyId " +
                     "WHERE a.EmployeeId = ?";
         return jdbcTemplate.queryForList(sql, employeeId);
-    }
-
-    // Get total count of jobs for pagination
-    public int getTotalJobCount(String city, String country, Double minSalary, Double maxSalary, String workType) {
-        StringBuilder sql = new StringBuilder(
-            "SELECT COUNT(*) " +
-            "FROM JobPostings j " +
-            "JOIN Employers e ON j.EmployerId = e.UserId " +
-            "JOIN Companies c ON e.CompanyId = c.CompanyId " +
-            "JOIN Cities ci ON j.CityId = ci.CityId " +
-            "JOIN Countries co ON ci.CountryId = co.CountryId " +
-            "WHERE j.IsActive = 1 " +
-            "AND (?1 IS NULL OR ci.CityName LIKE ?1) " +
-            "AND (?2 IS NULL OR co.CountryName LIKE ?2) " +
-            "AND (?3 IS NULL OR j.MinSalary >= ?3) " +
-            "AND (?4 IS NULL OR j.MaxSalary <= ?4) " +
-            "AND (?5 IS NULL OR j.WorkType = ?5)"
-        );
-
-        // Prepare parameters with wildcards for text searches
-        String cityParam = city != null ? "%" + city + "%" : null;
-        String countryParam = country != null ? "%" + country + "%" : null;
-
-        List<Object> params = new ArrayList<>();
-        params.add(cityParam);
-        params.add(countryParam);
-        params.add(minSalary);
-        params.add(maxSalary);
-        params.add(workType);
-        
-        return jdbcTemplate.queryForObject(sql.toString(), Integer.class, params.toArray());
     }
 }
