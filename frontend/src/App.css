@@ -134,12 +134,7 @@
   margin-bottom: var(--spacing-xs);
 }
 
-.job-title {
-  margin: 0;
-  color: var(--color-primary);
-  font-size: 1.3rem;
-  font-weight: var(--font-weight-medium);
-}
+
 
 .job-details {
   display: grid;
@@ -294,10 +289,37 @@
 
 /* Loading Indicator */
 .loading-indicator {
-  padding: var(--spacing-md);
-  text-align: center;
-  color: var(--color-text-light);
-  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: rgba(235, 243, 255, 0.9);
+  border-radius: 8px;
+  margin: 1rem 0;
+  color: var(--color-primary);
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 1rem;
+  z-index: 10;
+}
+
+.loading-indicator::before {
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-primary);
+  border-top-color: transparent;
+  border-radius: 50%;
+  margin-right: 8px;
+  animation: spinner 0.8s linear infinite;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* No Jobs Message */

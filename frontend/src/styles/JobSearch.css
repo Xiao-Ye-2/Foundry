@@ -513,4 +513,226 @@
   border-radius: var(--border-radius);
   color: var(--color-text);
   font-size: 1.1rem;
+}
+
+/* =========================================
+   Table-Style Job List
+   ========================================= */
+
+/* Job Table Container */
+.job-table-container {
+  width: 100%;
+  overflow-x: auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  margin-top: var(--spacing-md);
+}
+
+/* Job Table */
+.job-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+/* Table Header */
+.job-table thead {
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.job-table th {
+  padding: 12px 16px;
+  font-weight: 500;
+  color: #111827;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Table Body */
+.job-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s;
+}
+
+.job-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.job-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.job-table tbody tr.expanded {
+  background-color: #f3f4f6;
+}
+
+/* Table Cells */
+.job-table td {
+  padding: 16px;
+  vertical-align: middle;
+}
+
+/* Column-specific styles */
+.position-col {
+  width: 25%;
+}
+
+.company-col, .location-col, .work-type-col {
+  width: 15%;
+}
+
+.salary-col {
+  width: 15%;
+}
+
+.actions-col {
+  width: 15%;
+}
+
+/* Job Title */
+.job-title {
+  font-weight: 500;
+  color: var(--color-primary);
+  font-size: 1.1rem;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+/* Action Buttons Container */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* Details Button */
+.details-button {
+  padding: 8px 12px;
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.details-button:hover {
+  background-color: #e5e7eb;
+}
+
+/* Apply Button */
+.apply-button {
+  padding: 8px 12px;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 100px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.apply-button:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.apply-button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Applied Badge */
+.applied-badge {
+  padding: 8px 12px;
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  border-radius: 4px;
+  font-weight: 500;
+  min-width: 100px;
+  text-align: center;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+/* Job Description Row */
+.job-description-row {
+  background-color: #f9fafb !important;
+}
+
+.job-description {
+  padding: 16px;
+  color: #4b5563;
+  line-height: 1.5;
+  border-left: 4px solid var(--color-primary);
+  background-color: #f3f4f6;
+  margin: 8px 0;
+  border-radius: 4px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .job-table {
+    display: block;
+  }
+  
+  .job-table thead {
+    display: none;
+  }
+  
+  .job-table tbody, .job-table tr, .job-table td {
+    display: block;
+    width: 100%;
+  }
+  
+  .job-table tr {
+    margin-bottom: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .job-table td {
+    display: flex;
+    padding: 8px 16px;
+    text-align: right;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  
+  .job-table td:before {
+    content: attr(data-label);
+    font-weight: 500;
+    margin-right: auto;
+    text-align: left;
+  }
+  
+  .job-table td.position-col {
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+  }
+  
+  .job-table td.actions-col {
+    border-bottom: none;
+  }
+  
+  .job-description-row td {
+    padding: 0;
+  }
+  
+  .action-buttons {
+    justify-content: flex-start;
+    width: 100%;
+    margin-top: 8px;
+  }
 } 

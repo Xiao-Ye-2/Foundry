@@ -221,17 +221,21 @@ const JobSearch: React.FC<JobSearchProps> = ({
   // Pagination handlers
   const goToPage = (page: number) => {
     setCurrentPage(page);
+    setLoading(true); // Set loading state before fetching
+    // fetchJobs will be called via useEffect
   };
   
   const goToPreviousPage = () => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
+      setLoading(true); // Set loading state before fetching
     }
   };
   
   const goToNextPage = () => {
     if (currentPage < totalPages - 1) {
       setCurrentPage(currentPage + 1);
+      setLoading(true); // Set loading state before fetching
     }
   };
   
@@ -317,17 +321,24 @@ const JobSearch: React.FC<JobSearchProps> = ({
       
       {error && <div className="error">Error: {error}</div>}
       
+      {loading && (
+        <div className="loading">
+          {filteredJobs.length > 0 ? 'Loading more jobs...' : 'Loading jobs...'}
+        </div>
+      )}
+      
       <div className="job-results">
         <div className="job-results-header">
           <h3>Job Results</h3>
           <div className="job-count-badge">
-            {totalJobs} jobs found {filteredJobs.length > 0 && totalPages > 1 && `• Page ${currentPage + 1} of ${totalPages}`}
+            {totalJobs === 0 && !hasSearched ? 
+              "Calculating available positions..." : 
+              `${totalJobs} jobs available ${filteredJobs.length > 0 && totalPages > 1 ? `• Page ${currentPage + 1} of ${totalPages}` : ''}`
+            }
           </div>
         </div>
         
-        {loading ? (
-          <div className="loading">Loading jobs...</div>
-        ) : filteredJobs.length === 0 ? (
+        {!loading && filteredJobs.length === 0 ? (
           hasSearched ? (
             <div className="no-results">No jobs found matching your criteria</div>
           ) : (
@@ -337,57 +348,65 @@ const JobSearch: React.FC<JobSearchProps> = ({
           )
         ) : (
           <>
-            <div className="job-list">
-              {filteredJobs.map((job) => (
-                <div key={job.jobId} className="job-card">
-                  <div className="job-card-header">
-                    <h3>{job.title}</h3>
-                    <h4>{job.companyName}</h4>
-                  </div>
-                  
-                  <div className="job-details">
-                    <p>
-                      <span className="job-detail-icon location-icon">📍</span>
-                      {job.cityName}{job.countryName ? `, ${job.countryName}` : ''}
-                    </p>
-                    <p>
-                      <span className="job-detail-icon salary-icon">💰</span>
-                      ${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()}
-                    </p>
-                    <p>
-                      <span className="job-detail-icon work-type-icon">🕒</span>
-                      {job.workType}
-                    </p>
-                  </div>
-                  
-                  {isJobExpanded(job.jobId) && (
-                    <div className="job-expanded-details">
-                      <p className="job-description">{job.description}</p>
-                    </div>
-                  )}
-                  
-                  <div className="job-card-footer">
-                    <button 
-                      className="job-details-button"
-                      onClick={() => toggleJobDetails(job.jobId)}
-                    >
-                      {isJobExpanded(job.jobId) ? 'Hide Details' : 'Show Details'}
-                    </button>
-                    
-                    {hasAppliedForJob(job.jobId) ? (
-                      <div className="applied-badge">Applied</div>
-                    ) : (
-                      <button 
-                        className="apply-button"
-                        onClick={() => onApplyForJob(job.jobId)}
-                        disabled={applyingToJob === job.jobId}
-                      >
-                        {applyingToJob === job.jobId ? 'Applying...' : 'Apply Now'}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
+            <div className="job-table-container">
+              <table className="job-table" style={loading ? { opacity: '0.7' } : {}}>
+                <thead>
+                  <tr>
+                    <th className="position-col">Position</th>
+                    <th className="company-col">Company</th>
+                    <th className="location-col">Location</th>
+                    <th className="salary-col">Salary</th>
+                    <th className="work-type-col">Work Type</th>
+                    <th className="actions-col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredJobs.map((job) => (
+                    <React.Fragment key={job.jobId}>
+                      <tr className={isJobExpanded(job.jobId) ? "job-row expanded" : "job-row"}>
+                        <td className="position-col" data-label="Position">
+                          <div className="job-title">{job.title}</div>
+                        </td>
+                        <td className="company-col" data-label="Company">{job.companyName}</td>
+                        <td className="location-col" data-label="Location">{job.cityName}{job.countryName ? `, ${job.countryName}` : ''}</td>
+                        <td className="salary-col" data-label="Salary">${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()}</td>
+                        <td className="work-type-col" data-label="Work Type">{job.workType}</td>
+                        <td className="actions-col" data-label="Actions">
+                          <div className="action-buttons">
+                            <button 
+                              className="details-button"
+                              onClick={() => toggleJobDetails(job.jobId)}
+                            >
+                              {isJobExpanded(job.jobId) ? 'Hide Details' : 'Show Details'}
+                            </button>
+                            
+                            {hasAppliedForJob(job.jobId) ? (
+                              <div className="applied-badge">Applied</div>
+                            ) : (
+                              <button 
+                                className="apply-button"
+                                onClick={() => onApplyForJob(job.jobId)}
+                                disabled={applyingToJob === job.jobId}
+                              >
+                                {applyingToJob === job.jobId ? 'Applying...' : 'Apply Now'}
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                      {isJobExpanded(job.jobId) && (
+                        <tr className="job-description-row">
+                          <td colSpan={6}>
+                            <div className="job-description">
+                              <p>{job.description}</p>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
             </div>
             
             {totalPages > 1 && (

@@ -56,8 +56,16 @@ const App: React.FC = () => {
   const [expandedJobs, setExpandedJobs] = useState<number[]>([]);
   const [showProfileDropdown, setProfileShowDropdown] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [totalJobs, setTotalJobs] = useState<number>(0);
+  const [pageSize] = useState<number>(75);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Calculate total pages
+  const totalPages = Math.ceil(totalJobs / pageSize);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -75,9 +83,9 @@ const App: React.FC = () => {
   // Load jobs when the component mounts or when the employee logs in
   useEffect(() => {
     if (employeeId !== null && jobs.length === 0) {
-      handleGetJobs();
+      handleGetJobs(currentPage);
     }
-  }, [employeeId, jobs.length]);
+  }, [employeeId, jobs.length, currentPage]);
 
   // Load applications when the employee logs in or when the tab changes to 'applications'
   useEffect(() => {
@@ -86,13 +94,24 @@ const App: React.FC = () => {
     }
   }, [employeeId, activeTab]);
 
-  const handleGetJobs = async () => {
+  // Fetch total count on initial load
+  useEffect(() => {
+    fetchTotalJobCount();
+  }, []);
+
+  const handleGetJobs = async (page: number = 0) => {
     try {
       setLoading(true);
       setError("");
-      console.log('Fetching jobs from:', 'http://localhost:8080/api/jobs');
+      
+      // Include pagination parameters
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('pageSize', pageSize.toString());
+      
+      console.log(`Fetching jobs from: http://localhost:8080/api/jobs?${params.toString()}`);
 
-      const response = await fetch('http://localhost:8080/api/jobs', {
+      const response = await fetch(`http://localhost:8080/api/jobs?${params.toString()}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -114,6 +133,9 @@ const App: React.FC = () => {
       const data = await response.json();
       console.log('Received data:', data);
       setJobs(data);
+      
+      // Fetch total count for pagination
+      fetchTotalJobCount();
     } catch (error) {
       console.error('Full error object:', error);
       const errorMessage = error instanceof Error
@@ -122,6 +144,30 @@ const App: React.FC = () => {
       setError(errorMessage);
     } finally {
       setLoading(false);
+    }
+  };
+  
+  // Fetch total job count
+  const fetchTotalJobCount = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/jobs/count', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        credentials: 'omit'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch job count: ${response.status} ${response.statusText}`);
+      }
+      
+      const count = await response.json();
+      console.log(`Total job count: ${count}`);
+      setTotalJobs(count);
+    } catch (err) {
+      console.error('Error fetching job count:', err);
     }
   };
 
@@ -250,22 +296,6 @@ const App: React.FC = () => {
     }
   };
 
-  const getCityIdFromBackend = async (cityName: string, countryName: string): Promise<number | null> => {
-    try {
-      const response = await fetch(`http://localhost:8080/api/cities/getCityId?city=${cityName}&country=${countryName}`);
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch cityId: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      return data.cityId || null;
-    } catch (error) {
-      console.error("Error fetching cityId:", error);
-      return null;
-    }
-  };
-
   const hasAppliedForJob = (jobId: number) => {
     return applications.some(app => app.jobId === jobId);
   };
@@ -312,6 +342,31 @@ const App: React.FC = () => {
   };
 
   const isJobExpanded = (jobId: number) => expandedJobs.includes(jobId);
+
+  // Pagination handlers
+  const goToPage = (page: number) => {
+    setCurrentPage(page);
+    setLoading(true); // Set loading state before fetching
+    handleGetJobs(page);
+  };
+  
+  const goToPreviousPage = () => {
+    if (currentPage > 0) {
+      const newPage = currentPage - 1;
+      setCurrentPage(newPage);
+      setLoading(true); // Set loading state before fetching
+      handleGetJobs(newPage);
+    }
+  };
+  
+  const goToNextPage = () => {
+    if (currentPage < totalPages - 1) {
+      const newPage = currentPage + 1;
+      setCurrentPage(newPage);
+      setLoading(true); // Set loading state before fetching
+      handleGetJobs(newPage);
+    }
+  };
 
   // If no role is selected, show the role selection screen
   if (userRole === null) {
@@ -384,7 +439,11 @@ const App: React.FC = () => {
 
         {activeTab === 'jobs' && (
           <>
-            {loading && <div className="loading-indicator">Loading jobs...</div>}
+            {loading && (
+              <div className="loading-indicator">
+                {jobs.length > 0 ? 'Loading more jobs...' : 'Loading jobs...'}
+              </div>
+            )}
 
             {error && (
               <div className="error-message">
@@ -395,7 +454,7 @@ const App: React.FC = () => {
             {!loading && !error && jobs.length === 0 && (
               <div className="no-jobs-message">
                 <p>No jobs available. Please try again later.</p>
-                <button className="primary-button" onClick={handleGetJobs}>
+                <button className="primary-button" onClick={() => handleGetJobs(currentPage)}>
                   Refresh Jobs
                 </button>
               </div>
@@ -404,53 +463,154 @@ const App: React.FC = () => {
             {jobs.length > 0 && (
               <>
                 <div className="job-results">
-                  <h3>Available Jobs ({jobs.length})</h3>
+                  <h3>Available Jobs ({totalJobs})</h3>
                 </div>
-                <div className="job-list-container">
-                  {jobs.map(job => (
-                    <div key={job.jobId} className="job-card">
-                      <div className="job-card-header">
-                        <h3 className="job-title">{job.title}</h3>
-                        <h4>{job.companyName}</h4>
-                      </div>
-                      <div className="job-details">
-                        <p><strong>Location:</strong> {job.cityName}{job.countryName ? `, ${job.countryName}` : ''}</p>
-                        <p><strong>Salary Range:</strong> ${job.minSalary.toLocaleString()}K - ${job.maxSalary.toLocaleString()}K</p>
-                        <p><strong>Work Type:</strong> {job.workType}</p>
-                        <p><strong>Posted:</strong> {new Date(job.postDate).toLocaleDateString()}</p>
-                      </div>
+                <div className="job-table-container">
+                  <table className="job-table" style={loading ? { opacity: '0.7' } : {}}>
+                    <thead>
+                      <tr>
+                        <th className="position-col">Position</th>
+                        <th className="company-col">Company</th>
+                        <th className="location-col">Location</th>
+                        <th className="salary-col">Salary</th>
+                        <th className="work-type-col">Work Type</th>
+                        <th className="actions-col">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {jobs.map(job => (
+                        <React.Fragment key={job.jobId}>
+                          <tr className={isJobExpanded(job.jobId) ? "job-row expanded" : "job-row"}>
+                            <td className="position-col" data-label="Position">
+                              <div className="job-title">{job.title}</div>
+                            </td>
+                            <td className="company-col" data-label="Company">{job.companyName}</td>
+                            <td className="location-col" data-label="Location">{job.cityName}{job.countryName ? `, ${job.countryName}` : ''}</td>
+                            <td className="salary-col" data-label="Salary">${job.minSalary.toLocaleString()}K - ${job.maxSalary.toLocaleString()}K</td>
+                            <td className="work-type-col" data-label="Work Type">{job.workType}</td>
+                            <td className="actions-col" data-label="Actions">
+                              <div className="action-buttons">
+                                <button
+                                  className="details-button"
+                                  onClick={() => toggleJobDetails(job.jobId)}
+                                >
+                                  {isJobExpanded(job.jobId) ? 'Hide Details' : 'Show Details'}
+                                </button>
 
-                      <div className="job-card-actions">
-                        <button
-                          className="details-button"
-                          onClick={() => toggleJobDetails(job.jobId)}
+                                {hasAppliedForJob(job.jobId) ? (
+                                  <div className="applied-badge">Applied</div>
+                                ) : (
+                                  <button
+                                    className="apply-button"
+                                    onClick={() => handleApplyForJob(job.jobId)}
+                                    disabled={applyingToJob === job.jobId}
+                                  >
+                                    {applyingToJob === job.jobId ? 'Applying...' : 'Apply Now'}
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                          {isJobExpanded(job.jobId) && job.description && (
+                            <tr className="job-description-row">
+                              <td colSpan={6}>
+                                <div className="job-description">
+                                  <p>{job.description}</p>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {totalPages > 1 && (
+                  <div className="pagination">
+                    <button 
+                      className="pagination-button prev-button"
+                      onClick={goToPreviousPage}
+                      disabled={currentPage === 0}
+                    >
+                      <span className="pagination-icon">«</span> Previous
+                    </button>
+                    
+                    <div className="pagination-numbers">
+                      {/* First page */}
+                      {currentPage > 1 && (
+                        <button 
+                          className="pagination-number"
+                          onClick={() => goToPage(0)}
                         >
-                          {isJobExpanded(job.jobId) ? 'Hide Details' : 'Show Details'}
+                          1
                         </button>
-
-                        {hasAppliedForJob(job.jobId) ? (
-                          <button className="applied-button" disabled>
-                            Applied
-                          </button>
-                        ) : (
-                          <button
-                            className="apply-button"
-                            onClick={() => handleApplyForJob(job.jobId)}
-                            disabled={applyingToJob === job.jobId}
+                      )}
+                      
+                      {/* Ellipsis after first page */}
+                      {currentPage > 2 && <span className="pagination-ellipsis">…</span>}
+                      
+                      {/* Generate page numbers around current page */}
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        let pageNumber;
+                        
+                        if (totalPages <= 5) {
+                          // If 5 or fewer pages, show all
+                          pageNumber = i;
+                        } else if (currentPage <= 2) {
+                          // Near start, show first 5 pages
+                          pageNumber = i;
+                        } else if (currentPage >= totalPages - 3) {
+                          // Near end, show last 5 pages
+                          pageNumber = totalPages - 5 + i;
+                        } else {
+                          // In middle, show 2 before and 2 after current
+                          pageNumber = currentPage - 2 + i;
+                        }
+                        
+                        // Skip rendering if number is out of range
+                        if (pageNumber < 0 || pageNumber >= totalPages) return null;
+                        
+                        // Skip first and last page if they'll be rendered separately
+                        if ((currentPage > 1 && pageNumber === 0) || 
+                            (currentPage < totalPages - 2 && pageNumber === totalPages - 1)) {
+                          return null;
+                        }
+                        
+                        return (
+                          <button 
+                            key={pageNumber}
+                            className={`pagination-number ${currentPage === pageNumber ? 'active' : ''}`}
+                            onClick={() => goToPage(pageNumber)}
                           >
-                            {applyingToJob === job.jobId ? 'Applying...' : 'Apply Now'}
+                            {pageNumber + 1}
                           </button>
-                        )}
-                      </div>
-
-                      {isJobExpanded(job.jobId) && job.description && (
-                        <div className="job-expanded-details">
-                          <p className="job-description">{job.description}</p>
-                        </div>
+                        );
+                      })}
+                      
+                      {/* Ellipsis before last page */}
+                      {currentPage < totalPages - 3 && <span className="pagination-ellipsis">…</span>}
+                      
+                      {/* Last page */}
+                      {currentPage < totalPages - 2 && (
+                        <button 
+                          className="pagination-number"
+                          onClick={() => goToPage(totalPages - 1)}
+                        >
+                          {totalPages}
+                        </button>
                       )}
                     </div>
-                  ))}
-                </div>
+                    
+                    <button 
+                      className="pagination-button next-button"
+                      onClick={goToNextPage}
+                      disabled={currentPage >= totalPages - 1}
+                    >
+                      Next <span className="pagination-icon">»</span>
+                    </button>
+                  </div>
+                )}
               </>
             )}
           </>
