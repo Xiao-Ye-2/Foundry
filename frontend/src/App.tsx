@@ -4,6 +4,7 @@ import RoleSelection from "./components/RoleSelection";
 import UserLogin from "./components/UserLogin";
 import ProfileDropdown from "./components/ProfileDropdown";
 import PostJob from "./components/PostJob";
+import ShortlistedJobs from "./components/ShortlistedJobs";
 import { UserProfile } from "./types";
 import "./App.css";
 
@@ -44,7 +45,7 @@ interface ApiApplication {
 }
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'jobs' | 'applications' | 'post-job' | 'advanced'>('jobs');
+  const [activeTab, setActiveTab] = useState<'jobs' | 'applications' | 'post-job' | 'advanced' | 'shortlist'>('jobs');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -371,20 +372,15 @@ const App: React.FC = () => {
     }
   };
 
+  // Handle browsing jobs from shortlist
+  const handleBrowseJobs = () => {
+    setActiveTab('advanced');
+  };
+
   // If no role is selected, show the role selection screen
   if (userRole === null) {
     return <RoleSelection onSelectRole={handleRoleSelection} />;
   }
-  // // If employee role is selected but not logged in, show the login screen
-  // if (userRole === 'employee' && employeeId === null) {
-  //   return <UserLogin onLogin={handleEmployeeLogin} onBack={() => setUserRole(null)} onSignup={handleEmployeeSignup}/>;
-  // }
-
-  // // If employee role is selected but not logged in, show the login screen
-  // if (userRole === 'employer' && employeeId === null) {
-  //   return <UserLogin onLogin={handleEmployeeLogin} onBack={() => setUserRole(null)} onSignup={handleEmployeeSignup}/>;
-  // }
-
 
   if (userProfile === null) {
     return <UserLogin onLogin={handleEmployeeLogin} onBack={() => setUserRole(null)} onSignup={handleEmployeeSignup} userRole={userRole} />;
@@ -423,9 +419,14 @@ const App: React.FC = () => {
           </button>
 
           {userRole === 'employee' ? (
-            <button onClick={() => setActiveTab('applications')} className={`tab-button ${activeTab === 'applications' ? 'active' : ''}`}>
-              My Applications
-            </button>
+            <>
+              <button onClick={() => setActiveTab('applications')} className={`tab-button ${activeTab === 'applications' ? 'active' : ''}`}>
+                My Applications
+              </button>
+              <button onClick={() => setActiveTab('shortlist')} className={`tab-button ${activeTab === 'shortlist' ? 'active' : ''}`}>
+                Shortlist
+              </button>
+            </>
           ) : (
             <button onClick={() => setActiveTab('post-job')} className={`tab-button ${activeTab === 'post-job' ? 'active' : ''}`}>
               Post a Job
@@ -691,6 +692,16 @@ const App: React.FC = () => {
               </div>
             )}
           </div>
+        )}
+
+        {activeTab === 'shortlist' && (
+          <ShortlistedJobs 
+            employeeId={employeeId}
+            hasAppliedForJob={hasAppliedForJob}
+            onApplyForJob={handleApplyForJob}
+            applyingToJob={applyingToJob}
+            onBrowseJobs={handleBrowseJobs}
+          />
         )}
 
         {activeTab === 'advanced' && (
