@@ -263,6 +263,13 @@ const JobSearch: React.FC<JobSearchProps> = ({
     }
   }, [currentPage, hasSearched, cityId, companyId, minSalary, maxSalary, workType]);
   
+  // Add effect to scroll to top when loading finishes after page change
+  useEffect(() => {
+    if (!loading && hasSearched && filteredJobs.length > 0) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [loading, hasSearched, filteredJobs.length]);
+  
   // Apply filters
   const applyFilters = (e: React.FormEvent) => {
     e.preventDefault();
