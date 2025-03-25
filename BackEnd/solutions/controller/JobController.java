@@ -27,8 +27,17 @@ public class JobController {
         // Calculate offset based on page number and page size
         Integer offset = page * pageSize;
         // Use searchJobs with no filters and with pagination params
-        return jobService.searchJobs(null, null, null, null, null, pageSize, offset);
+        return jobService.searchJobs(null, null, null, null, null, pageSize, offset, null);
     }
+
+    @GetMapping("/recommendations")
+    @CrossOrigin(origins = "http://localhost:5173")
+    public List<JobPosting> getRecommendedJobs(
+        @RequestParam Long jobId,
+        @RequestParam Long userId) {
+        return jobService.getRecommendedJobs(jobId, userId);
+    }
+
 
     // R6: Job search
     @GetMapping("/search")
@@ -40,10 +49,11 @@ public class JobController {
         @RequestParam(required = false) Double maxSalary,
         @RequestParam(required = false) String workType,
         @RequestParam(required = false, defaultValue = "75") Integer pageSize,
-        @RequestParam(required = false, defaultValue = "0") Integer page) {
+        @RequestParam(required = false, defaultValue = "0") Integer page,
+        @RequestParam(required = false) Long userId) {
         // Calculate offset based on page number and page size
         Integer offset = page * pageSize;
-        return jobService.searchJobs(city, country, minSalary, maxSalary, workType, pageSize, offset);
+        return jobService.searchJobs(city, country, minSalary, maxSalary, workType, pageSize, offset, userId);
     }
 
     // R7: Apply to a job

@@ -37,6 +37,25 @@ public class JobRowMapper implements RowMapper<JobPosting> {
                 jobPosting.setCountryName("Unknown Country");
             }
 
+            // Check for optional columns
+            try {
+                jobPosting.setApplyCount(rs.getInt("apply_count"));
+            } catch (SQLException e) {
+                jobPosting.setApplyCount(0); // Default value if column is missing
+            }
+
+            try {
+                jobPosting.setDislikeCount(rs.getInt("dislike_count"));
+            } catch (SQLException e) {
+                jobPosting.setDislikeCount(0); // Default value if column is missing
+            }
+
+            try {
+                jobPosting.setShortlistCount(rs.getInt("shortlist_count"));
+            } catch (SQLException e) {
+                jobPosting.setShortlistCount(0); // Default value if column is missing
+            }
+
             return jobPosting;
         } catch (SQLException e) {
             System.err.println("Error mapping row to JobPosting:");

@@ -3,6 +3,8 @@ package service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import data.JobPosting;
 import data.mapper.JobRowMapper;
@@ -11,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 
+
 @Service
 public class JobService {
     @Autowired
@@ -18,26 +21,69 @@ public class JobService {
     @Autowired
     private JobRowMapper jobRowMapper;
 
+    @PostConstruct
+    public void createViews() {
+        dropViews();
+        String sql = "CREATE VIEW JobDetailsView AS " +
+                     "SELECT j.*, c.CompanyName, ci.CityName, co.CountryName " +
+                     "FROM JobPostings j " +
+                     "JOIN Employers e ON j.EmployerId = e.UserId " +
+                     "JOIN Companies c ON e.CompanyId = c.CompanyId " +
+                     "JOIN Cities ci ON j.CityId = ci.CityId " +
+                     "JOIN Countries co ON ci.CountryId = co.CountryId";
+        jdbcTemplate.execute(sql);
+    }
+
+    @PreDestroy
+    public void dropViews() {
+        String dropViewSql = "DROP VIEW IF EXISTS JobDetailsView";
+        jdbcTemplate.execute(dropViewSql);
+    }
+
     // R6: Job search with filters
-    public List<JobPosting> searchJobs(String city, String country, Double minSalary, Double maxSalary, 
-                                     String workType, Integer limit, Integer offset) {
+    public List<JobPosting> searchJobs(String city, String country, Double minSalary, Double maxSalary,
+                                     String workType, Integer limit, Integer offset, Long userId) {
         StringBuilder sql = new StringBuilder(
-            "SELECT j.*, c.CompanyName, ci.CityName, co.CountryName " +
-            "FROM JobPostings j " +
-            "JOIN Employers e ON j.EmployerId = e.UserId " +
-            "JOIN Companies c ON e.CompanyId = c.CompanyId " +
-            "JOIN Cities ci ON j.CityId = ci.CityId " +
-            "JOIN Countries co ON ci.CountryId = co.CountryId " +
+            "WITH application_count AS ( " +
+            "    SELECT JobId, COUNT(*) AS apply_count " +
+            "    FROM Applications " +
+            "    GROUP BY JobId " +
+            "), " +
+            "dislike_count AS ( " +
+            "    SELECT JobId, COUNT(*) AS dislike_count " +
+            "    FROM Dislike " +
+            "    GROUP BY JobId " +
+            "), " +
+            "shortlist_count AS ( " +
+            "    SELECT JobId, COUNT(*) AS shortlist_count " +
+            "    FROM Shortlist " +
+            "    GROUP BY JobId " +
+            ") " +
+            "SELECT j.*," +
+            "       COALESCE(ac.apply_count, 0) AS apply_count, " +
+            "       COALESCE(dc.dislike_count, 0) AS dislike_count, " +
+            "       COALESCE(sc.shortlist_count, 0) AS shortlist_count " +
+            "FROM JobDetailsView j " +
+            "LEFT JOIN application_count ac ON j.JobId = ac.JobId " +
+            "LEFT JOIN dislike_count dc ON j.JobId = dc.JobId " +
+            "LEFT JOIN shortlist_count sc ON j.JobId = sc.JobId " +
             "WHERE j.IsActive = 1 " +
-            "AND (?1 IS NULL OR ci.CityName LIKE ?1) " +
-            "AND (?2 IS NULL OR co.CountryName LIKE ?2) " +
+            "AND (?1 IS NULL OR j.CityName LIKE ?1) " +
+            "AND (?2 IS NULL OR j.CountryName LIKE ?2) " +
             "AND (?3 IS NULL OR j.MinSalary >= ?3) " +
             "AND (?4 IS NULL OR j.MaxSalary <= ?4) " +
-            "AND (?5 IS NULL OR j.WorkType = ?5) " +
-            "ORDER BY j.PostDate DESC"
+            "AND (?5 IS NULL OR j.WorkType = ?5) "
         );
 
-        // Only add LIMIT and OFFSET if they are provided
+        // Conditionally add the NOT EXISTS clause if userId is provided
+        if (userId != null) {
+            sql.append("AND NOT EXISTS ( " +
+                       "    SELECT 1 FROM Dislike d WHERE d.EmployeeId = ?8 AND d.JobId = j.JobId " +
+                       ") ");
+        }
+
+        sql.append("ORDER BY j.PostDate DESC");
+
         if (limit != null) sql.append(" LIMIT ?6");
         if (offset != null) sql.append(" OFFSET ?7");
 
@@ -52,11 +98,42 @@ public class JobService {
         params.add(minSalary);
         params.add(maxSalary);
         params.add(workType);
-
         if (limit != null) params.add(limit);
         if (offset != null) params.add(offset);
-        
+        if (userId != null) params.add(userId);
+
         return jdbcTemplate.query(sql.toString(), jobRowMapper, params.toArray());
+    }
+
+    public List<JobPosting> getRecommendedJobs(Long jobId, Long userId) {
+        StringBuilder sql = new StringBuilder(
+            "WITH JobIndustry AS ( " +
+            "    SELECT j.*, f.IndustryId, e.CompanyId" +
+            "    FROM JobPostings j " +
+            "    JOIN Employers e ON j.EmployerId = e.UserId " +
+            "    JOIN FocusOn f ON e.CompanyId = f.CompanyId " +
+            ") " +
+            "SELECT T1.*, a.CompanyName, a.CityName, a.CountryName, COUNT(a.JobId) AS application_count " +
+            "FROM JobIndustry T1 " +
+            "LEFT JOIN JobDetailsView a ON T1.JobId = a.JobId " +
+            "WHERE T1.IndustryId = ( " +
+            "    SELECT f.IndustryId " +
+            "    FROM JobPostings j " +
+            "    JOIN Employers e ON j.EmployerId = e.UserId " +
+            "    JOIN FocusOn f ON e.CompanyId = f.CompanyId " +
+            "    WHERE j.JobId = ? " +
+            ") " +
+            "AND T1.JobId NOT IN ( " +
+            "    SELECT a.JobId " +
+            "    FROM Applications a " +
+            "    WHERE a.EmployeeId = ? " +
+            ") " +
+            "GROUP BY T1.JobId " +
+            "ORDER BY application_count DESC " +
+            "LIMIT 3"
+        );
+
+        return jdbcTemplate.query(sql.toString(), jobRowMapper, jobId, userId);
     }
 
     // R7:
@@ -89,38 +166,6 @@ public class JobService {
                     "JOIN JobPostings j ON a.JobId = j.JobId " +
                     "WHERE j.EmployerId = ?";
         return jdbcTemplate.queryForList(sql, employerId);
-    }
-
-    // Get all active jobs
-    public List<JobPosting> getAllJobs() {
-        try {
-            // First, let's check if the table exists and has data
-            String checkSql = "SELECT COUNT(*) FROM JobPostings";
-            Integer count = jdbcTemplate.queryForObject(checkSql, Integer.class);
-            System.out.println("Found " + count + " jobs in database");
-
-            String sql = "SELECT j.JobId, j.Title, j.Description, " +
-                        "j.MinSalary, j.MaxSalary, j.WorkType, " +
-                        "j.IsActive, j.PostDate, j.EmployerId, " +
-                        "c.CompanyName as CompanyName, " +
-                        "ci.CityName as CityName, " +
-                        "co.CountryName as CountryName " +
-                        "FROM JobPostings j " +
-                        "LEFT JOIN Employers e ON j.EmployerId = e.UserId " +
-                        "LEFT JOIN Companies c ON e.CompanyId = c.CompanyId " +
-                        "LEFT JOIN Cities ci ON j.CityId = ci.CityId " +
-                        "LEFT JOIN Countries co ON ci.CountryId = co.CountryId " +
-                        "WHERE j.IsActive = 1 " +
-                        "ORDER BY j.PostDate DESC " +
-                        "LIMIT 500";
-
-            System.out.println("Executing query: " + sql);
-            List<JobPosting> jobs = jdbcTemplate.query(sql, jobRowMapper);
-            System.out.println("Query executed successfully, found " + jobs.size() + " jobs");
-            return jobs;
-        } catch (Exception e) {
-            throw new RuntimeException("Database error: " + e.getMessage(), e);
-        }
     }
 
     // Get applications by employee ID
@@ -161,7 +206,7 @@ public class JobService {
         params.add(minSalary);
         params.add(maxSalary);
         params.add(workType);
-        
+
         return jdbcTemplate.queryForObject(sql.toString(), Integer.class, params.toArray());
     }
 }

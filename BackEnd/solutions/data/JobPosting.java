@@ -14,6 +14,9 @@ public class JobPosting {
     private String companyName;
     private String cityName;
     private String countryName;
+    private int applyCount;
+    private int dislikeCount;
+    private int shortlistCount;
 
     // Getters and Setters
     public Long getJobId() {
@@ -118,5 +121,29 @@ public class JobPosting {
 
     public void setCountryName(String countryName) {
         this.countryName = countryName;
+    }
+
+    public int getApplyCount() {
+        return applyCount;
+    }
+
+    public void setApplyCount(int applyCount) {
+        this.applyCount = applyCount;
+    }
+
+    public int getDislikeCount() {
+        return dislikeCount;
+    }
+
+    public void setDislikeCount(int dislikeCount) {
+        this.dislikeCount = dislikeCount;
+    }
+
+    public int getShortlistCount() {
+        return shortlistCount;
+    }
+
+    public void setShortlistCount(int shortlistCount) {
+        this.shortlistCount = shortlistCount;
     }
 }
