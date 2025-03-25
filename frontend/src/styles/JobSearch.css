@@ -615,25 +615,36 @@
 /* Action Buttons Container */
 .action-buttons {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: nowrap;
   justify-content: flex-end;
   align-items: center;
   width: 100%;
 }
 
+/* Common button styles for all action buttons */
+.details-button,
+.apply-button,
+.applied-badge {
+  height: 32px;
+  min-width: 70px;
+  padding: 0 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Details Button */
 .details-button {
-  padding: 6px 10px;
   background-color: #f3f4f6;
   color: #4b5563;
   border: 1px solid #e5e7eb;
-  border-radius: 4px;
-  font-weight: 500;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
 }
 
 .details-button:hover {
@@ -642,18 +653,9 @@
 
 /* Apply Button */
 .apply-button {
-  padding: 6px 10px;
   background-color: var(--color-primary);
   color: white;
   border: none;
-  border-radius: 4px;
-  font-weight: 500;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  min-width: 80px;
-  text-align: center;
-  white-space: nowrap;
 }
 
 .apply-button:hover {
@@ -667,16 +669,10 @@
 
 /* Applied Badge */
 .applied-badge {
-  padding: 6px 10px;
   background-color: #d1fae5;
   color: #065f46;
   border: 1px solid #a7f3d0;
-  border-radius: 4px;
-  font-weight: 500;
-  min-width: 80px;
-  text-align: center;
-  font-size: 0.8rem;
-  white-space: nowrap;
+  cursor: default;
 }
 
 /* Job Description Row */
@@ -756,8 +752,8 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  min-width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   background-color: #f5f5f5;
   border-radius: 50%;
   color: #666;
@@ -765,6 +761,7 @@
   transition: all 0.2s ease;
   border: 1px solid #e0e0e0;
   flex-shrink: 0;
+  margin: 0;
 }
 
 .shortlist-button:hover {
@@ -781,6 +778,7 @@
 .shortlist-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
 .shortlist-icon {
@@ -802,11 +800,20 @@
   .action-buttons {
     justify-content: flex-start;
     margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  
+  .details-button,
+  .apply-button,
+  .applied-badge {
+    flex: 1;
+    min-width: calc(50% - 4px);
   }
   
   .shortlist-button {
-    min-width: 32px;
+    width: 32px;
     height: 32px;
-    padding: 4px;
+    padding: 0;
+    flex: 0 0 32px;
   }
 } 
