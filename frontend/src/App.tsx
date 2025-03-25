@@ -5,6 +5,7 @@ import UserLogin from "./components/UserLogin";
 import ProfileDropdown from "./components/ProfileDropdown";
 import PostJob from "./components/PostJob";
 import ShortlistedJobs from "./components/ShortlistedJobs";
+import EmployeeApplications from "./components/EmployeeApplications";
 import { UserProfile } from "./types";
 import "./App.css";
 
@@ -55,7 +56,6 @@ const App: React.FC = () => {
   const [applyingToJob, setApplyingToJob] = useState<number | null>(null);
   const [loadingApplications, setLoadingApplications] = useState(false);
   const [applicationError, setApplicationError] = useState<string>("");
-  const [expandedApplications, setExpandedApplications] = useState<number[]>([]);
   const [expandedJobs, setExpandedJobs] = useState<number[]>([]);
   const [showProfileDropdown, setProfileShowDropdown] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -327,16 +327,6 @@ const App: React.FC = () => {
     setApplications([]);
   };
 
-  const toggleApplicationDetails = (jobId: number) => {
-    setExpandedApplications(prev =>
-      prev.includes(jobId)
-        ? prev.filter(id => id !== jobId)
-        : [...prev, jobId]
-    );
-  };
-
-  const isApplicationExpanded = (jobId: number) => expandedApplications.includes(jobId);
-
   const toggleJobDetails = (jobId: number) => {
     setExpandedJobs(prev =>
       prev.includes(jobId)
@@ -374,7 +364,7 @@ const App: React.FC = () => {
 
   // Handle browsing jobs from shortlist
   const handleBrowseJobs = () => {
-    setActiveTab('advanced');
+    setActiveTab('jobs');
   };
 
   // If no role is selected, show the role selection screen
@@ -630,68 +620,12 @@ const App: React.FC = () => {
         )}
 
         {activeTab === 'applications' && (
-          <div className="applications-container">
-            <h2>My Applications</h2>
-
-            {loadingApplications && <div className="loading-indicator">Loading your applications...</div>}
-
-            {applicationError && (
-              <div className="error-message">
-                {applicationError}
-              </div>
-            )}
-
-            {!loadingApplications && !applicationError && applications.length === 0 && (
-              <div className="no-applications-message">
-                <p>You haven't applied to any jobs yet.</p>
-                <button className="primary-button" onClick={() => setActiveTab('jobs')}>
-                  Browse Jobs
-                </button>
-              </div>
-            )}
-
-            {!loadingApplications && !applicationError && applications.length > 0 && (
-              <div className="applications-list">
-                {applications.map((application) => {
-                  // Find the corresponding job
-                  const job = jobs.find(j => j.jobId === application.jobId);
-
-                  return (
-                    <div key={`${application.employeeId}-${application.jobId}`} className="application-card">
-                      <div className="application-header">
-                        <h3>{application.title || job?.title || `Job #${application.jobId}`}</h3>
-                        <h4>{application.companyName || job?.companyName || 'Unknown Company'}</h4>
-                      </div>
-
-                      <div className="application-details">
-                        <p><strong>Applied On:</strong> {application.applicationDate ? new Date(application.applicationDate).toLocaleDateString() : 'Unknown'}</p>
-                        <p><strong>Status:</strong> <span className={`status-${application.status?.toLowerCase()}`}>{application.status || 'Pending'}</span></p>
-                      </div>
-
-                      {job && isApplicationExpanded(job.jobId) && (
-                        <div className="job-expanded-details">
-                          <p><strong>Location:</strong> {job.cityName}{job.countryName ? `, ${job.countryName}` : ''}</p>
-                          <p><strong>Salary Range:</strong> ${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()}</p>
-                          <p><strong>Work Type:</strong> {job.workType}</p>
-                          <p><strong>Description:</strong></p>
-                          <p className="job-description">{job.description}</p>
-                        </div>
-                      )}
-
-                      {job && (
-                        <button
-                          className="view-job-button"
-                          onClick={() => toggleApplicationDetails(job.jobId)}
-                        >
-                          {isApplicationExpanded(job.jobId) ? 'Hide Details' : 'View Job Details'}
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          <EmployeeApplications
+            applications={applications}
+            loadingApplications={loadingApplications}
+            applicationError={applicationError}
+            onBrowseJobs={handleBrowseJobs}
+          />
         )}
 
         {activeTab === 'shortlist' && (

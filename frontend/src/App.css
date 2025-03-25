@@ -393,7 +393,7 @@
 /* Applications Container */
 .applications-container {
   width: 100%;
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
@@ -416,10 +416,57 @@
   margin: var(--spacing-lg) 0;
 }
 
-.applications-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
+.applications-table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive applications table - consistent with job table */
+@media (max-width: 768px) {
+  .applications-table-container table {
+    border: 0;
+  }
+  
+  .applications-table-container table thead {
+    display: none;
+  }
+  
+  .applications-table-container table tr {
+    margin-bottom: 10px;
+    display: block;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    background-color: white;
+  }
+  
+  .applications-table-container table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    border-bottom: 1px solid var(--color-border);
+    padding: 8px 12px;
+  }
+  
+  .applications-table-container table td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    width: 40%;
+    margin-right: 10px;
+  }
+  
+  .applications-table-container table td:last-child {
+    border-bottom: 0;
+  }
+  
+  .applications-table-container .action-buttons {
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
 }
 
 .application-card {
