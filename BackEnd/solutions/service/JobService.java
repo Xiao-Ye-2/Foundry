@@ -69,7 +69,7 @@ public class JobService {
             "LEFT JOIN shortlist_count sc ON j.JobId = sc.JobId " +
             "WHERE j.IsActive = 1 " +
             "AND (?1 IS NULL OR j.CityId = ?1) " +
-            "AND (?2 IS NULL OR j.companyId = ?2) " +
+            "AND (?2 IS NULL OR j.CompanyId = ?2) " +
             "AND (?3 IS NULL OR j.MinSalary >= ?3) " +
             "AND (?4 IS NULL OR j.MaxSalary <= ?4) " +
             "AND (?5 IS NULL OR j.WorkType = ?5) "
@@ -182,7 +182,7 @@ public class JobService {
             "FROM JobDetailsView j " +
             "WHERE j.IsActive = 1 " +
             "AND (?1 IS NULL OR j.CityId = ?1) " +
-            "AND (?2 IS NULL OR j.companyId = ?2) " +
+            "AND (?2 IS NULL OR j.CompanyId = ?2) " +
             "AND (?3 IS NULL OR j.MinSalary >= ?3) " +
             "AND (?4 IS NULL OR j.MaxSalary <= ?4) " +
             "AND (?5 IS NULL OR j.WorkType = ?5)"
