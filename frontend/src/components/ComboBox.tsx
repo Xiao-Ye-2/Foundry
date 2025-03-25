@@ -21,6 +21,10 @@ const ComboBox: React.FC<ComboBoxProps> = ({ options, value, onChange, placehold
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setInputValue(value);
+  }, [value]);
+
+  useEffect(() => {
     const filtered = options.filter(option =>
       option.label.toLowerCase().includes(inputValue.toLowerCase())
     );

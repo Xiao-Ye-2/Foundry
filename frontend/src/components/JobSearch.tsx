@@ -273,10 +273,17 @@ const JobSearch: React.FC<JobSearchProps> = ({
   
   // Reset filters
   const resetFilters = () => {
+    console.log('Resetting all filters');
+    
+    // Reset IDs first
     setCityId('');
-    setLocationDisplay('');
     setCompanyId('');
+    
+    // Reset display values
+    setLocationDisplay('');
     setCompanyDisplay('');
+    
+    // Reset other filters
     setMinSalary('');
     setMaxSalary('');
     setWorkType('');
