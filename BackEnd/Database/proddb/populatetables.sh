@@ -25,6 +25,7 @@ SELECT UserId, Phone, NULL, PasswordHash, UserName, CityId, Role FROM Users_tmp;
 
 .import --skip 1 Employers.csv Employers
 .import --skip 1 JobPostings.csv JobPostings
+.import --skip 1 FocusOn.csv FocusOn
 
 # .mode column
 # .headers on
@@ -44,4 +45,4 @@ SELECT UserId, Phone, NULL, PasswordHash, UserName, CityId, Role FROM Users_tmp;
 END_SQL
 
 echo "Populating complete"
-rm *csv
+# rm *csv

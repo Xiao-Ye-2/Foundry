@@ -110,4 +110,30 @@ jobs.rename(columns={'Role': 'Title', 'Job Description': 'Description', 'Job Pos
 jobs = jobs[['JobId', 'EmployerId', 'Title', 'Description', 'MinSalary', 'MaxSalary', 'WorkType', 'CityId', 'IsActive', 'PostDate']]
 jobs.to_csv("JobPostings.csv", index=False)
 
+print("Generating FocusOn.csv...")
+def extract_industry_list(profile):
+    if pd.isna(profile):
+        return []
+    try:
+        profile_str = str(profile).replace("'", "\"")
+        profile_dict = json.loads(profile_str)
+        industry = profile_dict.get("Industry", None)
+        return [industry] if industry else []
+    except json.JSONDecodeError:
+        return []
+
+df["Industries"] = df["Company Profile"].apply(extract_industry_list)
+
+focus_on_data = set()  # Use a set to store unique (CompanyId, IndustryId) pairs
+for _, row in df.iterrows():
+    company_id = company_map.get(row['Company'])
+    industries = row['Industries']
+    for industry in industries:
+        industry_id = industry_map.get(industry)
+        if company_id and industry_id:
+            focus_on_data.add((company_id, industry_id))  # Add to set to ensure uniqueness
+
+focus_on_df = pd.DataFrame(list(focus_on_data), columns=["CompanyId", "IndustryId"])
+focus_on_df.to_csv("FocusOn.csv", index=False)
+
 print("CSV files generated successfully!")
