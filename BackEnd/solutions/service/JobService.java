@@ -41,7 +41,7 @@ public class JobService {
     }
 
     // R6: Job search with filters
-    public List<JobPosting> searchJobs(Long cityId, Long employerId, Double minSalary, Double maxSalary,
+    public List<JobPosting> searchJobs(Long cityId, Long companyId, Double minSalary, Double maxSalary,
                                      String workType, Integer limit, Integer offset, Long userId) {
         StringBuilder sql = new StringBuilder(
             "WITH application_count AS ( " +
@@ -69,7 +69,7 @@ public class JobService {
             "LEFT JOIN shortlist_count sc ON j.JobId = sc.JobId " +
             "WHERE j.IsActive = 1 " +
             "AND (?1 IS NULL OR j.CityId = ?1) " +
-            "AND (?2 IS NULL OR j.EmployerId = ?2) " +
+            "AND (?2 IS NULL OR j.companyId = ?2) " +
             "AND (?3 IS NULL OR j.MinSalary >= ?3) " +
             "AND (?4 IS NULL OR j.MaxSalary <= ?4) " +
             "AND (?5 IS NULL OR j.WorkType = ?5) "
@@ -90,7 +90,7 @@ public class JobService {
         // Create a list of parameters to pass to the query
         List<Object> params = new ArrayList<>();
         params.add(cityId);
-        params.add(employerId);
+        params.add(companyId);
         params.add(minSalary);
         params.add(maxSalary);
         params.add(workType);
@@ -176,13 +176,13 @@ public class JobService {
     }
 
     // Get total count of jobs for pagination
-    public int getTotalJobCount(Long cityId, Long employerId, Double minSalary, Double maxSalary, String workType) {
+    public int getTotalJobCount(Long cityId, Long companyId, Double minSalary, Double maxSalary, String workType) {
         StringBuilder sql = new StringBuilder(
             "SELECT COUNT(*) " +
             "FROM JobDetailsView j " +
             "WHERE j.IsActive = 1 " +
             "AND (?1 IS NULL OR j.CityId = ?1) " +
-            "AND (?2 IS NULL OR j.EmployerId = ?2) " +
+            "AND (?2 IS NULL OR j.companyId = ?2) " +
             "AND (?3 IS NULL OR j.MinSalary >= ?3) " +
             "AND (?4 IS NULL OR j.MaxSalary <= ?4) " +
             "AND (?5 IS NULL OR j.WorkType = ?5)"
@@ -190,7 +190,7 @@ public class JobService {
 
         List<Object> params = new ArrayList<>();
         params.add(cityId);
-        params.add(employerId);
+        params.add(companyId);
         params.add(minSalary);
         params.add(maxSalary);
         params.add(workType);

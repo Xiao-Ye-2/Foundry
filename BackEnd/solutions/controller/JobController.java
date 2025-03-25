@@ -44,7 +44,7 @@ public class JobController {
     @CrossOrigin(origins = "http://localhost:5173")
     public List<JobPosting> searchJobs(
         @RequestParam(required = false) Long cityId,
-        @RequestParam(required = false) Long employerId,
+        @RequestParam(required = false) Long companyId,
         @RequestParam(required = false) Double minSalary,
         @RequestParam(required = false) Double maxSalary,
         @RequestParam(required = false) String workType,
@@ -53,7 +53,7 @@ public class JobController {
         @RequestParam(required = false) Long userId) {
         // Calculate offset based on page number and page size
         Integer offset = page * pageSize;
-        return jobService.searchJobs(cityId, employerId, minSalary, maxSalary, workType, pageSize, offset, userId);
+        return jobService.searchJobs(cityId, companyId, minSalary, maxSalary, workType, pageSize, offset, userId);
     }
 
     // R7: Apply to a job
@@ -112,10 +112,10 @@ public class JobController {
     @CrossOrigin(origins = "http://localhost:5173")
     public int getJobsCount(
         @RequestParam(required = false) Long cityId,
-        @RequestParam(required = false) Long employerId,
+        @RequestParam(required = false) Long companyId,
         @RequestParam(required = false) Double minSalary,
         @RequestParam(required = false) Double maxSalary,
         @RequestParam(required = false) String workType) {
-        return jobService.getTotalJobCount(cityId, employerId, minSalary, maxSalary, workType);
+        return jobService.getTotalJobCount(cityId, companyId, minSalary, maxSalary, workType);
     }
 }
