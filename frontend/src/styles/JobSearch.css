@@ -625,7 +625,9 @@
 /* Common button styles for all action buttons */
 .details-button,
 .apply-button,
-.applied-badge {
+.applied-badge,
+.recommend-button,
+.rec-shortlist-button {
   height: 32px;
   min-width: 70px;
   padding: 0 12px;
@@ -676,7 +678,8 @@
 }
 
 /* Job Description Row */
-.job-description-row {
+.job-description-row,
+.job-recommendations-row {
   background-color: #f9fafb !important;
 }
 
@@ -815,5 +818,267 @@
     height: 32px;
     padding: 0;
     flex: 0 0 32px;
+  }
+}
+
+/* Recommend Button */
+.recommend-button {
+  background-color: #f0f9ff;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  width: 40px;
+  height: 32px;
+  padding: 0;
+}
+
+.recommend-button:hover {
+  background-color: #e0f2fe;
+}
+
+.recommend-button.active {
+  background-color: #0ea5e9;
+  color: white;
+  border-color: #0ea5e9;
+}
+
+.recommend-icon {
+  font-size: 1rem;
+}
+
+.recommend-loading {
+  animation: spin 1s linear infinite;
+}
+
+/* Recommendations Container */
+.recommendations-container {
+  margin-top: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: #f9fafb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.recommendations-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #f0f9ff;
+  border-bottom: 1px solid #bae6fd;
+}
+
+.recommendations-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #0369a1;
+}
+
+.close-recommendations {
+  background: none;
+  border: none;
+  color: #0369a1;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-recommendations:hover {
+  background-color: rgba(3, 105, 161, 0.1);
+}
+
+.recommendations-loading,
+.recommendations-error,
+.no-recommendations {
+  padding: 24px;
+  text-align: center;
+  color: #4b5563;
+  font-size: 0.95rem;
+}
+
+.recommendations-loading {
+  color: #0369a1;
+}
+
+.recommendations-error {
+  color: #b91c1c;
+  background-color: #fee2e2;
+}
+
+.recommendations-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+.recommendation-card {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.recommendation-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.recommendation-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.recommendation-header h4 {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  color: #111827;
+}
+
+.recommendation-header .company-name {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.recommendation-details {
+  padding: 12px 16px;
+  flex-grow: 1;
+}
+
+.recommendation-details p {
+  margin: 6px 0;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.recommendation-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.recommendation-actions .shortlist-button,
+.recommendation-actions .apply-button,
+.recommendation-actions .applied-badge {
+  flex: 1;
+  height: 32px !important;
+  font-size: 0.85rem;
+}
+
+.recommendation-actions .shortlist-button {
+  background-color: #f9fafb;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+}
+
+.recommendation-actions .shortlist-button:hover {
+  background-color: #f3f4f6;
+}
+
+.recommendation-actions .shortlist-button.shortlisted {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Inline Recommendations Container */
+.inline-recommendations-container {
+  padding: 16px;
+  background-color: #f3f4f6;
+  margin: 8px 0;
+  border-radius: 4px;
+  border-left: 4px solid #0ea5e9;
+}
+
+.inline-recommendations-container .recommendations-header {
+  background-color: transparent;
+  border-bottom: 1px solid #d1d5db;
+  margin-bottom: 16px;
+  padding: 0 0 12px 0;
+}
+
+.inline-recommendations-container .recommendations-header h3 {
+  font-size: 1rem;
+  color: #0369a1;
+  margin: 0;
+}
+
+.inline-recommendations-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+/* Recommendation Card in Inline View */
+.inline-recommendations-list .recommendation-card {
+  background-color: white;
+}
+
+/* Recommendation Action Button Styles */
+.rec-shortlist-button {
+  height: 32px !important;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f9fafb;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+  flex: 1;
+}
+
+.rec-shortlist-button:hover {
+  background-color: #f3f4f6;
+}
+
+.rec-shortlist-button.shortlisted {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.rec-shortlist-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Responsive adjustments for inline recommendations */
+@media (max-width: 768px) {
+  .inline-recommendations-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .job-recommendations-row td {
+    padding: 8px !important;
+  }
+  
+  .inline-recommendations-container {
+    padding: 12px;
   }
 } 

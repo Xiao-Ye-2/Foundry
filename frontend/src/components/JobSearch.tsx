@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/JobSearch.css';
 import ComboBox from './ComboBox';
+import JobRecommendations from './JobRecommendations';
 
 interface Job {
   jobId: number;
@@ -75,6 +76,9 @@ const JobSearch: React.FC<JobSearchProps> = ({
   const [shortlistedJobs, setShortlistedJobs] = useState<number[]>([]);
   const [shortlistingJob, setShortlistingJob] = useState<number | null>(null);
   
+  // Update state for recommended jobs to just track the source job ID
+  const [recommendedJobId, setRecommendedJobId] = useState<number | null>(null);
+  
   // Fetch locations when component mounts
   useEffect(() => {
     const fetchLocations = async () => {
@@ -115,6 +119,11 @@ const JobSearch: React.FC<JobSearchProps> = ({
   
   // Toggle job details expansion
   const toggleJobDetails = (jobId: number) => {
+    // If recommendations are showing for this job, hide them first
+    if (recommendedJobId === jobId) {
+      setRecommendedJobId(null);
+    }
+    
     setExpandedJobIds(prevIds => 
       prevIds.includes(jobId) 
         ? prevIds.filter(id => id !== jobId) 
@@ -342,6 +351,28 @@ const JobSearch: React.FC<JobSearchProps> = ({
     }
   };
   
+  // Function to toggle job recommendations
+  const toggleJobRecommendations = (jobId: number) => {
+    if (!employeeId) {
+      alert('Please log in to see job recommendations');
+      return;
+    }
+    
+    // If clicking on the same job, toggle recommendations off
+    if (recommendedJobId === jobId) {
+      setRecommendedJobId(null);
+      return;
+    }
+    
+    // If we're showing job details, close them
+    if (expandedJobIds.includes(jobId)) {
+      setExpandedJobIds(prevIds => prevIds.filter(id => id !== jobId));
+    }
+    
+    // Set the job ID for recommendations
+    setRecommendedJobId(jobId);
+  };
+  
   // Handle Shortlist click
   const handleShortlistClick = async (jobId: number) => {
     if (!employeeId) {
@@ -567,6 +598,14 @@ const JobSearch: React.FC<JobSearchProps> = ({
                               )}
                             </button>
                             
+                            <button
+                              className={`recommend-button ${recommendedJobId === job.jobId ? 'active' : ''}`}
+                              onClick={() => toggleJobRecommendations(job.jobId)}
+                              title="See similar jobs"
+                            >
+                              <span className="recommend-icon">👍</span>
+                            </button>
+                            
                             {hasAppliedForJob(job.jobId) ? (
                               <div className="applied-badge">Applied</div>
                             ) : (
@@ -587,6 +626,24 @@ const JobSearch: React.FC<JobSearchProps> = ({
                             <div className="job-description">
                               <p>{job.description}</p>
                             </div>
+                          </td>
+                        </tr>
+                      )}
+                      {recommendedJobId === job.jobId && (
+                        <tr className="job-recommendations-row">
+                          <td colSpan={6}>
+                            <JobRecommendations
+                              employeeId={employeeId}
+                              jobId={job.jobId}
+                              onClose={() => setRecommendedJobId(null)}
+                              onApplyForJob={onApplyForJob}
+                              hasAppliedForJob={hasAppliedForJob}
+                              applyingToJob={applyingToJob}
+                              onShortlistToggle={handleShortlistClick}
+                              isJobShortlisted={isJobShortlisted}
+                              shortlistingJob={shortlistingJob}
+                              inline={true}
+                            />
                           </td>
                         </tr>
                       )}
