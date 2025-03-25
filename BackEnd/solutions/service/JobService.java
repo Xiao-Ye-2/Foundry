@@ -223,9 +223,10 @@ public class JobService {
     
     // Get shortlisted jobs
     public List<JobPosting> getShortlistedJobs(Long employeeId) {
-        String sql = "SELECT j.* FROM JobPostings j " +
+        String sql = "SELECT j.* FROM JobDetailsView j " +
                     "JOIN Shortlist s ON j.JobId = s.JobId " +
-                    "WHERE s.EmployeeId = ?";
+                    "WHERE s.EmployeeId = ? " +
+                    "ORDER BY j.PostDate DESC";
         return jdbcTemplate.query(sql, jobRowMapper, employeeId);
     }
 }
