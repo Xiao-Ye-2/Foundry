@@ -497,7 +497,7 @@ const App: React.FC = () => {
                                   className="details-button"
                                   onClick={() => toggleJobDetails(job.jobId)}
                                 >
-                                  {isJobExpanded(job.jobId) ? 'Hide Details' : 'Show Details'}
+                                  {isJobExpanded(job.jobId) ? 'Hide' : 'Show'}
                                 </button>
 
                                 {hasAppliedForJob(job.jobId) ? (

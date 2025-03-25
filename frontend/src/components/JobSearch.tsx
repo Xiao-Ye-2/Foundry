@@ -33,6 +33,7 @@ interface JobSearchProps {
 }
 
 const JobSearch: React.FC<JobSearchProps> = ({ 
+  employeeId,
   onApplyForJob, 
   hasAppliedForJob,
   applyingToJob
@@ -69,6 +70,10 @@ const JobSearch: React.FC<JobSearchProps> = ({
   
   // Added state to track if a search has been performed
   const [hasSearched, setHasSearched] = useState<boolean>(false);
+  
+  // Track shortlisted jobs
+  const [shortlistedJobs, setShortlistedJobs] = useState<number[]>([]);
+  const [shortlistingJob, setShortlistingJob] = useState<number | null>(null);
   
   // Fetch locations when component mounts
   useEffect(() => {
@@ -337,6 +342,74 @@ const JobSearch: React.FC<JobSearchProps> = ({
     }
   };
   
+  // Handle Shortlist click
+  const handleShortlistClick = async (jobId: number) => {
+    if (!employeeId) {
+      alert('Please log in to shortlist jobs');
+      return;
+    }
+
+    setShortlistingJob(jobId);
+    
+    try {
+      if (shortlistedJobs.includes(jobId)) {
+        // Remove from shortlisted jobs
+        await fetch(`http://localhost:8080/api/jobs/shortlist?employeeId=${employeeId}&jobId=${jobId}`, {
+          method: 'DELETE',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        setShortlistedJobs(prev => prev.filter(id => id !== jobId));
+      } else {
+        // Add to shortlisted jobs
+        await fetch(`http://localhost:8080/api/jobs/shortlist?employeeId=${employeeId}&jobId=${jobId}`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        setShortlistedJobs(prev => [...prev, jobId]);
+      }
+    } catch (error) {
+      console.error('Error toggling job shortlist:', error);
+    } finally {
+      setShortlistingJob(null);
+    }
+  };
+  
+  // Check if a job is shortlisted
+  const isJobShortlisted = (jobId: number) => shortlistedJobs.includes(jobId);
+  
+  // Fetch shortlisted jobs when component mounts if employeeId exists
+  useEffect(() => {
+    const fetchShortlistedJobs = async () => {
+      if (!employeeId) return;
+      
+      try {
+        const response = await fetch(`http://localhost:8080/api/jobs/shortlist/${employeeId}`, {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setShortlistedJobs(data.map((job: Job) => job.jobId));
+        }
+      } catch (error) {
+        console.error('Error fetching shortlisted jobs:', error);
+      }
+    };
+    
+    fetchShortlistedJobs();
+  }, [employeeId]);
+  
   return (
     <div className="job-search-container">
       <h2>Find Your Dream Job</h2>
@@ -476,7 +549,22 @@ const JobSearch: React.FC<JobSearchProps> = ({
                               className="details-button"
                               onClick={() => toggleJobDetails(job.jobId)}
                             >
-                              {isJobExpanded(job.jobId) ? 'Hide Details' : 'Show Details'}
+                              {isJobExpanded(job.jobId) ? 'Hide' : 'Details'}
+                            </button>
+                            
+                            <button
+                              className={`shortlist-button ${isJobShortlisted(job.jobId) ? 'shortlisted' : ''}`}
+                              onClick={() => handleShortlistClick(job.jobId)}
+                              disabled={shortlistingJob === job.jobId}
+                              title={isJobShortlisted(job.jobId) ? "Remove from shortlist" : "Save to shortlist"}
+                            >
+                              {shortlistingJob === job.jobId ? (
+                                <span className="shortlist-loading">⏳</span>
+                              ) : isJobShortlisted(job.jobId) ? (
+                                <span className="shortlist-icon">★</span>
+                              ) : (
+                                <span className="shortlist-icon">☆</span>
+                              )}
                             </button>
                             
                             {hasAppliedForJob(job.jobId) ? (
@@ -487,7 +575,7 @@ const JobSearch: React.FC<JobSearchProps> = ({
                                 onClick={() => handleApplyClick(job.jobId)}
                                 disabled={applyingToJob === job.jobId}
                               >
-                                {applyingToJob === job.jobId ? 'Applying...' : 'Apply Now'}
+                                {applyingToJob === job.jobId ? 'Applying...' : 'Apply'}
                               </button>
                             )}
                           </div>
