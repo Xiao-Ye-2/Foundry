@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/JobSearch.css';
+import ComboBox from './ComboBox';
 
 interface Job {
   jobId: number;
@@ -11,6 +12,17 @@ interface Job {
   companyName: string;
   cityName: string;
   countryName: string;
+}
+
+interface Location {
+  cityId: number;
+  cityName: string;
+  countryName: string;
+}
+
+interface Company {
+  companyId: number;
+  companyName: string;
 }
 
 interface JobSearchProps {
@@ -34,24 +46,67 @@ const JobSearch: React.FC<JobSearchProps> = ({
   const [totalJobs, setTotalJobs] = useState<number>(0);
   const [pageSize] = useState<number>(75);
   
-  // Filter states
-  const [city, setCity] = useState<string>('');
-  const [country, setCountry] = useState<string>('');
+  // Filter states and references
+  const [cityId, setCityId] = useState<string>('');
+  const [companyId, setCompanyId] = useState<string>('');
   const [minSalary, setMinSalary] = useState<string>('');
   const [maxSalary, setMaxSalary] = useState<string>('');
   const [workType, setWorkType] = useState<string>('');
   
+  // Data for dropdowns
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  
+  // Display values for combo boxes
+  const [locationDisplay, setLocationDisplay] = useState<string>('');
+  const [companyDisplay, setCompanyDisplay] = useState<string>('');
+  
   // Work type options based on database schema constraints
   const workTypes = ['Full-time', 'Part-time', 'Contract', 'Intern'];
-  
-  // Country options based on database
-  const countries = ['USA', 'Canada', 'UK', 'Germany', 'France', 'Australia', 'Japan', 'China'];
   
   // State for expanded job cards
   const [expandedJobIds, setExpandedJobIds] = useState<number[]>([]);
   
   // Added state to track if a search has been performed
   const [hasSearched, setHasSearched] = useState<boolean>(false);
+  
+  // Fetch locations when component mounts
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/locations');
+        if (response.ok) {
+          const data = await response.json();
+          setLocations(data);
+        } else {
+          console.error('Failed to fetch locations');
+        }
+      } catch (error) {
+        console.error('Error fetching locations:', error);
+      }
+    };
+    
+    fetchLocations();
+  }, []);
+  
+  // Fetch companies when component mounts
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/companies');
+        if (response.ok) {
+          const data = await response.json();
+          setCompanies(data);
+        } else {
+          console.error('Failed to fetch companies');
+        }
+      } catch (error) {
+        console.error('Error fetching companies:', error);
+      }
+    };
+    
+    fetchCompanies();
+  }, []);
   
   // Toggle job details expansion
   const toggleJobDetails = (jobId: number) => {
@@ -68,18 +123,30 @@ const JobSearch: React.FC<JobSearchProps> = ({
   // Reset expanded jobs when filters change
   useEffect(() => {
     setExpandedJobIds([]);
-  }, [city, country, minSalary, maxSalary, workType]);
+  }, [cityId, companyId, minSalary, maxSalary, workType]);
   
   // Calculate total pages
   const totalPages = Math.ceil(totalJobs / pageSize);
+  
+  // Handle location selection
+  const handleLocationChange = (label: string, id: number) => {
+    setLocationDisplay(label);
+    setCityId(id ? id.toString() : '');
+  };
+  
+  // Handle company selection
+  const handleCompanyChange = (label: string, id: number) => {
+    setCompanyDisplay(label);
+    setCompanyId(id ? id.toString() : '');
+  };
   
   // Fetch total job count
   const fetchTotalCount = async () => {
     try {
       // Build query parameters
       const params = new URLSearchParams();
-      if (city) params.append('city', city);
-      if (country) params.append('country', country);
+      if (cityId) params.append('cityId', cityId);
+      if (companyId) params.append('companyId', companyId);
       if (minSalary) params.append('minSalary', minSalary);
       if (maxSalary) params.append('maxSalary', maxSalary);
       if (workType) params.append('workType', workType);
@@ -115,8 +182,8 @@ const JobSearch: React.FC<JobSearchProps> = ({
       
       // Build query parameters
       const params = new URLSearchParams();
-      if (city) params.append('city', city);
-      if (country) params.append('country', country);
+      if (cityId) params.append('cityId', cityId);
+      if (companyId) params.append('companyId', companyId);
       if (minSalary) params.append('minSalary', minSalary);
       if (maxSalary) params.append('maxSalary', maxSalary);
       if (workType) params.append('workType', workType);
@@ -127,7 +194,7 @@ const JobSearch: React.FC<JobSearchProps> = ({
       
       // Determine which endpoint to use
       const baseUrl = 'http://localhost:8080/api/jobs';
-      const url = (city || country || minSalary || maxSalary || workType) 
+      const url = (cityId || companyId || minSalary || maxSalary || workType) 
         ? `${baseUrl}/search?${params.toString()}`
         : `${baseUrl}?${params.toString()}`;
       
@@ -194,7 +261,7 @@ const JobSearch: React.FC<JobSearchProps> = ({
     if (hasSearched) {
       fetchJobs(currentPage);
     }
-  }, [currentPage, hasSearched, city, country, minSalary, maxSalary, workType]);
+  }, [currentPage, hasSearched, cityId, companyId, minSalary, maxSalary, workType]);
   
   // Apply filters
   const applyFilters = (e: React.FormEvent) => {
@@ -206,8 +273,10 @@ const JobSearch: React.FC<JobSearchProps> = ({
   
   // Reset filters
   const resetFilters = () => {
-    setCity('');
-    setCountry('');
+    setCityId('');
+    setLocationDisplay('');
+    setCompanyId('');
+    setCompanyDisplay('');
     setMinSalary('');
     setMaxSalary('');
     setWorkType('');
@@ -260,30 +329,31 @@ const JobSearch: React.FC<JobSearchProps> = ({
       
       <div className="filters-container">
         <div className="filter-group">
-          <label htmlFor="city">City:</label>
-          <input
-            type="text"
-            id="city"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            placeholder="Enter city name"
+          <label htmlFor="location">Location:</label>
+          <ComboBox
+            options={locations.map(loc => ({
+              id: loc.cityId,
+              label: `${loc.cityName}, ${loc.countryName}`
+            }))}
+            value={locationDisplay}
+            onChange={handleLocationChange}
+            placeholder="Search for a location"
+            disabled={loading}
           />
         </div>
         
         <div className="filter-group">
-          <label htmlFor="country">Country:</label>
-          <select
-            id="country"
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-          >
-            <option value="">All Countries</option>
-            {countries.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
+          <label htmlFor="company">Company:</label>
+          <ComboBox
+            options={companies.map(comp => ({
+              id: comp.companyId,
+              label: comp.companyName
+            }))}
+            value={companyDisplay}
+            onChange={handleCompanyChange}
+            placeholder="Search for a company"
+            disabled={loading}
+          />
         </div>
         
         <div className="filter-group">
