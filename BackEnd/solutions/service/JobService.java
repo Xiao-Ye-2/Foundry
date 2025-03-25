@@ -25,7 +25,7 @@ public class JobService {
     public void createViews() {
         dropViews();
         String sql = "CREATE VIEW JobDetailsView AS " +
-                     "SELECT j.*, c.CompanyName, ci.CityName, co.CountryName " +
+                     "SELECT j.*, c.CompanyId, c.CompanyName, ci.CityName, co.CountryName " +
                      "FROM JobPostings j " +
                      "JOIN Employers e ON j.EmployerId = e.UserId " +
                      "JOIN Companies c ON e.CompanyId = c.CompanyId " +
