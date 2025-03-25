@@ -239,6 +239,21 @@ const JobSearch: React.FC<JobSearchProps> = ({
     }
   };
   
+  // Apply for a job
+  const handleApplyClick = async (jobId: number) => {
+    try {
+      await onApplyForJob(jobId);
+      
+      // Find the job that was applied to
+      const appliedJob = filteredJobs.find(job => job.jobId === jobId);
+      if (appliedJob) {
+        console.log(`Successfully applied to: ${appliedJob.title} at ${appliedJob.companyName}`);
+      }
+    } catch (error) {
+      console.error("Error applying for job:", error);
+    }
+  };
+  
   return (
     <div className="job-search-container">
       <h2>Find Your Dream Job</h2>
@@ -385,7 +400,7 @@ const JobSearch: React.FC<JobSearchProps> = ({
                             ) : (
                               <button 
                                 className="apply-button"
-                                onClick={() => onApplyForJob(job.jobId)}
+                                onClick={() => handleApplyClick(job.jobId)}
                                 disabled={applyingToJob === job.jobId}
                               >
                                 {applyingToJob === job.jobId ? 'Applying...' : 'Apply Now'}
