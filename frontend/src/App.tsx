@@ -29,6 +29,8 @@ interface JobApplication {
   jobId: number;
   applicationDate?: string;
   status?: string;
+  title?: string;
+  companyName?: string;
 }
 
 // Transform the data to match our JobApplication interface
@@ -192,13 +194,16 @@ const App: React.FC = () => {
       }
 
       const data = await response.json();
+      console.log("Application data from API:", data);
 
       // Transform the data to match our JobApplication interface
       const applications: JobApplication[] = data.map((app: ApiApplication) => ({
         employeeId: app.EmployeeId,
         jobId: app.JobId,
         applicationDate: app.ApplyDate,
-        status: app.Status || 'Pending'
+        status: app.Status || 'Pending',
+        title: app.JobTitle,
+        companyName: app.CompanyName
       }));
 
       setApplications(applications);
@@ -241,16 +246,14 @@ const App: React.FC = () => {
         throw new Error(`Failed to submit application: ${response.status} ${response.statusText}`);
       }
 
-      // Add the new application to the state
-      const newApplication: JobApplication = {
-        employeeId: employeeId,
-        jobId: jobId,
-        applicationDate: new Date().toISOString(),
-        status: 'Pending'
-      };
-
-      setApplications(prev => [...prev, newApplication]);
-      alert(`Application submitted successfully for job: ${jobs.find(job => job.jobId === jobId)?.title}`);
+      // After successfully applying, fetch the updated applications list
+      // This ensures we have all the correct job data including company names
+      await handleGetApplications();
+      
+      // Find job name from current jobs list (if applying from main page)
+      const appliedJob = jobs.find(job => job.jobId === jobId);
+      
+      alert(`Application submitted successfully for job: ${appliedJob?.title || `ID: ${jobId}`}`);
     } catch (error) {
       console.error('Error submitting application:', error);
       alert('Failed to submit application. Please try again later.');
@@ -655,8 +658,8 @@ const App: React.FC = () => {
                   return (
                     <div key={`${application.employeeId}-${application.jobId}`} className="application-card">
                       <div className="application-header">
-                        <h3>{job ? job.title : `Job #${application.jobId}`}</h3>
-                        <h4>{job ? job.companyName : 'Unknown Company'}</h4>
+                        <h3>{application.title || job?.title || `Job #${application.jobId}`}</h3>
+                        <h4>{application.companyName || job?.companyName || 'Unknown Company'}</h4>
                       </div>
 
                       <div className="application-details">
