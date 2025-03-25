@@ -118,4 +118,76 @@ public class JobController {
         @RequestParam(required = false) String workType) {
         return jobService.getTotalJobCount(cityId, companyId, minSalary, maxSalary, workType);
     }
+    
+    // Shortlist a job
+    @PostMapping("/shortlist")
+    @CrossOrigin(origins = "http://localhost:5173")
+    public ResponseEntity<?> shortlistJob(
+        @RequestParam Long employeeId,
+        @RequestParam Long jobId
+    ) {
+        try {
+            jobService.shortlistJob(employeeId, jobId);
+            return ResponseEntity.ok("Job shortlisted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+    
+    // Remove a job from shortlist
+    @DeleteMapping("/shortlist")
+    @CrossOrigin(origins = "http://localhost:5173")
+    public ResponseEntity<?> unshortlistJob(
+        @RequestParam Long employeeId,
+        @RequestParam Long jobId
+    ) {
+        try {
+            jobService.unshortlistJob(employeeId, jobId);
+            return ResponseEntity.ok("Job removed from shortlist successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+    
+    // Get shortlisted jobs for an employee
+    @GetMapping("/shortlist/{employeeId}")
+    @CrossOrigin(origins = "http://localhost:5173")
+    public ResponseEntity<?> getShortlistedJobs(@PathVariable Long employeeId) {
+        try {
+            List<JobPosting> shortlistedJobs = jobService.getShortlistedJobs(employeeId);
+            return ResponseEntity.ok(shortlistedJobs);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+    
+    // Dislike a job
+    @PostMapping("/dislike")
+    @CrossOrigin(origins = "http://localhost:5173")
+    public ResponseEntity<?> dislikeJob(
+        @RequestParam Long employeeId,
+        @RequestParam Long jobId
+    ) {
+        try {
+            jobService.dislikeJob(employeeId, jobId);
+            return ResponseEntity.ok("Job disliked successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+    
+    // Remove a job from dislike list
+    @DeleteMapping("/dislike")
+    @CrossOrigin(origins = "http://localhost:5173")
+    public ResponseEntity<?> undislikeJob(
+        @RequestParam Long employeeId,
+        @RequestParam Long jobId
+    ) {
+        try {
+            jobService.undislikeJob(employeeId, jobId);
+            return ResponseEntity.ok("Job removed from dislike list successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
 }

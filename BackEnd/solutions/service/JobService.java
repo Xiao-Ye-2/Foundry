@@ -197,4 +197,35 @@ public class JobService {
 
         return jdbcTemplate.queryForObject(sql.toString(), Integer.class, params.toArray());
     }
+    // Shortlist a job
+    public void shortlistJob(Long employeeId, Long jobId) {
+        String sql = "INSERT INTO Shortlist (EmployeeId, JobId) VALUES (?, ?)";
+        jdbcTemplate.update(sql, employeeId, jobId);
+    }
+
+    // Unshortlist a job
+    public void unshortlistJob(Long employeeId, Long jobId) {
+        String sql = "DELETE FROM Shortlist WHERE EmployeeId = ? AND JobId = ?";
+        jdbcTemplate.update(sql, employeeId, jobId);
+    }
+    
+    // Dislike a job
+    public void dislikeJob(Long employeeId, Long jobId) {
+        String sql = "INSERT INTO Dislike (EmployeeId, JobId) VALUES (?, ?)";
+        jdbcTemplate.update(sql, employeeId, jobId);
+    }
+    
+    // UnDislike a job
+    public void undislikeJob(Long employeeId, Long jobId) {
+        String sql = "DELETE FROM Dislike WHERE EmployeeId = ? AND JobId = ?";
+        jdbcTemplate.update(sql, employeeId, jobId);
+    }
+    
+    // Get shortlisted jobs
+    public List<JobPosting> getShortlistedJobs(Long employeeId) {
+        String sql = "SELECT j.* FROM JobPostings j " +
+                    "JOIN Shortlist s ON j.JobId = s.JobId " +
+                    "WHERE s.EmployeeId = ?";
+        return jdbcTemplate.query(sql, jobRowMapper, employeeId);
+    }
 }
