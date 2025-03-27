@@ -3,8 +3,6 @@ package service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import data.JobPosting;
 import data.mapper.JobRowMapper;
@@ -20,25 +18,6 @@ public class JobService {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private JobRowMapper jobRowMapper;
-
-    @PostConstruct
-    public void createViews() {
-        dropViews();
-        String sql = "CREATE VIEW JobDetailsView AS " +
-                     "SELECT j.*, c.CompanyId, c.CompanyName, ci.CityName, co.CountryName " +
-                     "FROM JobPostings j " +
-                     "JOIN Employers e ON j.EmployerId = e.UserId " +
-                     "JOIN Companies c ON e.CompanyId = c.CompanyId " +
-                     "JOIN Cities ci ON j.CityId = ci.CityId " +
-                     "JOIN Countries co ON ci.CountryId = co.CountryId";
-        jdbcTemplate.execute(sql);
-    }
-
-    @PreDestroy
-    public void dropViews() {
-        String dropViewSql = "DROP VIEW IF EXISTS JobDetailsView";
-        jdbcTemplate.execute(dropViewSql);
-    }
 
     // R6: Job search with filters
     public List<JobPosting> searchJobs(Long cityId, Long companyId, Double minSalary, Double maxSalary,
@@ -208,19 +187,19 @@ public class JobService {
         String sql = "DELETE FROM Shortlist WHERE EmployeeId = ? AND JobId = ?";
         jdbcTemplate.update(sql, employeeId, jobId);
     }
-    
+
     // Dislike a job
     public void dislikeJob(Long employeeId, Long jobId) {
         String sql = "INSERT INTO Dislike (EmployeeId, JobId) VALUES (?, ?)";
         jdbcTemplate.update(sql, employeeId, jobId);
     }
-    
+
     // UnDislike a job
     public void undislikeJob(Long employeeId, Long jobId) {
         String sql = "DELETE FROM Dislike WHERE EmployeeId = ? AND JobId = ?";
         jdbcTemplate.update(sql, employeeId, jobId);
     }
-    
+
     // Get shortlisted jobs
     public List<JobPosting> getShortlistedJobs(Long employeeId) {
         String sql = "SELECT j.* FROM JobDetailsView j " +

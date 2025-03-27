@@ -2,21 +2,23 @@ package controller;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
-
-import data.ApplicationRequest;
-
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import data.JobPosting;
+import data.ApplicationRequest;
 import service.JobService;
-import java.util.Map;
+import service.JobStatisticsService;
+
 
 @RestController
 @RequestMapping("/api/jobs")
 public class JobController {
     @Autowired
     private JobService jobService;
+    @Autowired
+    private JobStatisticsService statisticsService;
 
     @GetMapping
     @CrossOrigin(origins = "http://localhost:5173")
@@ -118,7 +120,7 @@ public class JobController {
         @RequestParam(required = false) String workType) {
         return jobService.getTotalJobCount(cityId, companyId, minSalary, maxSalary, workType);
     }
-    
+
     // Shortlist a job
     @PostMapping("/shortlist")
     @CrossOrigin(origins = "http://localhost:5173")
@@ -133,7 +135,7 @@ public class JobController {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
-    
+
     // Remove a job from shortlist
     @DeleteMapping("/shortlist")
     @CrossOrigin(origins = "http://localhost:5173")
@@ -148,7 +150,7 @@ public class JobController {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
-    
+
     // Get shortlisted jobs for an employee
     @GetMapping("/shortlist/{employeeId}")
     @CrossOrigin(origins = "http://localhost:5173")
@@ -160,7 +162,7 @@ public class JobController {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
-    
+
     // Dislike a job
     @PostMapping("/dislike")
     @CrossOrigin(origins = "http://localhost:5173")
@@ -175,7 +177,7 @@ public class JobController {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
-    
+
     // Remove a job from dislike list
     @DeleteMapping("/dislike")
     @CrossOrigin(origins = "http://localhost:5173")
@@ -186,6 +188,50 @@ public class JobController {
         try {
             jobService.undislikeJob(employeeId, jobId);
             return ResponseEntity.ok("Job removed from dislike list successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/statistics/location/{cityId}")
+    @CrossOrigin(origins = "http://localhost:5173")
+    public ResponseEntity<?> getLocationStats(@PathVariable Long cityId) {
+        try {
+            Map<String, Object> stats = statisticsService.getLocationStats(cityId);
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/statistics/company/{companyId}")
+    @CrossOrigin(origins = "http://localhost:5173")
+    public ResponseEntity<?> getCompanyStats(@PathVariable Long companyId) {
+        try {
+            Map<String, Object> stats = statisticsService.getCompanyStats(companyId);
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/statistics/shortlist-ratio")
+    @CrossOrigin(origins = "http://localhost:5173")
+    public ResponseEntity<?> getShortlistRatioStats() {
+        try {
+            List<Map<String, Object>> ratioStats = statisticsService.getShortlistRatioStats();
+            return ResponseEntity.ok(ratioStats);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/statistics/shortlist-ratio/{jobId}")
+    @CrossOrigin(origins = "http://localhost:5173")
+    public ResponseEntity<?> getShortlistRatioForJob(@PathVariable Long jobId) {
+        try {
+            Map<String, Object> ratioStats = statisticsService.getShortlistRatioForJob(jobId);
+            return ResponseEntity.ok(ratioStats);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
