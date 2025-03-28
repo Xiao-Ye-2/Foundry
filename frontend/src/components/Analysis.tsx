@@ -39,7 +39,7 @@ const Analysis: React.FC = () => {
     setSalaryMetric(label);
     setCurrentPage(0);  // Reset to first page when metric changes
   };
-  
+
   useEffect(() => {
     const fetchStatistics = async () => {
       if (filter === 'Location' && (salaryMetric === 'Minimum Salary' || salaryMetric === 'Maximum Salary')) {
@@ -121,7 +121,7 @@ const Analysis: React.FC = () => {
         </div>
       )}
       </div>
-      
+
       {isLoading ? (
         <div className="loading-container">
           <div className="loading-spinner"></div>
