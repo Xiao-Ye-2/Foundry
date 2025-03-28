@@ -236,4 +236,26 @@ public class JobController {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
+
+    @GetMapping("/statistics/location/minsalary")
+    @CrossOrigin(origins = "http://localhost:5173")
+    public ResponseEntity<?> getLocationMinsalary() {
+        try {
+            List<Map<String, Object>> sortedStats = statisticsService.getLocationMinsalary();
+            return ResponseEntity.ok(sortedStats);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/statistics/location/maxsalary")
+    @CrossOrigin(origins = "http://localhost:5173")
+    public ResponseEntity<?> getLocationMaxsalary() {
+        try {
+            List<Map<String, Object>> sortedStats = statisticsService.getLocationMaxsalary();
+            return ResponseEntity.ok(sortedStats);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
 }

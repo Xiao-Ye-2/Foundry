@@ -112,4 +112,24 @@ public class JobStatisticsService {
             throw e;
         }
     }
+
+    public List<Map<String, Object>> getLocationMinsalary() {
+        String sql = "SELECT CityName, CountryName, AvgMinSalary FROM JobAverageSalary ORDER BY AvgMinSalary DESC";
+        try {
+            return jdbcTemplate.queryForList(sql);
+        } catch (Exception e) {
+            System.err.println("Error getting sorted locations by minsalary " + e.getMessage());
+            throw e;
+        }
+    }
+
+    public List<Map<String, Object>> getLocationMaxsalary() {
+        String sql = "SELECT CityName, CountryName, AvgMaxSalary FROM JobAverageSalary ORDER BY AvgMaxSalary DESC";
+        try {
+            return jdbcTemplate.queryForList(sql);
+        } catch (Exception e) {
+            System.err.println("Error getting sorted locations by maxsalary " + e.getMessage());
+            throw e;
+        }
+    }
 }

@@ -15,7 +15,7 @@ public class JobDetailsViewManager {
     public void createView() {
         String sql =
             "CREATE VIEW IF NOT EXISTS JobDetailsView AS " +
-            "SELECT j.*, c.CompanyName, ci.CityName, co.CountryName " +
+            "SELECT j.*, c.CompanyName, ci.CityName, co.CountryName, c.CompanyId " +
             "FROM JobPostings j " +
             "JOIN Employers e ON j.EmployerId = e.UserId " +
             "JOIN Companies c ON e.CompanyId = c.CompanyId " +
