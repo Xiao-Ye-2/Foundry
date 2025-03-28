@@ -6,6 +6,7 @@ import ProfileDropdown from "./components/ProfileDropdown";
 import PostJob from "./components/PostJob";
 import ShortlistedJobs from "./components/ShortlistedJobs";
 import EmployeeApplications from "./components/EmployeeApplications";
+import Analysis from "./components/Analysis";
 import { UserProfile } from "./types";
 import "./App.css";
 
@@ -46,7 +47,7 @@ interface ApiApplication {
 }
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'jobs' | 'applications' | 'post-job' | 'advanced' | 'shortlist'>('jobs');
+  const [activeTab, setActiveTab] = useState<'jobs' | 'applications' | 'post-job' | 'advanced' | 'shortlist' | 'analysis'>('jobs');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -429,6 +430,13 @@ const App: React.FC = () => {
           >
             Advanced Search
           </button>
+
+          <button
+            onClick={() => setActiveTab('analysis')}
+            className={`tab-button ${activeTab === 'analysis' ? 'active' : ''}`}
+          >
+            Analysis
+          </button>
         </div>
 
         {activeTab === 'jobs' && (
@@ -644,6 +652,11 @@ const App: React.FC = () => {
             onApplyForJob={handleApplyForJob}
             hasAppliedForJob={hasAppliedForJob}
             applyingToJob={applyingToJob}
+          />
+        )}
+
+        {activeTab === 'analysis' && (
+          <Analysis
           />
         )}
       </div>

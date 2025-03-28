@@ -1000,3 +1000,52 @@
   font-weight: 500;
   border: 1px solid #fecaca;
 }
+
+
+/* =========================================
+   Statistics Table Styles
+   ========================================= */
+.statistics-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.statistics-table th,
+.statistics-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+.statistics-table th {
+  background-color: #f5f5f5;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* =========================================
+   Pagination Button Styles
+   ========================================= */
+.pagination-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.pagination-button:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.page-info {
+  margin: 0 1rem;
+}
