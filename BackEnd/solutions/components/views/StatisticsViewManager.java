@@ -61,6 +61,24 @@ public class StatisticsViewManager {
         }
     }
 
+    @PostConstruct
+    public void createJobAverageSalaryView() {
+        String sql =
+            "CREATE VIEW IF NOT EXISTS JobAverageSalary AS " +
+            "SELECT " +
+            "    j.CityName, " +
+            "    j.CountryName, " +
+            "    AVG(j.MinSalary) AS AvgMinSalary, " +
+            "    AVG(j.MaxSalary) AS AvgMaxSalary " +
+            "FROM JobDetailsView j " +
+            "GROUP BY j.CityName, j.CountryName";
+        try {
+            jdbcTemplate.execute(sql);
+        } catch (Exception e) {
+            System.err.println("Error creating JobAverageSalaryView view: " + e.getMessage());
+        }
+    }
+
     @PreDestroy
     public void dropAverageCountsView() {
         try {
