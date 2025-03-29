@@ -13,6 +13,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import data.UserProfile;
 import data.LoginRequest;
@@ -32,40 +33,52 @@ public class UserService {
         this.userProfileMapper = new UserProfileMapper();
     }
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     public void signUp(UserProfile userProfile) throws Exception {
-        if (isDuplicateUser(userProfile.getPhone(), userProfile.getEmail())) {
-            throw new Exception("A user with the same phone number or email already exists");
-        }
+        transactionTemplate.executeWithoutResult(status -> {
+            try {
+                if (isDuplicateUser(userProfile.getPhone(), userProfile.getEmail())) {
+                    throw new RuntimeException("A user with the same phone number or email already exists");
+                }
 
-        String insertUserSql = "INSERT INTO Users (Phone, PasswordHash, UserName, CityId, Role, Email) VALUES (?, ?, ?, ?, ?, ?)";
-        String hashedPassword = passwordEncoder.encode(userProfile.getPasswordHash());
+                String insertUserSql = "INSERT INTO Users (Phone, PasswordHash, UserName, CityId, Role, Email) VALUES (?, ?, ?, ?, ?, ?)";
+                String hashedPassword = passwordEncoder.encode(userProfile.getPasswordHash());
 
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(insertUserSql, Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, userProfile.getPhone());
-            ps.setString(2, hashedPassword);
-            ps.setString(3, userProfile.getUserName());
-            ps.setLong(4, userProfile.getCityId());
-            ps.setString(5, userProfile.getRole());
-            ps.setString(6, userProfile.getEmail().length() > 0 ? userProfile.getEmail() : null);
-            return ps;
-        }, keyHolder);
+                KeyHolder keyHolder = new GeneratedKeyHolder();
+                jdbcTemplate.update(connection -> {
+                    PreparedStatement ps = connection.prepareStatement(insertUserSql, Statement.RETURN_GENERATED_KEYS);
+                    ps.setString(1, userProfile.getPhone());
+                    ps.setString(2, hashedPassword);
+                    ps.setString(3, userProfile.getUserName());
+                    ps.setLong(4, userProfile.getCityId());
+                    ps.setString(5, userProfile.getRole());
+                    ps.setString(6, userProfile.getEmail().length() > 0 ? userProfile.getEmail() : null);
+                    return ps;
+                }, keyHolder);
 
-        Long userId = Optional.ofNullable(keyHolder.getKey())
-                     .map(Number::longValue)
-                     .orElseThrow(() -> new Exception("Failed to retrieve generated user ID"));
+                Long userId = Optional.ofNullable(keyHolder.getKey())
+                        .map(Number::longValue)
+                        .orElseThrow(() -> new RuntimeException("Failed to retrieve generated user ID"));
 
-        if ("employee".equalsIgnoreCase(userProfile.getRole())) {
-            String insertEmployeeSql = "INSERT INTO Employees (UserId) VALUES (?)";
-            jdbcTemplate.update(insertEmployeeSql, userId);
-        } else if ("employer".equalsIgnoreCase(userProfile.getRole())) {
-            String insertEmployerSql = "INSERT INTO Employers (UserId, CompanyId) VALUES (?, ?)";
-            jdbcTemplate.update(insertEmployerSql, userId, userProfile.getCompanyId());
-        } else {
-            throw new Exception("Invalid role");
-        }
+                if ("employee".equalsIgnoreCase(userProfile.getRole())) {
+                    String insertEmployeeSql = "INSERT INTO Employees (UserId) VALUES (?)";
+                    jdbcTemplate.update(insertEmployeeSql, userId);
+                } else if ("employer".equalsIgnoreCase(userProfile.getRole())) {
+                    String insertEmployerSql = "INSERT INTO Employers (UserId, CompanyId) VALUES (?, ?)";
+                    jdbcTemplate.update(insertEmployerSql, userId, 28374193);
+                } else {
+                    throw new RuntimeException("Invalid role");
+                }
+
+            } catch (RuntimeException ex) {
+                status.setRollbackOnly();
+                throw ex;
+            }
+        });
     }
+
 
     public UserProfile login(LoginRequest loginRequest) throws Exception {
         UserProfile userProfile = findUserByIdentifier(loginRequest);

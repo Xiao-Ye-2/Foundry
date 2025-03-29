@@ -42,6 +42,8 @@ SELECT UserId, Phone, NULL, PasswordHash, UserName, CityId, Role FROM Users_tmp;
 # SELECT * FROM Shortlist;
 # SELECT * FROM Dislike;
 # SELECT * FROM Applications;
+
+PRAGMA foreign_keys = ON;
 END_SQL
 
 echo "Populating complete"
