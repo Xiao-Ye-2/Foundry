@@ -114,7 +114,14 @@ public class JobStatisticsService {
     }
 
     public List<Map<String, Object>> getLocationMinsalary() {
-        String sql = "SELECT CityName, CountryName, AvgMinSalary FROM JobAverageSalary ORDER BY AvgMinSalary DESC";
+        String sql =
+            "SELECT " +
+            "    j.CityName, " +
+            "    j.CountryName, " +
+            "    AVG(j.MinSalary) AS AvgSalary " +
+            "FROM JobDetailsView j " +
+            "GROUP BY j.CityName, j.CountryName " +
+            "ORDER BY AvgSalary DESC";
         try {
             return jdbcTemplate.queryForList(sql);
         } catch (Exception e) {
@@ -124,7 +131,14 @@ public class JobStatisticsService {
     }
 
     public List<Map<String, Object>> getLocationMaxsalary() {
-        String sql = "SELECT CityName, CountryName, AvgMaxSalary FROM JobAverageSalary ORDER BY AvgMaxSalary DESC";
+        String sql =
+            "SELECT " +
+            "    j.CityName, " +
+            "    j.CountryName, " +
+            "    AVG(j.MaxSalary) AS AvgSalary " +
+            "FROM JobDetailsView j " +
+            "GROUP BY j.CityName, j.CountryName " +
+            "ORDER BY AvgSalary DESC";
         try {
             return jdbcTemplate.queryForList(sql);
         } catch (Exception e) {

@@ -4,8 +4,7 @@ import ComboBox from './ComboBox';
 interface Location {
   CityName: string;
   CountryName: string;
-  AvgMinSalary: number;
-  AvgMaxSalary: number;
+  AvgSalary: number;
 }
 
 type Option = {
@@ -135,7 +134,7 @@ const Analysis: React.FC = () => {
               <tr>
                 <th>City</th>
                 <th>Country</th>
-                <th>Salary(k)</th>
+                <th>Salary(k) (ranked from high to low)</th>
               </tr>
             </thead>
             <tbody>
@@ -143,16 +142,14 @@ const Analysis: React.FC = () => {
                 <tr key={currentPage * rowsPerPage + index}>
                   <td>{location.CityName}</td>
                   <td>{location.CountryName}</td>
-                  <td>${salaryMetric === 'Minimum Salary'
-                    ? location.AvgMinSalary?.toLocaleString()
-                    : location.AvgMaxSalary?.toLocaleString()}</td>
+                  <td>${location.AvgSalary?.toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
           </table>
           <div className="pagination-controls">
-            <button 
-              onClick={handlePrevPage} 
+            <button
+              onClick={handlePrevPage}
               disabled={currentPage === 0}
               className="pagination-button"
             >
@@ -161,7 +158,7 @@ const Analysis: React.FC = () => {
             <span className="page-info">
               Page {currentPage + 1} of {Math.ceil(statistics.length / rowsPerPage)}
             </span>
-            <button 
+            <button
               onClick={handleNextPage}
               disabled={(currentPage + 1) * rowsPerPage >= statistics.length}
               className="pagination-button"
