@@ -47,7 +47,7 @@ interface ApiApplication {
 }
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'jobs' | 'applications' | 'post-job' | 'advanced' | 'shortlist' | 'analysis'>('jobs');
+  const [activeTab, setActiveTab] = useState<'jobs' | 'applications' | 'post-job' | 'advanced' | 'shortlist' | 'analysis' | 'applicants'>('jobs');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -60,7 +60,7 @@ const App: React.FC = () => {
   const [expandedJobs, setExpandedJobs] = useState<number[]>([]);
   const [showProfileDropdown, setProfileShowDropdown] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  
+  const [employerApplications, setEmployerApplications] = useState<any[]>([]);
   // Pagination states
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [totalJobs, setTotalJobs] = useState<number>(0);
@@ -116,6 +116,12 @@ const App: React.FC = () => {
   }, [activeTab, employeeId]);
 
     
+  useEffect(() => {
+    if (userRole === 'employer' && activeTab === 'applicants') {
+      fetchEmployerApplications();
+    }
+  }, [userRole, activeTab]);
+
   const handleGetJobs = async (page: number = 0) => {
     try {
       setLoading(true);
@@ -443,6 +449,26 @@ const App: React.FC = () => {
     setActiveTab('jobs');
   };
 
+  const fetchEmployerApplications = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/api/jobs/applications", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "user-id": userProfile?.userId?.toString() || ""
+        }
+      });
+  
+      if (!response.ok) throw new Error("Failed to fetch applications");
+  
+      const data = await response.json();
+      setEmployerApplications(data);
+    } catch (err) {
+      console.error("Error fetching employer applications:", err);
+    }
+  };
+  
+
   // If no role is selected, show the role selection screen
   if (userRole === null) {
     return <RoleSelection onSelectRole={handleRoleSelection} />;
@@ -494,9 +520,12 @@ const App: React.FC = () => {
               </button>
             </>
           ) : (
+            <>
             <button onClick={() => setActiveTab('post-job')} className={`tab-button ${activeTab === 'post-job' ? 'active' : ''}`}>
               Post a Job
             </button>
+            <button onClick={() => setActiveTab('applicants')} className={`tab-button ${activeTab === 'applicants' ? 'active' : ''}`}>Applicants</button>
+            </>
           )}
 
           <button
@@ -749,6 +778,48 @@ const App: React.FC = () => {
           <Analysis userRole={userRole} userId={userProfile.userId}
           />
         )}
+
+        {activeTab === 'applicants' && userRole === 'employer' && (
+          <div className="employer-applications-container">
+          <h2>Applications to Your Jobs</h2>
+          {employerApplications.length === 0 ? (
+            <p className="no-applicants-message">No applications found.</p>
+          ) : (
+            <div className="applications-table-container">
+              <table className="employer-applicant-table">
+                <thead>
+                  <tr>
+                    <th>Job Title</th>
+                    <th>Applicant ID</th>
+                    <th>Apply Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {employerApplications.map((app, index) => (
+                    <tr key={index}>
+                      <td>{app.jobTitle}</td>
+                      <td>{app.employeeId}</td>
+                      <td>
+                        {app.applyDate && !isNaN(new Date(app.applyDate).getTime())
+                          ? new Date(app.applyDate).toLocaleDateString()
+                          : 'N/A'}
+                      </td>
+                      <td>
+                        <span className={`status-${app.status?.toLowerCase() || 'pending'}`}>
+                          {app.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+        )}
+
+
       </div>
     </div>
   );

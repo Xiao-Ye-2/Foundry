@@ -135,11 +135,12 @@ public class JobService {
 
     // R9:
     public List<Map<String, Object>> getApplications(Long employerId) {
-        String sql = "SELECT a.*, u.FirstName, u.LastName, j.Title " +
-                    "FROM Applications a " +
-                    "JOIN Users u ON a.EmployeeId = u.UserId " +
-                    "JOIN JobPostings j ON a.JobId = j.JobId " +
-                    "WHERE j.EmployerId = ?";
+        String sql = "SELECT j.Title AS jobTitle, u.UserName AS userName, a.EmployeeId AS employeeId, a.Status AS status, a.ApplyDate AS applyDate " +
+             "FROM Applications a " +
+             "JOIN Users u ON a.EmployeeId = u.UserId " +
+             "JOIN JobPostings j ON a.JobId = j.JobId " +
+             "WHERE j.EmployerId = ?";
+
         return jdbcTemplate.queryForList(sql, employerId);
     }
 
