@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import ComboBox from './ComboBox';
 
-interface Location {
-  CityName: string;
-  CountryName: string;
-  AvgSalary: number;
+interface StatisticData {
+  // Location data fields
+  CityName?: string;
+  CountryName?: string;
+  AvgSalary?: number;
+  
+  // Shortlist ratio fields
+  JobId?: number;
+  JobTitle?: string;
+  TotalSL?: number;
+  TotalApp?: number;
+  ShortlistToApplicationRatio?: number | null;
 }
 
 type Option = {
@@ -22,10 +30,18 @@ const metricsOptions: Option[] = [
   { id: 2, label: 'Maximum Salary' }
 ];
 
-const Analysis: React.FC = () => {
+const analysisOptionsEmployer: Option[] = [
+  { id: 1, label: 'Shortlist-Application Ratio' },
+];
+interface AnalysisProps {
+  userRole: 'employee' | 'employer';
+  userId ?: number | null;
+}
+
+const Analysis: React.FC<AnalysisProps> = ({ userRole, userId }) => {
   const [filter, setFilter] = useState<string>('');
   const [salaryMetric, setSalaryMetric] = useState<string>('');
-  const [statistics, setStatistics] = useState<Location[]>([]);
+  const [statistics, setStatistics] = useState<StatisticData[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const rowsPerPage = 10;
@@ -70,11 +86,38 @@ const Analysis: React.FC = () => {
         } finally {
           setIsLoading(false);
         }
+      } else if (filter === 'Shortlist-Application Ratio') {
+        setIsLoading(true);
+        try {
+          const url = `http://localhost:8080/api/jobs/statistics/shortlist-ratio/employer/${userId}`;
+          console.log(`Fetching shortlist ratio stats from: ${url}`);
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              // Optionally pass employer info here if your backend needs it
+            },
+            credentials: 'omit'
+          });
+          if (!response.ok) {
+            throw new Error(`Failed to fetch shortlist ratio stats: ${response.status} ${response.statusText}`);
+          }
+          const data = await response.json();
+          setStatistics(data);
+          console.log('Shortlist ratio stats:', JSON.stringify(data, null, 2));
+        } catch (error) {
+          console.error('Error fetching shortlist ratio stats:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        console.log(filter);
       }
     };
 
     fetchStatistics();
-  }, [salaryMetric]);
+  }, [salaryMetric, filter, userId]);
 
   const handleNextPage = () => {
     if ((currentPage + 1) * rowsPerPage < statistics.length) {
@@ -101,7 +144,7 @@ const Analysis: React.FC = () => {
         <div className="filter-group">
           <label htmlFor="location">Analyze on:</label>
           <ComboBox
-            options={analysisOptions}
+            options={userRole === 'employee' ? analysisOptions : analysisOptionsEmployer}
             value={filter}
             onChange={handleFilterChange}
             placeholder="Select analysis type"
@@ -126,23 +169,51 @@ const Analysis: React.FC = () => {
           <div className="loading-spinner"></div>
           <p>Loading statistics...</p>
         </div>
-      ) : statistics.length > 0 && filter === 'Location' && (
+      ) : statistics.length > 0 && (
         <div className="statistics-container">
           <h3>Statistics Results</h3>
           <table className="statistics-table">
             <thead>
               <tr>
-                <th>City</th>
-                <th>Country</th>
-                <th>Salary(k) (ranked from high to low)</th>
+                {filter === 'Location' ? (
+                  <>
+                    <th>City</th>
+                    <th>Country</th>
+                    <th>Salary(k) (ranked from high to low)</th>
+                  </>
+                ) : filter === 'Shortlist-Application Ratio' ? (
+                  <>
+                    <th>Job ID</th>
+                    <th>Job Title</th>
+                    <th>Shortlisted</th>
+                    <th>Applications</th>
+                    <th>Shortlist Ratio</th>
+                  </>
+                ) : null}
               </tr>
             </thead>
             <tbody>
-              {getCurrentPageData().map((location, index) => (
+            {getCurrentPageData().map((item, index) => (
                 <tr key={currentPage * rowsPerPage + index}>
-                  <td>{location.CityName}</td>
-                  <td>{location.CountryName}</td>
-                  <td>${location.AvgSalary?.toLocaleString()}</td>
+                  {filter === 'Location' ? (
+                    <>
+                      <td>{item.CityName}</td>
+                      <td>{item.CountryName}</td>
+                      <td>${item.AvgSalary?.toLocaleString()}</td>
+                    </>
+                  ) : filter === 'Shortlist-Application Ratio' ? (
+                    <>
+                      <td>{item.JobId}</td>
+                      <td>{item.JobTitle}</td>
+                      <td>{item.TotalSL}</td>
+                      <td>{item.TotalApp}</td>
+                      <td>
+                        {(item.ShortlistToApplicationRatio !== null && item.ShortlistToApplicationRatio !== undefined) 
+                          ? `${(item.ShortlistToApplicationRatio * 100).toFixed(1)}%` 
+                          : 'N/A'}
+                      </td>
+                    </>
+                  ) : null}
                 </tr>
               ))}
             </tbody>

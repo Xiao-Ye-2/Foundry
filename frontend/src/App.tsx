@@ -656,7 +656,7 @@ const App: React.FC = () => {
         )}
 
         {activeTab === 'analysis' && (
-          <Analysis
+          <Analysis userRole={userRole} userId={userProfile.userId}
           />
         )}
       </div>
