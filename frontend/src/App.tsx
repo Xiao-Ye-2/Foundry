@@ -71,6 +71,10 @@ const App: React.FC = () => {
   // Calculate total pages
   const totalPages = Math.ceil(totalJobs / pageSize);
 
+  //shortlist 
+  const [shortlistedJobs, setShortlistedJobs] = useState<number[]>([]);
+  const [shortlistingJob, setShortlistingJob] = useState<number | null>(null);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -91,6 +95,7 @@ const App: React.FC = () => {
     }
   }, [employeeId, jobs.length, currentPage]);
 
+
   // Load applications when the employee logs in or when the tab changes to 'applications'
   useEffect(() => {
     if (employeeId !== null && activeTab === 'applications') {
@@ -103,6 +108,14 @@ const App: React.FC = () => {
     fetchTotalJobCount();
   }, []);
 
+  
+  useEffect(() => {
+    if (activeTab === 'jobs' && employeeId) {
+      fetchShortlistedJobs();
+    }
+  }, [activeTab, employeeId]);
+
+    
   const handleGetJobs = async (page: number = 0) => {
     try {
       setLoading(true);
@@ -151,6 +164,68 @@ const App: React.FC = () => {
     }
   };
   
+  // Handle Shortlist click
+  const handleShortlistClick = async (jobId: number) => {
+    if (!employeeId) {
+      alert('Please log in to shortlist jobs');
+      return;
+    }
+
+    setShortlistingJob(jobId);
+    
+    try {
+      if (shortlistedJobs.includes(jobId)) {
+        // Remove from shortlisted jobs
+        await fetch(`http://localhost:8080/api/jobs/shortlist?employeeId=${employeeId}&jobId=${jobId}`, {
+          method: 'DELETE',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        setShortlistedJobs(prev => prev.filter(id => id !== jobId));
+      } else {
+        // Add to shortlisted jobs
+        await fetch(`http://localhost:8080/api/jobs/shortlist?employeeId=${employeeId}&jobId=${jobId}`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        setShortlistedJobs(prev => [...prev, jobId]);
+      }
+    } catch (error) {
+      console.error('Error toggling job shortlist:', error);
+    } finally {
+      setShortlistingJob(null);
+    }
+  };
+  
+  // Check if a job is shortlisted
+  const isJobShortlisted = (jobId: number) => shortlistedJobs.includes(jobId);
+
+  const fetchShortlistedJobs = async () => {
+    if (!employeeId) return;
+    
+    try {
+      const response = await fetch(`http://localhost:8080/api/jobs/shortlist/${employeeId}`, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setShortlistedJobs(data.map((job: Job) => job.jobId));
+      }
+    } catch (error) {
+      console.error('Error fetching shortlisted jobs:', error);
+    }
+  };
   // Fetch total job count
   const fetchTotalJobCount = async () => {
     try {
@@ -498,6 +573,21 @@ const App: React.FC = () => {
                                 >
                                   {isJobExpanded(job.jobId) ? 'Hide' : 'Show'}
                                 </button>
+
+                                <button
+                              className={`shortlist-button ${isJobShortlisted(job.jobId) ? 'shortlisted' : ''}`}
+                              onClick={() => handleShortlistClick(job.jobId)}
+                              disabled={shortlistingJob === job.jobId}
+                              title={isJobShortlisted(job.jobId) ? "Remove from shortlist" : "Save to shortlist"}
+                            >
+                              {shortlistingJob === job.jobId ? (
+                                <span className="shortlist-loading">⏳</span>
+                              ) : isJobShortlisted(job.jobId) ? (
+                                <span className="shortlist-icon">★</span>
+                              ) : (
+                                <span className="shortlist-icon">☆</span>
+                              )}
+                            </button>
 
                                 {hasAppliedForJob(job.jobId) ? (
                                   <div className="applied-badge">Applied</div>
