@@ -48,7 +48,7 @@ public class StatisticsViewManager {
             "    COUNT(DISTINCT app.EmployeeId) AS TotalApp, " +
             "    CASE " +
             "        WHEN COUNT(DISTINCT app.EmployeeId) = 0 THEN NULL " +
-            "        ELSE CAST(COUNT(DISTINCT sl.EmployeeId) AS REAL) / COUNT(DISTINCT app.EmployeeId) " +
+            "        ELSE CAST(COUNT(DISTINCT SL.EmployeeId) AS REAL) / COUNT(DISTINCT app.EmployeeId) " +
             "    END AS ShortlistToApplicationRatio " +
             "FROM JobPostings jp " +
             "LEFT JOIN Shortlist SL ON jp.JobId = SL.JobId " +

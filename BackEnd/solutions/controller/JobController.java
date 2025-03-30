@@ -237,6 +237,18 @@ public class JobController {
         }
     }
 
+    @GetMapping("/statistics/shortlist-ratio/employer/{employerId}")
+    @CrossOrigin(origins = "http://localhost:5173")
+    public ResponseEntity<?> getShortlistRatioForEmployer(@PathVariable Long employerId) {
+        System.out.println("Employer ID: " + employerId);
+        try {
+            List<Map<String, Object>> ratioStats = statisticsService.getShortlistRatioForEmployer(employerId);
+            return ResponseEntity.ok(ratioStats);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/statistics/location/minsalary")
     @CrossOrigin(origins = "http://localhost:5173")
     public ResponseEntity<?> getLocationMinsalary() {
