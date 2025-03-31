@@ -92,7 +92,9 @@
 .search-button,
 .reset-button,
 .apply-button,
-.shortlist-button {
+.shortlist-button,
+.dislike-button,
+.recommend-button {
   padding: var(--spacing-md) var(--spacing-lg);
   border: none;
   border-radius: var(--border-radius-sm);
@@ -616,10 +618,9 @@
 .action-buttons {
   display: flex;
   gap: 8px;
-  flex-wrap: nowrap;
   justify-content: flex-end;
   align-items: center;
-  width: 100%;
+  flex-wrap: nowrap;
 }
 
 /* Common button styles for all action buttons */
@@ -749,53 +750,87 @@
   }
 }
 
-/* Shortlist Button Styles */
-.shortlist-button {
+/* Action Buttons */
+.action-buttons {
   display: flex;
+  gap: 8px;
+  justify-content: flex-end;
   align-items: center;
-  justify-content: center;
-  padding: 0;
-  width: 32px;
-  height: 32px;
-  background-color: #f5f5f5;
-  border-radius: 50%;
-  color: #666;
-  font-size: 14px;
-  transition: all 0.2s ease;
-  border: 1px solid #e0e0e0;
-  flex-shrink: 0;
-  margin: 0;
+  flex-wrap: nowrap;
+}
+
+/* Icon buttons: shortlist, dislike, recommend */
+.shortlist-button,
+.dislike-button,
+.recommend-button {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+  border: 1px solid #e0e0e0 !important;
+  background-color: #f5f5f5 !important;
+}
+
+.shortlist-button {
+  color: #666 !important;
 }
 
 .shortlist-button:hover {
-  background-color: #fff8e0;
-  color: #f59e0b;
+  background-color: #fff8e0 !important;
+  color: #f59e0b !important;
   transform: translateY(-2px);
 }
 
 .shortlist-button.shortlisted {
-  background-color: #f59e0b;
-  color: white;
+  background-color: #f59e0b !important;
+  color: white !important;
 }
 
-.shortlist-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
+/* Dislike Button Styles */
+.dislike-button {
+  color: #666 !important;
 }
 
+.dislike-button:hover {
+  background-color: #fee2e2 !important;
+  color: #b91c1c !important;
+}
+
+/* Recommend Button */
+.recommend-button {
+  color: #666 !important;
+}
+
+.recommend-button:hover {
+  background-color: #e0f2fe !important;
+  color: #0369a1 !important;
+}
+
+.recommend-button.active {
+  background-color: #0ea5e9 !important;
+  color: white !important;
+}
+
+.dislike-icon, 
+.recommend-icon,
 .shortlist-icon {
   font-size: 16px;
   line-height: 1;
 }
 
+.dislike-loading,
+.recommend-loading,
 .shortlist-loading {
   animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  display: inline-block;
 }
 
 /* Media query adjustments */
@@ -819,38 +854,6 @@
     padding: 0;
     flex: 0 0 32px;
   }
-}
-
-/* Recommend Button */
-.recommend-button {
-  background-color: #f0f9ff;
-  color: #0369a1;
-  border: 1px solid #bae6fd;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 40px;
-  width: 40px;
-  height: 32px;
-  padding: 0;
-}
-
-.recommend-button:hover {
-  background-color: #e0f2fe;
-}
-
-.recommend-button.active {
-  background-color: #0ea5e9;
-  color: white;
-  border-color: #0ea5e9;
-}
-
-.recommend-icon {
-  font-size: 1rem;
-}
-
-.recommend-loading {
-  animation: spin 1s linear infinite;
 }
 
 /* Recommendations Container */

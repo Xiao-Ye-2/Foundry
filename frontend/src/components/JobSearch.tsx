@@ -76,8 +76,11 @@ const JobSearch: React.FC<JobSearchProps> = ({
   const [shortlistedJobs, setShortlistedJobs] = useState<number[]>([]);
   const [shortlistingJob, setShortlistingJob] = useState<number | null>(null);
   
-  // Update state for recommended jobs to just track the source job ID
-  const [recommendedJobId, setRecommendedJobId] = useState<number | null>(null);
+  // Only keep track of the job being disliked (for UI purposes)
+  const [dislikingJob, setDislikingJob] = useState<number | null>(null);
+  
+  // Update state for recommended jobs to track multiple job IDs
+  const [recommendedJobIds, setRecommendedJobIds] = useState<number[]>([]);
   
   // Fetch locations when component mounts
   useEffect(() => {
@@ -120,8 +123,8 @@ const JobSearch: React.FC<JobSearchProps> = ({
   // Toggle job details expansion
   const toggleJobDetails = (jobId: number) => {
     // If recommendations are showing for this job, hide them first
-    if (recommendedJobId === jobId) {
-      setRecommendedJobId(null);
+    if (recommendedJobIds.includes(jobId)) {
+      setRecommendedJobIds(prevIds => prevIds.filter(id => id !== jobId));
     }
     
     setExpandedJobIds(prevIds => 
@@ -169,22 +172,22 @@ const JobSearch: React.FC<JobSearchProps> = ({
       console.log(`Fetching job count from: ${url}`);
       
       const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        credentials: 'omit'
-      });
-      
-      if (!response.ok) {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          credentials: 'omit'
+        });
+        
+        if (!response.ok) {
         throw new Error(`Failed to fetch job count: ${response.status} ${response.statusText}`);
       }
       
       const count = await response.json();
       console.log(`Total job count: ${count}`);
       setTotalJobs(count);
-    } catch (err) {
+      } catch (err) {
       console.error('Error fetching job count:', err);
     }
   };
@@ -359,18 +362,17 @@ const JobSearch: React.FC<JobSearchProps> = ({
     }
     
     // If clicking on the same job, toggle recommendations off
-    if (recommendedJobId === jobId) {
-      setRecommendedJobId(null);
-      return;
+    if (recommendedJobIds.includes(jobId)) {
+      setRecommendedJobIds(prevIds => prevIds.filter(id => id !== jobId));
+    } else {
+      // If we're showing job details, close them
+      if (expandedJobIds.includes(jobId)) {
+        setExpandedJobIds(prevIds => prevIds.filter(id => id !== jobId));
+      }
+      
+      // Set the job ID for recommendations
+      setRecommendedJobIds(prevIds => [...prevIds, jobId]);
     }
-    
-    // If we're showing job details, close them
-    if (expandedJobIds.includes(jobId)) {
-      setExpandedJobIds(prevIds => prevIds.filter(id => id !== jobId));
-    }
-    
-    // Set the job ID for recommendations
-    setRecommendedJobId(jobId);
   };
   
   // Handle Shortlist click
@@ -440,6 +442,47 @@ const JobSearch: React.FC<JobSearchProps> = ({
     
     fetchShortlistedJobs();
   }, [employeeId]);
+  
+  // Handle Dislike click - simplified version
+  const handleDislikeClick = async (jobId: number) => {
+    if (!employeeId) {
+      alert('Please log in to hide jobs');
+      return;
+    }
+
+    setDislikingJob(jobId);
+    
+    try {
+      // Always send a POST request to dislike the job
+      // We don't need to track disliked jobs in the frontend
+      await fetch(`http://localhost:8080/api/jobs/dislike?employeeId=${employeeId}&jobId=${jobId}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      // If this job has recommendations open, close them
+      if (recommendedJobIds.includes(jobId)) {
+        setRecommendedJobIds(prevIds => prevIds.filter(id => id !== jobId));
+      }
+      
+      // If this job is expanded, collapse it
+      if (expandedJobIds.includes(jobId)) {
+        setExpandedJobIds(prevIds => prevIds.filter(id => id !== jobId));
+      }
+      
+      // Remove the job from the displayed list after a slight delay
+      setTimeout(() => {
+        setFilteredJobs(prevJobs => prevJobs.filter(job => job.jobId !== jobId));
+      }, 500);
+    } catch (error) {
+      console.error('Error disliking job:', error);
+    } finally {
+      setDislikingJob(null);
+    }
+  };
   
   return (
     <div className="job-search-container">
@@ -543,7 +586,7 @@ const JobSearch: React.FC<JobSearchProps> = ({
         
         {!loading && filteredJobs.length === 0 ? (
           hasSearched ? (
-            <div className="no-results">No jobs found matching your criteria</div>
+          <div className="no-results">No jobs found matching your criteria</div>
           ) : (
             <div className="intro-message">
               Use the filters above to search for jobs
@@ -564,7 +607,7 @@ const JobSearch: React.FC<JobSearchProps> = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredJobs.map((job) => (
+            {filteredJobs.map((job) => (
                     <React.Fragment key={job.jobId}>
                       <tr className={isJobExpanded(job.jobId) ? "job-row expanded" : "job-row"}>
                         <td className="position-col" data-label="Position">
@@ -576,10 +619,10 @@ const JobSearch: React.FC<JobSearchProps> = ({
                         <td className="work-type-col" data-label="Work Type">{job.workType}</td>
                         <td className="actions-col" data-label="Actions">
                           <div className="action-buttons">
-                            <button 
-                              className="details-button"
-                              onClick={() => toggleJobDetails(job.jobId)}
-                            >
+                  <button 
+                    className="details-button" 
+                    onClick={() => toggleJobDetails(job.jobId)}
+                  >
                               {isJobExpanded(job.jobId) ? 'Hide' : 'Details'}
                             </button>
                             
@@ -599,14 +642,27 @@ const JobSearch: React.FC<JobSearchProps> = ({
                             </button>
                             
                             <button
-                              className={`recommend-button ${recommendedJobId === job.jobId ? 'active' : ''}`}
+                              className="dislike-button"
+                              onClick={() => handleDislikeClick(job.jobId)}
+                              disabled={dislikingJob === job.jobId}
+                              title="Hide this job"
+                            >
+                              {dislikingJob === job.jobId ? (
+                                <span className="dislike-loading">⏳</span>
+                              ) : (
+                                <span className="dislike-icon">👎</span>
+                              )}
+                            </button>
+                            
+                            <button
+                              className={`recommend-button ${recommendedJobIds.includes(job.jobId) ? 'active' : ''}`}
                               onClick={() => toggleJobRecommendations(job.jobId)}
                               title="See similar jobs"
                             >
                               <span className="recommend-icon">👍</span>
-                            </button>
-                            
-                            {hasAppliedForJob(job.jobId) ? (
+                  </button>
+                  
+                  {hasAppliedForJob(job.jobId) ? (
                               <div className="applied-badge">Applied</div>
                             ) : (
                               <button 
@@ -629,13 +685,13 @@ const JobSearch: React.FC<JobSearchProps> = ({
                           </td>
                         </tr>
                       )}
-                      {recommendedJobId === job.jobId && (
+                      {recommendedJobIds.includes(job.jobId) && (
                         <tr className="job-recommendations-row">
                           <td colSpan={6}>
                             <JobRecommendations
                               employeeId={employeeId}
                               jobId={job.jobId}
-                              onClose={() => setRecommendedJobId(null)}
+                              onClose={() => setRecommendedJobIds(prev => prev.filter(id => id !== job.jobId))}
                               onApplyForJob={onApplyForJob}
                               hasAppliedForJob={hasAppliedForJob}
                               applyingToJob={applyingToJob}
