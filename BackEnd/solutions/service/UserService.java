@@ -67,7 +67,7 @@ public class UserService {
                     jdbcTemplate.update(insertEmployeeSql, userId);
                 } else if ("employer".equalsIgnoreCase(userProfile.getRole())) {
                     String insertEmployerSql = "INSERT INTO Employers (UserId, CompanyId) VALUES (?, ?)";
-                    jdbcTemplate.update(insertEmployerSql, userId, 28374193);
+                    jdbcTemplate.update(insertEmployerSql, userId, userProfile.getCompanyId());
                 } else {
                     throw new RuntimeException("Invalid role");
                 }
