@@ -50,9 +50,8 @@ type Option = {
 
 const analysisOptions: Option[] = [
   { id: 1, label: 'Location' },
-  { id: 2, label: 'Company' },
-  { id: 3, label: 'Location Stats' }, // New option for location stats
-  { id: 4, label: 'Company Stats' } // New option for Company stats
+  { id: 2, label: 'Location Stats' }, // New option for location stats
+  { id: 3, label: 'Company Stats' } // New option for Company stats
 ]
 const metricsOptions: Option[] = [
   { id: 1, label: 'Minimum Salary' },
