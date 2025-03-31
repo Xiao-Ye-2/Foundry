@@ -19,7 +19,6 @@ public class JobService {
     @Autowired
     private JobRowMapper jobRowMapper;
 
-    // R6: Job search with filters
     public List<JobPosting> searchJobs(Long cityId, Long companyId, Double minSalary, Double maxSalary,
                                      String workType, Integer limit, Integer offset, Long userId) {
         StringBuilder sql = new StringBuilder(
@@ -111,7 +110,6 @@ public class JobService {
         return jdbcTemplate.query(sql.toString(), jobRowMapper, jobId, userId);
     }
 
-    // R7:
     public void applyToJob(Long employeeId, Long jobId) {
         String checkSql = "SELECT COUNT(*) FROM Applications WHERE EmployeeId = ? AND JobId = ?";
         int count = jdbcTemplate.queryForObject(checkSql, Integer.class, employeeId, jobId);
@@ -124,7 +122,6 @@ public class JobService {
         jdbcTemplate.update(sql, employeeId, jobId);
     }
 
-    // R8:
     public void postJob(JobPosting job) {
         String sql = "INSERT INTO JobPostings (EmployerId, Title, Description, MinSalary, " +
                     "MaxSalary, WorkType, CityId) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -133,7 +130,6 @@ public class JobService {
             job.getMinSalary(), job.getMaxSalary(), job.getWorkType(), job.getCityId());
     }
 
-    // R9:
     public List<Map<String, Object>> getApplications(Long employerId) {
         String sql = "SELECT j.Title AS jobTitle, u.UserName AS userName, a.EmployeeId AS employeeId, a.Status AS status, a.ApplyDate AS applyDate " +
              "FROM Applications a " +
