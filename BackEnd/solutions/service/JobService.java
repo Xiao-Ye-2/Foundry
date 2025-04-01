@@ -139,7 +139,7 @@ public class JobService {
              "FROM Applications a " +
              "JOIN Users u ON a.EmployeeId = u.UserId " +
              "JOIN Employees e ON e.UserId = u.UserId " +
-             "JOIN JobPostings j INDEXED ON idxOnEmployerJob ON a.JobId = j.JobId " +
+             "JOIN JobPostings j INDEXED BY idxOnEmployerJobs ON a.JobId = j.JobId " +
              "WHERE j.EmployerId = ? " +
              "ORDER BY j.JobId";
 
