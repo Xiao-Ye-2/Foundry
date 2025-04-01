@@ -136,7 +136,8 @@ public class JobService {
              "JOIN Users u ON a.EmployeeId = u.UserId " +
              "JOIN Employees e ON e.UserId = u.UserId " +
              "JOIN JobPostings j ON a.JobId = j.JobId " +
-             "WHERE j.EmployerId = ?";
+             "WHERE j.EmployerId = ? " +
+             "ORDER BY j.JobId";
 
         return jdbcTemplate.queryForList(sql, employerId);
     }
