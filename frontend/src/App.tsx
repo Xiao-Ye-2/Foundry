@@ -541,6 +541,8 @@ const App: React.FC = () => {
 
   const fetchEmployerApplications = async () => {
     try {
+      setLoading(true);
+      
       const response = await fetch("http://localhost:8080/api/jobs/applications", {
         method: "GET",
         headers: {
@@ -552,10 +554,12 @@ const App: React.FC = () => {
       if (!response.ok) throw new Error("Failed to fetch applications");
   
       const data = await response.json();
-      console.log(data)
+      console.log("Employer applications:", data);
       setEmployerApplications(data);
     } catch (err) {
       console.error("Error fetching employer applications:", err);
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -717,60 +721,70 @@ const App: React.FC = () => {
 
         {activeTab === 'applicants' && userRole === 'employer' && (
           <div className="employer-applications-container">
-          <h2>Applications to Your Jobs</h2>
-          {employerApplications.length === 0 ? (
-            <p className="no-applicants-message">No applications found.</p>
-          ) : (
-            <div className="applications-table-container">
-              <table className="employer-applicant-table">
-                <thead>
-                  <tr>
-                  <th>Job Title</th>
-                  <th>Applicant Name</th>
-                  <th>Email</th>
-                  <th>Apply Date</th>
-                  <th>Status</th>
-                  <th>Resume</th>
-
-                  </tr>
-                </thead>
-                <tbody>
-                  {employerApplications.map((app, index) => (
-                    <tr key={index}>
-                      <td>{app.jobTitle}</td>
-                      <td>{app.userName}</td>
-                      <td>{app.email}</td>
-                      <td>
-                        {app.applyDate && !isNaN(new Date(app.applyDate).getTime())
-                          ? new Date(app.applyDate).toLocaleDateString()
-                          : 'N/A'}
-                      </td>
-                      <td>
-                        <span className={`status-${app.status?.toLowerCase() || 'pending'}`}>
-                          {app.status || 'Pending'}
-                        </span>
-                      </td>
-                      <td>
-                        {app.resume ? (
-                          <a 
-                            href={app.resume} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="resume-link"
-                          >
-                            View Resume
-                          </a>
-                        ) : (
-                          <span className="no-resume">No Resume</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="applications-header">
+              <h2>Applications to Your Jobs</h2>
+              <button 
+                className="refresh-button"
+                onClick={fetchEmployerApplications}
+                disabled={loading}
+              >
+                {loading ? 'Refreshing...' : 'Refresh Applicants'}
+              </button>
             </div>
-          )}
-        </div>
+            {loading && <div className="loading-indicator">Loading applications...</div>}
+            {employerApplications.length === 0 && !loading ? (
+              <p className="no-applicants-message">No applications found.</p>
+            ) : (
+              <div className="applications-table-container">
+                <table className="employer-applicant-table">
+                  <thead>
+                    <tr>
+                    <th>Job Title</th>
+                    <th>Applicant Name</th>
+                    <th>Email</th>
+                    <th>Apply Date</th>
+                    <th>Status</th>
+                    <th>Resume</th>
+
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {employerApplications.map((app, index) => (
+                      <tr key={index}>
+                        <td>{app.jobTitle}</td>
+                        <td>{app.userName}</td>
+                        <td>{app.email}</td>
+                        <td>
+                          {app.applyDate && !isNaN(new Date(app.applyDate).getTime())
+                            ? new Date(app.applyDate).toLocaleDateString()
+                            : 'N/A'}
+                        </td>
+                        <td>
+                          <span className={`status-${app.status?.toLowerCase() || 'pending'}`}>
+                            {app.status || 'Pending'}
+                          </span>
+                        </td>
+                        <td>
+                          {app.resume ? (
+                            <a 
+                              href={app.resume} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="resume-link"
+                            >
+                              View Resume
+                            </a>
+                          ) : (
+                            <span className="no-resume">No Resume</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         )}
 
 
