@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../styles/JobSearch.css';
 import ComboBox from './ComboBox';
 import JobRecommendations from './JobRecommendations';
+import JobTable from './JobTable';
 
 interface Job {
   jobId: number;
@@ -583,10 +584,8 @@ const JobSearch: React.FC<JobSearchProps> = ({
       
       {error && <div className="error">Error: {error}</div>}
       
-      {loading && (
-        <div className="loading">
-          {filteredJobs.length > 0 ? 'Loading more jobs...' : 'Loading jobs...'}
-        </div>
+      {loading && filteredJobs.length === 0 && (
+        <div className="loading">Loading jobs...</div>
       )}
       
       <div className="job-results">
@@ -602,215 +601,52 @@ const JobSearch: React.FC<JobSearchProps> = ({
         
         {!loading && filteredJobs.length === 0 ? (
           hasSearched ? (
-          <div className="no-results">No jobs found matching your criteria</div>
+            <div className="no-results">No jobs found matching your criteria</div>
           ) : (
             <div className="intro-message">
               Use the filters above to search for jobs
             </div>
           )
         ) : (
-          <>
-            <div className="job-table-container">
-              <table className="job-table" style={loading ? { opacity: '0.7' } : {}}>
-                <thead>
-                  <tr>
-                    <th className="position-col">Position</th>
-                    <th className="company-col">Company</th>
-                    <th className="location-col">Location</th>
-                    <th className="salary-col">Salary</th>
-                    <th className="work-type-col">Work Type</th>
-                    <th className="actions-col">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-            {filteredJobs.map((job) => (
-                    <React.Fragment key={job.jobId}>
-                      <tr className={isJobExpanded(job.jobId) ? "job-row expanded" : "job-row"}>
-                        <td className="position-col" data-label="Position">
-                          <div className="job-title">{job.title}</div>
-                        </td>
-                        <td className="company-col" data-label="Company">{job.companyName}</td>
-                        <td className="location-col" data-label="Location">{job.cityName}{job.countryName ? `, ${job.countryName}` : ''}</td>
-                        <td className="salary-col" data-label="Salary">${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()}</td>
-                        <td className="work-type-col" data-label="Work Type">{job.workType}</td>
-                        <td className="actions-col" data-label="Actions">
-                          <div className="action-buttons">
-                  <button 
-                    className="details-button" 
-                    onClick={() => toggleJobDetails(job.jobId)}
-                  >
-                              {isJobExpanded(job.jobId) ? 'Hide' : 'Details'}
-                            </button>
-                            
-                            <button
-                              className={`shortlist-button ${isJobShortlisted(job.jobId) ? 'shortlisted' : ''}`}
-                              onClick={() => handleShortlistClick(job.jobId)}
-                              disabled={shortlistingJob === job.jobId}
-                              title={isJobShortlisted(job.jobId) ? "Remove from shortlist" : "Save to shortlist"}
-                            >
-                              {shortlistingJob === job.jobId ? (
-                                <span className="shortlist-loading">⏳</span>
-                              ) : isJobShortlisted(job.jobId) ? (
-                                <span className="shortlist-icon">★</span>
-                              ) : (
-                                <span className="shortlist-icon">☆</span>
-                              )}
-                            </button>
-                            
-                            <button
-                              className="dislike-button"
-                              onClick={() => handleDislikeClick(job.jobId)}
-                              disabled={dislikingJob === job.jobId}
-                              title="Hide this job"
-                            >
-                              {dislikingJob === job.jobId ? (
-                                <span className="dislike-loading">⏳</span>
-                              ) : (
-                                <span className="dislike-icon">👎</span>
-                              )}
-                            </button>
-                            
-                            <button
-                              className={`recommend-button ${recommendedJobIds.includes(job.jobId) ? 'active' : ''}`}
-                              onClick={() => toggleJobRecommendations(job.jobId)}
-                              title="See similar jobs"
-                            >
-                              <span className="recommend-icon">👍</span>
-                  </button>
-                  
-                  {hasAppliedForJob(job.jobId) ? (
-                              <div className="applied-badge">Applied</div>
-                            ) : (
-                              <button 
-                                className="apply-button"
-                                onClick={() => handleApplyClick(job.jobId)}
-                                disabled={applyingToJob === job.jobId}
-                              >
-                                {applyingToJob === job.jobId ? 'Applying...' : 'Apply'}
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                      {isJobExpanded(job.jobId) && (
-                        <tr className="job-description-row">
-                          <td colSpan={6}>
-                            <div className="job-description">
-                              <p>{job.description}</p>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                      {recommendedJobIds.includes(job.jobId) && (
-                        <tr className="job-recommendations-row">
-                          <td colSpan={6}>
-                            <JobRecommendations
-                              employeeId={employeeId}
-                              jobId={job.jobId}
-                              onClose={() => setRecommendedJobIds(prev => prev.filter(id => id !== job.jobId))}
-                              onApplyForJob={onApplyForJob}
-                              hasAppliedForJob={hasAppliedForJob}
-                              applyingToJob={applyingToJob}
-                              onShortlistToggle={handleShortlistClick}
-                              isJobShortlisted={isJobShortlisted}
-                              shortlistingJob={shortlistingJob}
-                              inline={true}
-                            />
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            
-            {totalPages > 1 && (
-              <div className="pagination">
-                <button 
-                  className="pagination-button prev-button"
-                  onClick={goToPreviousPage}
-                  disabled={currentPage === 0}
-                >
-                  <span className="pagination-icon">«</span> Previous
-                </button>
-                
-                <div className="pagination-numbers">
-                  {/* First page */}
-                  {currentPage > 1 && (
-                    <button 
-                      className="pagination-number"
-                      onClick={() => goToPage(0)}
-                    >
-                      1
-                    </button>
-                  )}
-                  
-                  {/* Ellipsis after first page */}
-                  {currentPage > 2 && <span className="pagination-ellipsis">…</span>}
-                  
-                  {/* Generate more page numbers around current page */}
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNumber;
-                    
-                    if (totalPages <= 5) {
-                      // If 5 or fewer pages, show all
-                      pageNumber = i;
-                    } else if (currentPage <= 2) {
-                      // Near start, show first 5 pages
-                      pageNumber = i;
-                    } else if (currentPage >= totalPages - 3) {
-                      // Near end, show last 5 pages
-                      pageNumber = totalPages - 5 + i;
-                    } else {
-                      // In middle, show 2 before and 2 after current
-                      pageNumber = currentPage - 2 + i;
-                    }
-                    
-                    // Skip rendering if number is out of range
-                    if (pageNumber < 0 || pageNumber >= totalPages) return null;
-                    
-                    // Skip first and last page if they'll be rendered separately
-                    if ((currentPage > 1 && pageNumber === 0) || 
-                        (currentPage < totalPages - 2 && pageNumber === totalPages - 1)) {
-                      return null;
-                    }
-                    
-                    return (
-                      <button 
-                        key={pageNumber}
-                        className={`pagination-number ${currentPage === pageNumber ? 'active' : ''}`}
-                        onClick={() => goToPage(pageNumber)}
-                      >
-                        {pageNumber + 1}
-                      </button>
-                    );
-                  })}
-                  
-                  {/* Ellipsis before last page */}
-                  {currentPage < totalPages - 3 && <span className="pagination-ellipsis">…</span>}
-                  
-                  {/* Last page */}
-                  {currentPage < totalPages - 2 && (
-                    <button 
-                      className="pagination-number"
-                      onClick={() => goToPage(totalPages - 1)}
-                    >
-                      {totalPages}
-                    </button>
-                  )}
-                </div>
-                
-                <button 
-                  className="pagination-button next-button"
-                  onClick={goToNextPage}
-                  disabled={currentPage >= totalPages - 1}
-                >
-                  Next <span className="pagination-icon">»</span>
-                </button>
-              </div>
+          <JobTable
+            jobs={filteredJobs}
+            loading={loading && filteredJobs.length > 0}
+            error={error}
+            totalJobs={totalJobs}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            applyingToJob={applyingToJob}
+            shortlistingJob={shortlistingJob}
+            dislikingJob={dislikingJob}
+            expandedJobIds={expandedJobIds}
+            recommendedJobIds={recommendedJobIds}
+            onToggleJobDetails={toggleJobDetails}
+            onApplyForJob={handleApplyClick}
+            onShortlistJob={handleShortlistClick}
+            onDislikeJob={handleDislikeClick}
+            onRecommendJob={toggleJobRecommendations}
+            goToPage={goToPage}
+            goToPreviousPage={goToPreviousPage}
+            goToNextPage={goToNextPage}
+            hasAppliedForJob={hasAppliedForJob}
+            isJobShortlisted={isJobShortlisted}
+            isJobExpanded={isJobExpanded}
+            showRefreshButton={false}
+            renderJobRecommendations={(jobId) => (
+              <JobRecommendations
+                employeeId={employeeId}
+                jobId={jobId}
+                onClose={() => setRecommendedJobIds(prev => prev.filter(id => id !== jobId))}
+                onApplyForJob={onApplyForJob}
+                hasAppliedForJob={hasAppliedForJob}
+                applyingToJob={applyingToJob}
+                onShortlistToggle={handleShortlistClick}
+                isJobShortlisted={isJobShortlisted}
+                shortlistingJob={shortlistingJob}
+                inline={true}
+              />
             )}
-          </>
+          />
         )}
       </div>
     </div>

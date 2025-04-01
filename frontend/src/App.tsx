@@ -520,6 +520,12 @@ const App: React.FC = () => {
   if (userProfile === null) {
     return <UserLogin onLogin={handleEmployeeLogin} onBack={() => setUserRole(null)} onSignup={handleEmployeeSignup} userRole={userRole} />;
   }
+
+  // Add this function near the other handlers
+  const handleRefreshJobs = () => {
+    handleGetJobs(currentPage);
+  };
+
   // Show the job board (employee view)
   return (
     <div className="app-container">
@@ -603,6 +609,7 @@ const App: React.FC = () => {
               totalPages={totalPages}
               applyingToJob={applyingToJob}
               shortlistingJob={shortlistingJob}
+              employeeId={employeeId}
               hasAppliedForJob={hasAppliedForJob}
               toggleJobDetails={toggleJobDetails}
               handleApplyForJob={handleApplyForJob}
@@ -612,6 +619,7 @@ const App: React.FC = () => {
               goToNextPage={goToNextPage}
               isJobExpanded={isJobExpanded}
               isJobShortlisted={isJobShortlisted}
+              onRefresh={handleRefreshJobs}
             />
           </div>
         )}
