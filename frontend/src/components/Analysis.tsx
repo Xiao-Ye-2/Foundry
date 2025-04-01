@@ -70,6 +70,8 @@ const Analysis: React.FC<AnalysisProps> = ({ userRole, userId }) => {
   const [filter, setFilter] = useState<string>('');
   const [salaryMetric, setSalaryMetric] = useState<string>('');
   const [statistics, setStatistics] = useState<StatisticData[]>([]);
+  const [minSalaryStats, setMinSalaryStats] = useState<StatisticData[]>([]);
+  const [maxSalaryStats, setMaxSalaryStats] = useState<StatisticData[]>([]);
   const [selectedCityId, setSelectedCityId] = useState<number | null>(null);
   const [locations, setLocations] = useState<Location[]>([]);  const [currentPage, setCurrentPage] = useState(0);
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -87,6 +89,37 @@ const Analysis: React.FC<AnalysisProps> = ({ userRole, userId }) => {
     setSalaryMetric(label);
     setCurrentPage(0);  // Reset to first page when metric changes
   };
+  useEffect(() => {
+    const fetchMinAndMaxSalary = async () => {
+      setIsLoading(true);
+      try {
+        const [minRes, maxRes] = await Promise.all([
+          fetch('http://localhost:8080/api/jobs/statistics/location/minsalary'),
+          fetch('http://localhost:8080/api/jobs/statistics/location/maxsalary')
+        ]);
+
+        if (!minRes.ok || !maxRes.ok) {
+          throw new Error('Failed to fetch salary statistics');
+        }
+
+        const minData = await minRes.json();
+        const maxData = await maxRes.json();
+
+        setMinSalaryStats(minData);
+        setMaxSalaryStats(maxData);
+
+        console.log('Min Salary:', minData);
+        console.log('Max Salary:', maxData);
+      } catch (err) {
+        console.error('Error fetching salary stats:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMinAndMaxSalary(); // run once when component mounts
+  }, []); // 👈 empty dependency array = only run on mount
+
   useEffect(() => {
     const fetchLocations = async () => {
       try {
@@ -136,27 +169,11 @@ const Analysis: React.FC<AnalysisProps> = ({ userRole, userId }) => {
       if (filter === 'Location' && (salaryMetric === 'Minimum Salary' || salaryMetric === 'Maximum Salary')) {
         setIsLoading(true);
         try {
-          let url = '';
           if (salaryMetric === 'Minimum Salary') {
-            url = 'http://localhost:8080/api/jobs/statistics/location/minsalary';
+            setStatistics(minSalaryStats);
           } else {
-            url = 'http://localhost:8080/api/jobs/statistics/location/maxsalary';
+            setStatistics(maxSalaryStats);
           }
-          console.log(`Fetching avgSalary in location from: ${url}`);
-          const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-            },
-            credentials: 'omit'
-          });
-          if (!response.ok) {
-            throw new Error(`Failed to fetch avgSalary in location: ${response.status} ${response.statusText}`);
-          }
-          const data = await response.json();
-          setStatistics(data);
-          console.log('AvgSalary in location:', JSON.stringify(data, null, 2));
         } catch (error) {
           console.error('Error fetching avgSalary in location:', error);
         } finally {
