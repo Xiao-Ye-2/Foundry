@@ -45,8 +45,11 @@ public class JobDetailsViewManager {
             "    AND EmployeeId != NEW.EmployeeId " +
             "    AND Status != 'Withdrawn' " +
             "    AND Status != 'Accepted'; " +
-            "END;";
 
+            "    UPDATE JobPostings " +
+            "    SET IsActive = 0 " +
+            "    WHERE JobId = NEW.JobId; " +
+            "END;";
         try {
             jdbcTemplate.execute(sql);
         } catch (Exception e) {
