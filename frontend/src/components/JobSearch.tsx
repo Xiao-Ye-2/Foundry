@@ -348,6 +348,10 @@ const JobSearch: React.FC<JobSearchProps> = ({
       const appliedJob = filteredJobs.find(job => job.jobId === jobId);
       if (appliedJob) {
         console.log(`Successfully applied to: ${appliedJob.title} at ${appliedJob.companyName}`);
+        
+        // Force re-render by creating a new array with the same jobs
+        // This ensures the hasAppliedForJob check will be run again
+        setFilteredJobs([...filteredJobs]);
       }
     } catch (error) {
       console.error("Error applying for job:", error);
