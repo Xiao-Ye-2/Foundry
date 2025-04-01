@@ -168,6 +168,9 @@ const JobSearch: React.FC<JobSearchProps> = ({
       if (maxSalary) params.append('maxSalary', maxSalary);
       if (workType) params.append('workType', workType);
       
+      // Include userId (employeeId) to filter out disliked jobs
+      if (employeeId) params.append('userId', employeeId.toString());
+      
       const url = `http://localhost:8080/api/jobs/count?${params.toString()}`;
       console.log(`Fetching job count from: ${url}`);
       
@@ -204,6 +207,9 @@ const JobSearch: React.FC<JobSearchProps> = ({
       if (minSalary) params.append('minSalary', minSalary);
       if (maxSalary) params.append('maxSalary', maxSalary);
       if (workType) params.append('workType', workType);
+      
+      // Include userId (employeeId) to filter out disliked jobs
+      if (employeeId) params.append('userId', employeeId.toString());
       
       // Always include pagination parameters
       params.append('page', page.toString());
@@ -247,7 +253,13 @@ const JobSearch: React.FC<JobSearchProps> = ({
   // Fetch initial total count silently (without loading state)
   const fetchInitialCount = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/jobs/count', {
+      // Include userId parameter if available
+      const params = new URLSearchParams();
+      if (employeeId) params.append('userId', employeeId.toString());
+      
+      const url = `http://localhost:8080/api/jobs/count${params.toString() ? `?${params.toString()}` : ''}`;
+      
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -268,10 +280,10 @@ const JobSearch: React.FC<JobSearchProps> = ({
     }
   };
   
-  // Fetch initial total count on component mount
+  // Fetch initial total count on component mount and when employeeId changes
   useEffect(() => {
     fetchInitialCount();
-  }, []);
+  }, [employeeId]);
 
   // Fetch jobs only when search is performed or page is changed
   useEffect(() => {
