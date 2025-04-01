@@ -124,3 +124,4 @@ CREATE TABLE Applications (
     FOREIGN KEY (JobId) REFERENCES JobPostings(JobId)
 );
 
+CREATE INDEX idxOnEmployerJobs ON JobPostings(EmployerId);

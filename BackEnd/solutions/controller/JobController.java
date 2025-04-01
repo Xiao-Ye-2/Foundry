@@ -270,4 +270,19 @@ public class JobController {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
+
+    @GetMapping("/applications/employer/changestatus/")
+    @CrossOrigin(origins = "http://localhost:5173")
+    public ResponseEntity<?> changeApplicationStatus(
+        @RequestParam Long employeeId,
+        @RequestParam Long jobId,
+        @RequestParam String status
+    ) {
+        try {
+            jobService.changeApplicationStatus(employeeId, jobId, status);
+            return ResponseEntity.ok("Application status changed successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
 }

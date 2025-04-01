@@ -1,8 +1,12 @@
 package service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import data.JobPosting;
 import data.mapper.JobRowMapper;
@@ -135,7 +139,7 @@ public class JobService {
              "FROM Applications a " +
              "JOIN Users u ON a.EmployeeId = u.UserId " +
              "JOIN Employees e ON e.UserId = u.UserId " +
-             "JOIN JobPostings j ON a.JobId = j.JobId " +
+             "JOIN JobPostings j INDEXED ON idxOnEmployerJob ON a.JobId = j.JobId " +
              "WHERE j.EmployerId = ? " +
              "ORDER BY j.JobId";
 
@@ -206,5 +210,10 @@ public class JobService {
                     "WHERE s.EmployeeId = ? " +
                     "ORDER BY j.PostDate DESC";
         return jdbcTemplate.query(sql, jobRowMapper, employeeId);
+    }
+
+    public void changeApplicationStatus(Long employeeId, Long jobId, String status) {
+        String sql = "UPDATE Applications SET Status = ? WHERE EmployeeId = ? AND JobId = ?";
+        jdbcTemplate.update(sql, status, employeeId, jobId);
     }
 }
