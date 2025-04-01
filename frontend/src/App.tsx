@@ -158,9 +158,15 @@ const App: React.FC = () => {
       params.append('page', page.toString());
       params.append('pageSize', pageSize.toString());
       
-      console.log(`Fetching jobs from: http://localhost:8080/api/jobs?${params.toString()}`);
+      // Include employeeId to filter out disliked jobs
+      if (employeeId) {
+        params.append('userId', employeeId.toString());
+      }
+      
+      // Use /api/jobs/search endpoint instead of /api/jobs
+      console.log(`Fetching jobs from: http://localhost:8080/api/jobs/search?${params.toString()}`);
 
-      const response = await fetch(`http://localhost:8080/api/jobs?${params.toString()}`, {
+      const response = await fetch(`http://localhost:8080/api/jobs/search?${params.toString()}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -261,7 +267,16 @@ const App: React.FC = () => {
   // Fetch total job count
   const fetchTotalJobCount = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/jobs/count', {
+      // Include userId parameter to filter out disliked jobs
+      const params = new URLSearchParams();
+      if (employeeId) {
+        params.append('userId', employeeId.toString());
+      }
+      
+      // Use the search endpoint's count
+      const url = `http://localhost:8080/api/jobs/search/count${params.toString() ? `?${params.toString()}` : ''}`;
+      
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',

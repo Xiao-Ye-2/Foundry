@@ -490,9 +490,16 @@ const JobSearch: React.FC<JobSearchProps> = ({
         setExpandedJobIds(prevIds => prevIds.filter(id => id !== jobId));
       }
       
-      // Remove the job from the displayed list after a slight delay
+      // Remove the job from the displayed list after a slight delay and refetch data
       setTimeout(() => {
+        // First remove from local state for immediate UI feedback
         setFilteredJobs(prevJobs => prevJobs.filter(job => job.jobId !== jobId));
+        
+        // Then refetch the data to ensure server-side filtering is applied
+        if (hasSearched) {
+          fetchJobs(currentPage);
+          fetchTotalCount(); // Update the job count
+        }
       }, 500);
     } catch (error) {
       console.error('Error disliking job:', error);
