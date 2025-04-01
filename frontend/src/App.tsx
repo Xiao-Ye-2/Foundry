@@ -136,6 +136,15 @@ const App: React.FC = () => {
     }
   }, [userRole, activeTab]);
 
+  // Add this effect to set the default tab based on user role
+  useEffect(() => {
+    if (userRole === 'employer') {
+      setActiveTab('post-job');
+    } else if (userRole === 'employee') {
+      setActiveTab('jobs');
+    }
+  }, [userRole]);
+
   const handleGetJobs = async (page: number = 0) => {
     try {
       setLoading(true);
@@ -531,37 +540,43 @@ const App: React.FC = () => {
         </div>
 
         <div className="tab-container">
-          <button
-            onClick={() => setActiveTab('jobs')}
-            className={`tab-button ${activeTab === 'jobs' ? 'active' : ''}`}
-          >
-            Browse Jobs
-          </button>
-
-          {userRole === 'employee' ? (
+          {userRole === 'employee' && (
             <>
+              <button
+                onClick={() => setActiveTab('jobs')}
+                className={`tab-button ${activeTab === 'jobs' ? 'active' : ''}`}
+              >
+                Browse Jobs
+              </button>
+              
               <button onClick={() => setActiveTab('applications')} className={`tab-button ${activeTab === 'applications' ? 'active' : ''}`}>
                 My Applications
               </button>
+              
               <button onClick={() => setActiveTab('shortlist')} className={`tab-button ${activeTab === 'shortlist' ? 'active' : ''}`}>
                 Shortlist
               </button>
-            </>
-          ) : (
-            <>
-            <button onClick={() => setActiveTab('post-job')} className={`tab-button ${activeTab === 'post-job' ? 'active' : ''}`}>
-              Post a Job
-            </button>
-            <button onClick={() => setActiveTab('applicants')} className={`tab-button ${activeTab === 'applicants' ? 'active' : ''}`}>Applicants</button>
+              
+              <button
+                onClick={() => setActiveTab('advanced')}
+                className={`tab-button ${activeTab === 'advanced' ? 'active' : ''}`}
+              >
+                Advanced Search
+              </button>
             </>
           )}
-
-          <button
-            onClick={() => setActiveTab('advanced')}
-            className={`tab-button ${activeTab === 'advanced' ? 'active' : ''}`}
-          >
-            Advanced Search
-          </button>
+          
+          {userRole === 'employer' && (
+            <>
+              <button onClick={() => setActiveTab('post-job')} className={`tab-button ${activeTab === 'post-job' ? 'active' : ''}`}>
+                Post a Job
+              </button>
+              
+              <button onClick={() => setActiveTab('applicants')} className={`tab-button ${activeTab === 'applicants' ? 'active' : ''}`}>
+                Applicants
+              </button>
+            </>
+          )}
 
           <button
             onClick={() => setActiveTab('analysis')}
