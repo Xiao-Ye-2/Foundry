@@ -356,7 +356,7 @@ const App: React.FC = () => {
       // Find job title from jobs list
       const appliedJob = jobs.find(job => job.jobId === jobId);
       const appliedJobTitle = appliedJob?.title || `Job #${jobId}`;
-      
+
       // Immediately update our local state with the new application
       // This ensures the UI updates right away without waiting for API fetch
       const newApplication: JobApplication = {
@@ -367,12 +367,12 @@ const App: React.FC = () => {
         title: appliedJobTitle,
         companyName: appliedJob?.companyName || 'Unknown Company'
       };
-      
+
       setApplications(prevApplications => [...prevApplications, newApplication]);
-      
+
       // Still fetch all applications in the background to ensure data consistency
       handleGetApplications();
-      
+
       alert(`Application submitted successfully for job: ${appliedJobTitle}`);
     } catch (error) {
       console.error('Error submitting application:', error);

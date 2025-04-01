@@ -12,7 +12,12 @@ public class JobDetailsViewManager {
     private JdbcTemplate jdbcTemplate;
 
     @PostConstruct
-    public void createView() {
+    public void createDatabaseObjects() {
+        createJobDetailsView();
+        createAutoWithdrawTrigger();
+    }
+
+    private void createJobDetailsView() {
         String sql =
             "CREATE VIEW IF NOT EXISTS JobDetailsView AS " +
             "SELECT j.*, c.CompanyName, ci.CityName, co.CountryName, c.CompanyId " +
@@ -28,12 +33,46 @@ public class JobDetailsViewManager {
         }
     }
 
+    private void createAutoWithdrawTrigger() {
+        String sql =
+            "CREATE TRIGGER IF NOT EXISTS auto_withdraw_applications " +
+            "AFTER UPDATE ON Applications " +
+            "WHEN NEW.Status = 'Accepted' AND OLD.Status != 'Accepted' " +
+            "BEGIN " +
+            "    UPDATE Applications " +
+            "    SET Status = 'Withdrawn' " +
+            "    WHERE JobId = NEW.JobId " +
+            "    AND EmployeeId != NEW.EmployeeId " +
+            "    AND Status != 'Withdrawn' " +
+            "    AND Status != 'Accepted'; " +
+            "END;";
+
+        try {
+            jdbcTemplate.execute(sql);
+        } catch (Exception e) {
+            System.err.println("Error creating auto_withdraw_applications trigger: " + e.getMessage());
+        }
+    }
+
     @PreDestroy
-    public void dropView() {
+    public void dropDatabaseObjects() {
+        dropJobDetailsView();
+        dropAutoWithdrawTrigger();
+    }
+
+    private void dropJobDetailsView() {
         try {
             jdbcTemplate.execute("DROP VIEW IF EXISTS JobDetailsView");
         } catch (Exception e) {
             System.err.println("Error dropping JobDetailsView: " + e.getMessage());
+        }
+    }
+
+    private void dropAutoWithdrawTrigger() {
+        try {
+            jdbcTemplate.execute("DROP TRIGGER IF EXISTS auto_withdraw_applications");
+        } catch (Exception e) {
+            System.err.println("Error dropping auto_withdraw_applications trigger: " + e.getMessage());
         }
     }
 }
