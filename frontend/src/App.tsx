@@ -687,6 +687,7 @@ const App: React.FC = () => {
             loadingApplications={loadingApplications}
             applicationError={applicationError}
             onBrowseJobs={handleBrowseJobs}
+            onRefresh={handleGetApplications}
           />
         )}
 

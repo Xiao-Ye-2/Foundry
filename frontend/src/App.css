@@ -1726,3 +1726,37 @@
 .stat-item:nth-child(3) .stat-icon {
   color: #dc3545; /* Red for dislikes */
 }
+
+/* Applications Header Styling */
+.applications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.applications-header h2 {
+  margin: 0;
+}
+
+.applications-header .refresh-button {
+  padding: 8px 16px;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.applications-header .refresh-button:hover {
+  background-color: #e0e0e0;
+}
+
+.applications-header .refresh-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

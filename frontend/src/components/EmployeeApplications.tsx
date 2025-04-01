@@ -15,17 +15,30 @@ interface EmployeeApplicationsProps {
   loadingApplications: boolean;
   applicationError: string;
   onBrowseJobs: () => void;
+  onRefresh?: () => void;
 }
 
 const EmployeeApplications: React.FC<EmployeeApplicationsProps> = ({
   applications,
   loadingApplications,
   applicationError,
-  onBrowseJobs
+  onBrowseJobs,
+  onRefresh
 }) => {
   return (
     <div className="applications-container">
-      <h2>My Applications</h2>
+      <div className="applications-header">
+        <h2>My Applications</h2>
+        {onRefresh && (
+          <button 
+            className="refresh-button"
+            onClick={onRefresh}
+            disabled={loadingApplications}
+          >
+            {loadingApplications ? 'Refreshing...' : 'Refresh Applications'}
+          </button>
+        )}
+      </div>
 
       {loadingApplications && <div className="loading-indicator">
         <span className="loading-icon">⏳</span> Loading your applications...
