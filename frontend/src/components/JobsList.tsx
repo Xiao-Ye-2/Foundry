@@ -79,7 +79,16 @@ const JobsList: React.FC<JobsListProps> = ({
       {jobs.length > 0 && (
         <>
           <div className="job-results">
-            <h3>Available Jobs ({totalJobs})</h3>
+            <div className="jobs-header">
+              <h3>Available Jobs ({totalJobs})</h3>
+              <button 
+                className="refresh-button"
+                onClick={() => goToPage(currentPage)}
+                disabled={loading}
+              >
+                {loading ? 'Refreshing...' : 'Refresh Jobs'}
+              </button>
+            </div>
           </div>
           <div className="job-table-container">
             <table className="job-table" style={loading ? { opacity: '0.7' } : {}}>

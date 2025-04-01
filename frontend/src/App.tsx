@@ -411,8 +411,10 @@ const App: React.FC = () => {
       }
 
       alert("Job posted successfully!");
+      // Fetch new job list in the background for data consistency
       handleGetJobs();
-      setActiveTab('jobs');
+      // Redirect to the applicants tab instead of jobs (which is hidden for employers)
+      setActiveTab('applicants');
     } catch (error) {
       console.error("Error posting job:", error);
       alert("Failed to post job. Please try again.");
