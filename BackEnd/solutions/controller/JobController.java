@@ -41,7 +41,7 @@ public class JobController {
     }
 
 
-    // R6: Job search
+    // Job search
     @GetMapping("/search")
     @CrossOrigin(origins = "http://localhost:5173")
     public List<JobPosting> searchJobs(
@@ -58,7 +58,7 @@ public class JobController {
         return jobService.searchJobs(cityId, companyId, minSalary, maxSalary, workType, pageSize, offset, userId);
     }
 
-    // R7: Apply to a job
+    // Apply to a job
     @PostMapping("/apply")
     @CrossOrigin(origins = "http://localhost:5173")
     public ResponseEntity<?> applyToJob(@RequestBody ApplicationRequest request) {
@@ -70,7 +70,7 @@ public class JobController {
         }
     }
 
-    // R8: Post a job (Employer-only)
+    // Post a job (Employer-only)
     @PostMapping("/post")
     @CrossOrigin(origins = "http://localhost:5173")
     public ResponseEntity<?> postJob(
@@ -86,7 +86,7 @@ public class JobController {
         }
     }
 
-    // R9: View applications (Employer-only)
+    // View applications (Employer-only)
     @GetMapping("/applications")
     @CrossOrigin(origins = "http://localhost:5173")
     public ResponseEntity<?> getApplications(@RequestHeader("user-id") Long employerId) {

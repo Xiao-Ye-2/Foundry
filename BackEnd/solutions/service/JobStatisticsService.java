@@ -114,9 +114,9 @@ public class JobStatisticsService {
     }
 
     public List<Map<String, Object>> getShortlistRatioForEmployer(Long employerId) {
-        String sql = "SELECT sar.* " + 
-                        "FROM ShortlistApplicationRatio sar " + 
-                        "JOIN JobPostings jp ON sar.JobId = jp.JobId " + 
+        String sql = "SELECT sar.* " +
+                        "FROM ShortlistApplicationRatio sar " +
+                        "JOIN JobPostings jp ON sar.JobId = jp.JobId " +
                         "WHERE jp.EmployerId = ?";
         try {
             return jdbcTemplate.queryForList(sql, employerId);
