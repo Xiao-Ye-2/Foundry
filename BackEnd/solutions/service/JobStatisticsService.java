@@ -67,7 +67,7 @@ public class JobStatisticsService {
             "    JOIN FocusOn f2 ON f1.IndustryId = f2.IndustryId " +
             "    JOIN Companies c2 ON f2.CompanyId = c2.CompanyId " +
             "    WHERE c1.CompanyId = ? " +
-            "    AND c2.CompanyId != c1.CompanyId " +
+            // "    AND c2.CompanyId != c1.CompanyId " + // not exclude itself
             ") " +
             "SELECT " +
             "    (SELECT AVG(ApplyCount) FROM (" +
