@@ -49,6 +49,9 @@ interface ApiApplication {
 
 interface EmployerApplication {
   jobTitle: string;
+  userName: string;
+  email: string;
+  resume: string | null;
   employeeId: number;
   applyDate: string;
   status: string;
@@ -501,6 +504,7 @@ const App: React.FC = () => {
       if (!response.ok) throw new Error("Failed to fetch applications");
   
       const data = await response.json();
+      console.log(data)
       setEmployerApplications(data);
     } catch (err) {
       console.error("Error fetching employer applications:", err);
@@ -664,17 +668,21 @@ const App: React.FC = () => {
               <table className="employer-applicant-table">
                 <thead>
                   <tr>
-                    <th>Job Title</th>
-                    <th>Applicant ID</th>
-                    <th>Apply Date</th>
-                    <th>Status</th>
+                  <th>Job Title</th>
+                  <th>Applicant Name</th>
+                  <th>Email</th>
+                  <th>Apply Date</th>
+                  <th>Status</th>
+                  <th>Resume</th>
+
                   </tr>
                 </thead>
                 <tbody>
                   {employerApplications.map((app, index) => (
                     <tr key={index}>
                       <td>{app.jobTitle}</td>
-                      <td>{app.employeeId}</td>
+                      <td>{app.userName}</td>
+                      <td>{app.email}</td>
                       <td>
                         {app.applyDate && !isNaN(new Date(app.applyDate).getTime())
                           ? new Date(app.applyDate).toLocaleDateString()
@@ -682,8 +690,22 @@ const App: React.FC = () => {
                       </td>
                       <td>
                         <span className={`status-${app.status?.toLowerCase() || 'pending'}`}>
-                          {app.status}
+                          {app.status || 'Pending'}
                         </span>
+                      </td>
+                      <td>
+                        {app.resume ? (
+                          <a 
+                            href={app.resume} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="resume-link"
+                          >
+                            View Resume
+                          </a>
+                        ) : (
+                          <span className="no-resume">No Resume</span>
+                        )}
                       </td>
                     </tr>
                   ))}
