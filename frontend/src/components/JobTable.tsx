@@ -14,6 +14,9 @@ interface Job {
   isActive?: boolean;
   postDate?: string;
   countryName?: string;
+  applyCount?: number;
+  dislikeCount?: number;
+  shortlistCount?: number;
 }
 
 interface JobTableProps {
@@ -133,6 +136,7 @@ const JobTable: React.FC<JobTableProps> = ({
                   <th className="location-col">Location</th>
                   <th className="salary-col">Salary</th>
                   <th className="work-type-col">Work Type</th>
+                  <th className="stats-col">Stats</th>
                   <th className="actions-col">Actions</th>
                 </tr>
               </thead>

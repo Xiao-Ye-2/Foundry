@@ -10,6 +10,9 @@ interface Job {
   cityName: string;
   companyName: string;
   countryName?: string;
+  applyCount?: number;
+  dislikeCount?: number;
+  shortlistCount?: number;
 }
 
 interface JobRowProps {
@@ -59,6 +62,19 @@ const JobRow: React.FC<JobRowProps> = ({
           ${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()}
         </td>
         <td className="work-type-col" data-label="Work Type">{job.workType}</td>
+        <td className="stats-col" data-label="Stats">
+          <div className="job-stats">
+            <span title="Applications" className="stat-item">
+              <span className="stat-icon">👔</span> {job.applyCount || 0}
+            </span>
+            <span title="Shortlists" className="stat-item">
+              <span className="stat-icon">★</span> {job.shortlistCount || 0}
+            </span>
+            <span title="Dislikes" className="stat-item">
+              <span className="stat-icon">👎</span> {job.dislikeCount || 0}
+            </span>
+          </div>
+        </td>
         <td className="actions-col" data-label="Actions">
           <div className="action-buttons">
             <button
@@ -125,7 +141,7 @@ const JobRow: React.FC<JobRowProps> = ({
 
       {isExpanded && job.description && (
         <tr className="job-description-row">
-          <td colSpan={6}>
+          <td colSpan={7}>
             <div className="job-description">
               <p>{job.description}</p>
             </div>
@@ -135,7 +151,7 @@ const JobRow: React.FC<JobRowProps> = ({
 
       {showRecommendations && renderRecommendations && (
         <tr className="job-recommendations-row">
-          <td colSpan={6}>
+          <td colSpan={7}>
             {renderRecommendations(job.jobId)}
           </td>
         </tr>

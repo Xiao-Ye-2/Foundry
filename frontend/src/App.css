@@ -1683,3 +1683,46 @@
 .custom-refresh-button:disabled::before {
   animation: rotate 1s linear infinite;
 }
+
+/* Add the following CSS rules to style the job statistics */
+
+/* Stats column styling */
+.stats-col {
+  min-width: 120px;
+}
+
+.job-stats {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.stat-icon {
+  font-size: 1rem;
+}
+
+/* Make the stats more visible on hover */
+.job-row:hover .stat-item {
+  color: #333;
+}
+
+/* Different colors for different stats */
+.stat-item:nth-child(1) .stat-icon {
+  color: #4a6fa5; /* Blue for applications */
+}
+
+.stat-item:nth-child(2) .stat-icon {
+  color: #ffc107; /* Yellow for shortlists */
+}
+
+.stat-item:nth-child(3) .stat-icon {
+  color: #dc3545; /* Red for dislikes */
+}

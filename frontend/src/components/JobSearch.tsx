@@ -14,6 +14,9 @@ interface Job {
   companyName: string;
   cityName: string;
   countryName: string;
+  applyCount?: number;
+  dislikeCount?: number;
+  shortlistCount?: number;
 }
 
 interface Location {
@@ -239,6 +242,15 @@ const JobSearch: React.FC<JobSearchProps> = ({
       
       const data = await response.json();
       console.log(`Received ${data.length} jobs for page ${page}`);
+      // Check if job statistics are included in the search response
+      if (data.length > 0) {
+        console.log('Search job stats example:', {
+          jobId: data[0].jobId,
+          applyCount: data[0].applyCount,
+          shortlistCount: data[0].shortlistCount, 
+          dislikeCount: data[0].dislikeCount
+        });
+      }
       setFilteredJobs(data);
       
       // Also fetch total count for pagination
@@ -470,6 +482,13 @@ const JobSearch: React.FC<JobSearchProps> = ({
     setDislikingJob(jobId);
     
     try {
+      // Update the dislikeCount in the UI before sending the request
+      setFilteredJobs(prevJobs => prevJobs.map(job => 
+        job.jobId === jobId 
+          ? { ...job, dislikeCount: (job.dislikeCount || 0) + 1 } 
+          : job
+      ));
+      
       // Always send a POST request to dislike the job
       // We don't need to track disliked jobs in the frontend
       await fetch(`http://localhost:8080/api/jobs/dislike?employeeId=${employeeId}&jobId=${jobId}`, {

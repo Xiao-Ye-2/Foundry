@@ -23,6 +23,9 @@ interface Job {
   isActive: boolean;
   postDate: string;
   countryName?: string;
+  applyCount?: number;
+  dislikeCount?: number;
+  shortlistCount?: number;
 }
 
 type UserRole = 'employee' | 'employer' | null;
@@ -187,6 +190,15 @@ const App: React.FC = () => {
 
       const data = await response.json();
       console.log('Received data:', data);
+      // Check if job statistics are included in the response
+      if (data.length > 0) {
+        console.log('Job stats example:', {
+          jobId: data[0].jobId,
+          applyCount: data[0].applyCount,
+          shortlistCount: data[0].shortlistCount, 
+          dislikeCount: data[0].dislikeCount
+        });
+      }
       setJobs(data);
       
       // Fetch total count for pagination
@@ -223,6 +235,13 @@ const App: React.FC = () => {
         });
         
         setShortlistedJobs(prev => prev.filter(id => id !== jobId));
+        
+        // Decrement the job's shortlistCount in the local state
+        setJobs(prevJobs => prevJobs.map(job => 
+          job.jobId === jobId 
+            ? { ...job, shortlistCount: Math.max(0, (job.shortlistCount || 1) - 1) } 
+            : job
+        ));
       } else {
         // Add to shortlisted jobs
         await fetch(`http://localhost:8080/api/jobs/shortlist?employeeId=${employeeId}&jobId=${jobId}`, {
@@ -234,6 +253,13 @@ const App: React.FC = () => {
         });
         
         setShortlistedJobs(prev => [...prev, jobId]);
+        
+        // Increment the job's shortlistCount in the local state
+        setJobs(prevJobs => prevJobs.map(job => 
+          job.jobId === jobId 
+            ? { ...job, shortlistCount: (job.shortlistCount || 0) + 1 } 
+            : job
+        ));
       }
     } catch (error) {
       console.error('Error toggling job shortlist:', error);
@@ -273,8 +299,8 @@ const App: React.FC = () => {
         params.append('userId', employeeId.toString());
       }
       
-      // Use the search endpoint's count
-      const url = `http://localhost:8080/api/jobs/search/count${params.toString() ? `?${params.toString()}` : ''}`;
+      // Use the correct count endpoint
+      const url = `http://localhost:8080/api/jobs/count${params.toString() ? `?${params.toString()}` : ''}`;
       
       const response = await fetch(url, {
         method: 'GET',
@@ -387,6 +413,13 @@ const App: React.FC = () => {
       };
 
       setApplications(prevApplications => [...prevApplications, newApplication]);
+      
+      // Update the job's applyCount in the local state
+      setJobs(prevJobs => prevJobs.map(job => 
+        job.jobId === jobId 
+          ? { ...job, applyCount: (job.applyCount || 0) + 1 } 
+          : job
+      ));
 
       // Still fetch all applications in the background to ensure data consistency
       handleGetApplications();

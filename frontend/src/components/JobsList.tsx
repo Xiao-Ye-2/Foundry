@@ -14,6 +14,9 @@ interface Job {
   isActive: boolean;
   postDate: string;
   countryName?: string;
+  applyCount?: number;
+  dislikeCount?: number;
+  shortlistCount?: number;
 }
 
 interface JobsListProps {
@@ -78,8 +81,12 @@ const JobsList: React.FC<JobsListProps> = ({
     setDislikingJob(jobId);
     
     try {
+      // Parse IDs as numbers to ensure they're treated as Long values on the backend
+      const parsedEmployeeId = Number(employeeId);
+      const parsedJobId = Number(jobId);
+      
       // Send a POST request to dislike the job
-      await fetch(`http://localhost:8080/api/jobs/dislike?employeeId=${employeeId}&jobId=${jobId}`, {
+      await fetch(`http://localhost:8080/api/jobs/dislike?employeeId=${parsedEmployeeId}&jobId=${parsedJobId}`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
