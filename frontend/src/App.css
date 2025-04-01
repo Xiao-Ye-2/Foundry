@@ -1069,7 +1069,7 @@
 
 .employer-applicant-table th,
 .employer-applicant-table td {
-  padding: 12px 16px;
+  padding: 8px 10px;
   border-bottom: 1px solid #e5e7eb;
   text-align: left;
   color: var(--color-text);
@@ -1155,7 +1155,6 @@
 .resume-link {
   color: #0066cc;
   text-decoration: none;
-  display: inline-block;
   padding: 4px 8px;
   background-color: #f0f7ff;
   border-radius: 4px;
@@ -1759,4 +1758,47 @@
 .applications-header .refresh-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.status-dropdown select {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.status-dropdown select:hover {
+  border-color: #999;
+}
+
+.status-pending {
+  color: #f0ad4e;
+  font-weight: bold;
+}
+
+.status-accepted {
+  color: #5cb85c;
+  font-weight: bold;
+}
+
+.status-rejected {
+  color: #d9534f;
+  font-weight: bold;
+}
+
+.status-interviewing {
+  color: #5bc0de;
+  font-weight: bold;
+}
+
+.status-withdrawn {
+  color: #777;
+  font-weight: bold;
+}
+
+.employer-applicant-table th:last-child,
+.employer-applicant-table td:last-child {
+  min-width: 120px;
 }

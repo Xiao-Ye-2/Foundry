@@ -135,7 +135,7 @@ public class JobService {
     }
 
     public List<Map<String, Object>> getApplications(Long employerId) {
-        String sql = "SELECT j.Title AS jobTitle, u.UserName AS userName, u.Email as email, e.ResumeUrl as resume, a.EmployeeId AS employeeId, a.Status AS status, a.ApplyDate AS applyDate " +
+        String sql = "SELECT j.JobId AS jobId, j.Title AS jobTitle, u.UserName AS userName, u.Email as email, e.ResumeUrl as resume, a.EmployeeId AS employeeId, a.Status AS status, a.ApplyDate AS applyDate " +
              "FROM Applications a " +
              "JOIN Users u ON a.EmployeeId = u.UserId " +
              "JOIN Employees e ON e.UserId = u.UserId " +

@@ -51,6 +51,7 @@ interface ApiApplication {
 }
 
 interface EmployerApplication {
+  jobId: number;
   jobTitle: string;
   userName: string;
   email: string;
@@ -472,6 +473,38 @@ const App: React.FC = () => {
     }
   };
 
+  const handleChangeApplicationStatus = async (employeeId: number, jobId: number, status: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/jobs/applications/employer/changestatus/?employeeId=${employeeId}&jobId=${jobId}&status=${status}`, 
+        {
+          method: 'GET', // Your endpoint uses GET, though typically this would be PUT
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          credentials: 'omit'
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`Failed to change status: ${response.status} ${response.statusText}`);
+      }
+  
+      // Update the status locally to avoid refetching all applications
+      setEmployerApplications(prevApplications => 
+        prevApplications.map(app => 
+          app.employeeId === employeeId ? { ...app, status: status } : app
+        )
+      );
+  
+      alert(`Application status changed to ${status} successfully`);
+    } catch (error) {
+      console.error('Error changing application status:', error);
+      alert('Failed to change application status. Please try again.');
+    }
+  };
+
   const hasAppliedForJob = (jobId: number) => {
     return applications.some(app => app.jobId === jobId);
   };
@@ -745,7 +778,7 @@ const App: React.FC = () => {
                     <th>Apply Date</th>
                     <th>Status</th>
                     <th>Resume</th>
-
+                    <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -778,6 +811,25 @@ const App: React.FC = () => {
                             <span className="no-resume">No Resume</span>
                           )}
                         </td>
+                        <td>
+                        {app.status === 'Pending' && (
+                          <div className="status-dropdown">
+                            <select 
+                              onChange={(e) => {
+                                const newStatus = e.target.value;
+                                if (newStatus !== "") {
+                                  handleChangeApplicationStatus(app.employeeId, parseInt(app.jobId.toString()), newStatus);
+                                }
+                              }}
+                              value=""
+                            >
+                              <option value=""></option>
+                              <option value="Accepted">Accept  </option>
+                              <option value="Rejected">Reject  </option>
+                            </select>
+                          </div>
+                        )}
+                      </td>
                       </tr>
                     ))}
                   </tbody>
