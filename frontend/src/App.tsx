@@ -494,9 +494,12 @@ const App: React.FC = () => {
       // Update the status locally to avoid refetching all applications
       setEmployerApplications(prevApplications => 
         prevApplications.map(app => 
-          app.employeeId === employeeId ? { ...app, status: status } : app
+          (app.employeeId === employeeId && parseInt(app.jobId.toString()) === jobId)
+            ? { ...app, status: status } 
+            : app
         )
       );
+      fetchEmployerApplications();
   
       alert(`Application status changed to ${status} successfully`);
     } catch (error) {
