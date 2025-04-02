@@ -305,7 +305,7 @@ const Analysis: React.FC<AnalysisProps> = ({ userRole, userId }) => {
       labels: ['Applications', 'Dislikes', 'Shortlists'], // Updated labels
       datasets: [
         {
-          label: filter === 'Location Stats' ? 'Average Counts Per Posting' : 'Company Counts',
+          label: filter === 'Location Stats' ? 'Average Counts Per Posting' : 'Average Counts Per Posting',
           data: [
             barStats[firstDataKey]?.avg_apply ?? 0, 
             barStats[firstDataKey]?.avg_dislike ?? 0, 
