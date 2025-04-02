@@ -93,7 +93,7 @@ public class JobService {
             ") " +
             "SELECT T1.*, a.CompanyName, a.CityName, a.CountryName, COUNT(a.JobId) AS application_count " +
             "FROM JobIndustry T1 " +
-            "LEFT JOIN JobDetailsView a ON T1.JobId = a.JobId " +
+            "JOIN JobDetailsView a ON T1.JobId = a.JobId " +
             "WHERE T1.IndustryId = ( " +
             "    SELECT f.IndustryId " +
             "    FROM JobPostings j " +
