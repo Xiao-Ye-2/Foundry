@@ -285,13 +285,13 @@ const Analysis: React.FC<AnalysisProps> = ({ userRole, userId }) => {
   // Render the bar charts for location stats
   const renderStatsCharts = () => {
     if (!barStats) return null;
-    
+
     // Determine chart config based on the active filter
-    let firstChartTitle = 'Average Metrics';
-    let secondChartTitle = 'Top 10% Metrics'; 
+    let firstChartTitle = 'Average Job Metrics for Selected City';
+    let secondChartTitle = 'Top 10% Job Metrics'; 
     let firstDataKey = 'averages';
     let secondDataKey = 'top_10_percent';
-    
+
     // For company stats, use different keys if needed
     if (filter === 'Company Stats') {
       firstDataKey = barStats.company_averages ? 'company_averages' : 'averages';
@@ -299,13 +299,13 @@ const Analysis: React.FC<AnalysisProps> = ({ userRole, userId }) => {
       firstChartTitle = 'Company Metrics';
       secondChartTitle = 'Industry Top 10%';
     }
-    
+
     // Create datasets from the data
     const firstChartData = {
-      labels: ['Apply', 'Dislike', 'Shortlist'],
+      labels: ['Applications', 'Dislikes', 'Shortlists'], // Updated labels
       datasets: [
         {
-          label: filter === 'Location Stats' ? 'Average Counts' : 'Company Counts',
+          label: filter === 'Location Stats' ? 'Average Counts Per Posting' : 'Company Counts',
           data: [
             barStats[firstDataKey]?.avg_apply ?? 0, 
             barStats[firstDataKey]?.avg_dislike ?? 0, 
@@ -315,9 +315,9 @@ const Analysis: React.FC<AnalysisProps> = ({ userRole, userId }) => {
         },
       ],
     };
-    
+
     const secondChartData = {
-      labels: ['Apply', 'Dislike', 'Shortlist'],
+      labels: ['Applications', 'Dislikes', 'Shortlists'], // Updated labels
       datasets: [
         {
           label: 'Top 10% Performers',
@@ -340,11 +340,11 @@ const Analysis: React.FC<AnalysisProps> = ({ userRole, userId }) => {
         },
         title: {
           display: true,
-          text: filter === 'Location Stats' ? 'Location Statistics' : 'Company Performance',
+          text: filter === 'Location Stats' ? firstChartTitle : 'Company Performance',
         },
       },
     };
-    
+
     return (
       <div className="chart-container">
         <div className="chart-wrapper">
@@ -353,7 +353,7 @@ const Analysis: React.FC<AnalysisProps> = ({ userRole, userId }) => {
             <Bar options={options} data={firstChartData} />
           </div>
         </div>
-        
+
         <div className="chart-wrapper">
           <h4>{secondChartTitle}</h4>
           <div style={{ height: '300px' }}>
