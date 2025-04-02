@@ -25,25 +25,40 @@ public class JobStatisticsService {
             "FROM JobAverageStats " +
             "WHERE CityId = ?";
 
-        // Get independent top 10% averages for each metric
-        String topSql =
-            "SELECT " +
-            "    (SELECT AVG(ApplyCount) FROM (" +
-            "        SELECT ApplyCount, NTILE(10) OVER (ORDER BY ApplyCount DESC) as nt " +
-            "        FROM JobAverageStats WHERE CityId = ?" +
-            "    ) WHERE nt = 1) as top_apply, " +
-            "    (SELECT AVG(DislikeCount) FROM (" +
-            "        SELECT DislikeCount, NTILE(10) OVER (ORDER BY DislikeCount) as nt " +
-            "        FROM JobAverageStats WHERE CityId = ?" +
-            "    ) WHERE nt = 1) as top_dislike, " +
-            "    (SELECT AVG(ShortlistCount) FROM (" +
-            "        SELECT ShortlistCount, NTILE(10) OVER (ORDER BY ShortlistCount DESC) as nt " +
-            "        FROM JobAverageStats WHERE CityId = ?" +
-            "    ) WHERE nt = 1) as top_shortlist";
+        // Separate queries for each top 10% metric
+        String topApplySql =
+            "SELECT AVG(ApplyCount) as top_apply FROM (" +
+            "    SELECT ApplyCount, NTILE(10) OVER (ORDER BY ApplyCount DESC) as nt " +
+            "    FROM JobAverageStats WHERE CityId = ?" +
+            ") subquery WHERE nt = 1";
 
+        String topDislikeSql =
+            "SELECT AVG(DislikeCount) as top_dislike FROM (" +
+            "    SELECT DislikeCount, NTILE(10) OVER (ORDER BY DislikeCount) as nt " +
+            "    FROM JobAverageStats WHERE CityId = ?" +
+            ") subquery WHERE nt = 1";
+
+        String topShortlistSql =
+            "SELECT AVG(ShortlistCount) as top_shortlist FROM (" +
+            "    SELECT ShortlistCount, NTILE(10) OVER (ORDER BY ShortlistCount DESC) as nt " +
+            "    FROM JobAverageStats WHERE CityId = ?" +
+            ") subquery WHERE nt = 1";
+
+        // Execute queries and store results
         Map<String, Object> result = new HashMap<>();
         result.put("averages", jdbcTemplate.queryForMap(avgSql, cityId));
-        result.put("top_10_percent", jdbcTemplate.queryForMap(topSql, cityId));
+
+        Map<String, Object> topApply = jdbcTemplate.queryForMap(topApplySql, cityId);
+        Map<String, Object> topDislike = jdbcTemplate.queryForMap(topDislikeSql, cityId);
+        Map<String, Object> topShortlist = jdbcTemplate.queryForMap(topShortlistSql, cityId);
+
+        // Combine into a single map
+        Map<String, Object> top10Percent = new HashMap<>();
+        top10Percent.putAll(topApply);
+        top10Percent.putAll(topDislike);
+        top10Percent.putAll(topShortlist);
+
+        result.put("top_10_percent", top10Percent);
         return result;
     }
 
